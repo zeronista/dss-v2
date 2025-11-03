@@ -176,6 +176,120 @@
             display: block;
             margin-bottom: 10px;
         }
+        
+        .policy-simulator {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            margin-bottom: 30px;
+        }
+        
+        .policy-simulator h2 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 24px;
+        }
+        
+        .slider-container {
+            margin: 20px 0;
+        }
+        
+        .slider-container label {
+            display: block;
+            margin-bottom: 10px;
+            color: #666;
+            font-weight: 600;
+        }
+        
+        .slider {
+            width: 100%;
+            height: 8px;
+            border-radius: 5px;
+            background: #ddd;
+            outline: none;
+        }
+        
+        .slider::-webkit-slider-thumb {
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #f5576c;
+            cursor: pointer;
+        }
+        
+        .slider-value {
+            display: inline-block;
+            margin-left: 10px;
+            font-weight: bold;
+            color: #f5576c;
+            font-size: 18px;
+        }
+        
+        .simulation-result {
+            background: #f9f9f9;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+        
+        .result-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .result-item {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #f5576c;
+        }
+        
+        .result-label {
+            color: #666;
+            font-size: 12px;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+        }
+        
+        .result-value {
+            color: #333;
+            font-size: 24px;
+            font-weight: bold;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(245, 87, 108, 0.4);
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
+        
+        .error {
+            background: #fee;
+            color: #c33;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
     </style>
 </head>
 <body>
@@ -200,27 +314,90 @@
         
         <div class="dashboard-grid">
             <div class="stat-card">
-                <div class="stat-card-icon">📦</div>
-                <div class="stat-card-title">Total Products</div>
-                <div class="stat-card-value">3,847</div>
-            </div>
-            
-            <div class="stat-card">
                 <div class="stat-card-icon">⚠️</div>
-                <div class="stat-card-title">Low Stock Items</div>
-                <div class="stat-card-value">127</div>
+                <div class="stat-card-title">Mean Risk Score</div>
+                <div class="stat-card-value" id="meanRisk">Loading...</div>
             </div>
             
             <div class="stat-card">
-                <div class="stat-card-icon">📥</div>
-                <div class="stat-card-title">Incoming Orders</div>
-                <div class="stat-card-value">45</div>
+                <div class="stat-card-icon">📊</div>
+                <div class="stat-card-title">High Risk Orders</div>
+                <div class="stat-card-value" id="highRiskCount">Loading...</div>
             </div>
             
             <div class="stat-card">
-                <div class="stat-card-icon">📤</div>
-                <div class="stat-card-title">Outgoing Orders</div>
-                <div class="stat-card-value">89</div>
+                <div class="stat-card-icon">✅</div>
+                <div class="stat-card-title">Low Risk Orders</div>
+                <div class="stat-card-value" id="lowRiskCount">Loading...</div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-card-icon">🎯</div>
+                <div class="stat-card-title">Optimal Threshold</div>
+                <div class="stat-card-value" id="optimalTau">Finding...</div>
+            </div>
+        </div>
+        
+        <!-- Policy Simulator -->
+        <div class="policy-simulator">
+            <h2>🎛️ Return Risk Policy Simulator</h2>
+            <p style="color: #666; margin-bottom: 20px;">
+                Adjust the risk threshold (τ) to simulate different policy scenarios and optimize expected profit.
+            </p>
+            
+            <div class="slider-container">
+                <label>
+                    Risk Threshold (τ): 
+                    <span class="slider-value" id="tauValue">50</span>
+                </label>
+                <input type="range" min="0" max="100" value="50" class="slider" id="tauSlider">
+                <p style="color: #999; font-size: 14px; margin-top: 5px;">
+                    Orders with risk score ≥ τ will be subject to policy restrictions
+                </p>
+            </div>
+            
+            <div class="slider-container">
+                <label>
+                    Return Processing Cost: $
+                    <span class="slider-value" id="costValue">10</span>
+                </label>
+                <input type="range" min="5" max="50" value="10" step="5" class="slider" id="costSlider">
+            </div>
+            
+            <div class="slider-container">
+                <label>
+                    Conversion Impact: 
+                    <span class="slider-value" id="impactValue">20</span>%
+                </label>
+                <input type="range" min="0" max="100" value="20" class="slider" id="impactSlider">
+            </div>
+            
+            <button class="btn-primary" onclick="runSimulation()">
+                � Run Simulation
+            </button>
+            
+            <div id="simulationResult" style="display: none;">
+                <div class="simulation-result">
+                    <h3 style="margin-bottom: 15px;">Simulation Results</h3>
+                    <div class="result-grid">
+                        <div class="result-item">
+                            <div class="result-label">Expected Profit</div>
+                            <div class="result-value" id="expectedProfit">-</div>
+                        </div>
+                        <div class="result-item">
+                            <div class="result-label">Orders Blocked</div>
+                            <div class="result-value" id="ordersBlocked">-</div>
+                        </div>
+                        <div class="result-item">
+                            <div class="result-label">Orders Allowed</div>
+                            <div class="result-value" id="ordersAllowed">-</div>
+                        </div>
+                        <div class="result-item">
+                            <div class="result-label">Recommendation</div>
+                            <div class="result-value" id="recommendation" style="font-size: 14px;">-</div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
         
@@ -246,6 +423,130 @@
             </div>
         </div>
     </div>
+    
+    <script>
+        // API Configuration
+        const INVENTORY_API_URL = 'http://localhost:8002';
+        
+        // Update slider values
+        document.getElementById('tauSlider').addEventListener('input', function(e) {
+            document.getElementById('tauValue').textContent = e.target.value;
+        });
+        
+        document.getElementById('costSlider').addEventListener('input', function(e) {
+            document.getElementById('costValue').textContent = e.target.value;
+        });
+        
+        document.getElementById('impactSlider').addEventListener('input', function(e) {
+            document.getElementById('impactValue').textContent = e.target.value;
+        });
+        
+        // Load risk distribution
+        async function loadRiskDistribution() {
+            try {
+                const response = await fetch(`${INVENTORY_API_URL}/risk-distribution?sample_size=1000`);
+                
+                if (!response.ok) throw new Error('Failed to load risk distribution');
+                
+                const data = await response.json();
+                
+                // Update KPI cards
+                document.getElementById('meanRisk').textContent = data.mean_risk.toFixed(1);
+                
+                // Calculate high/low risk counts
+                const highRisk = data.distribution['60-80'] + data.distribution['80-100'];
+                const lowRisk = data.distribution['0-20'] + data.distribution['20-40'];
+                
+                document.getElementById('highRiskCount').textContent = highRisk;
+                document.getElementById('lowRiskCount').textContent = lowRisk;
+                
+            } catch (error) {
+                console.error('Error loading risk distribution:', error);
+                document.getElementById('meanRisk').textContent = 'Error';
+            }
+        }
+        
+        // Find optimal threshold
+        async function findOptimalThreshold() {
+            try {
+                const response = await fetch(`${INVENTORY_API_URL}/find-optimal-threshold`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        return_processing_cost: 10.0,
+                        conversion_impact: 0.2,
+                        sample_size: 500
+                    })
+                });
+                
+                if (!response.ok) throw new Error('Failed to find optimal threshold');
+                
+                const data = await response.json();
+                
+                document.getElementById('optimalTau').textContent = data.optimal_tau;
+                
+            } catch (error) {
+                console.error('Error finding optimal threshold:', error);
+                document.getElementById('optimalTau').textContent = 'Error';
+            }
+        }
+        
+        // Run policy simulation
+        async function runSimulation() {
+            const tau = document.getElementById('tauSlider').value;
+            const cost = document.getElementById('costSlider').value;
+            const impact = document.getElementById('impactSlider').value / 100;
+            
+            // Show loading
+            document.getElementById('simulationResult').style.display = 'block';
+            document.getElementById('expectedProfit').textContent = 'Calculating...';
+            document.getElementById('ordersBlocked').textContent = 'Calculating...';
+            document.getElementById('ordersAllowed').textContent = 'Calculating...';
+            document.getElementById('recommendation').textContent = 'Calculating...';
+            
+            try {
+                const response = await fetch(`${INVENTORY_API_URL}/simulate-policy`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        threshold_tau: parseFloat(tau),
+                        return_processing_cost: parseFloat(cost),
+                        conversion_impact: parseFloat(impact),
+                        sample_size: 1000
+                    })
+                });
+                
+                if (!response.ok) throw new Error('Simulation failed');
+                
+                const data = await response.json();
+                
+                // Update results
+                document.getElementById('expectedProfit').textContent = 
+                    '$' + data.total_expected_profit.toLocaleString();
+                document.getElementById('ordersBlocked').textContent = 
+                    data.orders_blocked.toLocaleString();
+                document.getElementById('ordersAllowed').textContent = 
+                    data.orders_allowed.toLocaleString();
+                document.getElementById('recommendation').textContent = 
+                    data.recommendation;
+                
+            } catch (error) {
+                console.error('Error running simulation:', error);
+                document.getElementById('expectedProfit').textContent = 'Error';
+                alert('Failed to run simulation. Make sure the Inventory API is running on port 8002.');
+            }
+        }
+        
+        // Load data on page load
+        window.addEventListener('DOMContentLoaded', function() {
+            loadRiskDistribution();
+            findOptimalThreshold();
+        });
+    </script>
 </body>
 </html>
 

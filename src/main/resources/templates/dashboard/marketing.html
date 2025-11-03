@@ -176,6 +176,127 @@
             display: block;
             margin-bottom: 10px;
         }
+        
+        .segment-container {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            margin-bottom: 30px;
+        }
+        
+        .segment-container h2 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 24px;
+        }
+        
+        .segment-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .segment-card {
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 3px 15px rgba(0,0,0,0.1);
+        }
+        
+        .segment-card h3 {
+            margin-bottom: 15px;
+            font-size: 20px;
+        }
+        
+        .segment-stats {
+            margin: 15px 0;
+            padding: 15px 0;
+            border-top: 1px solid rgba(255,255,255,0.3);
+            border-bottom: 1px solid rgba(255,255,255,0.3);
+        }
+        
+        .segment-stat {
+            display: flex;
+            justify-content: space-between;
+            margin: 8px 0;
+            font-size: 14px;
+        }
+        
+        .segment-actions {
+            margin-top: 15px;
+        }
+        
+        .segment-actions ul {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .segment-actions li {
+            padding: 5px 0;
+            font-size: 14px;
+        }
+        
+        .segment-actions li:before {
+            content: "✓ ";
+            margin-right: 8px;
+        }
+        
+        .bundles-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        
+        .bundles-table th,
+        .bundles-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .bundles-table th {
+            background: #f9f9f9;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .bundles-table tr:hover {
+            background: #f5f5f5;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
+        
+        .error {
+            background: #fee;
+            color: #c33;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-right: 10px;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(250, 112, 154, 0.4);
+        }
     </style>
 </head>
 <body>
@@ -202,25 +323,65 @@
             <div class="stat-card">
                 <div class="stat-card-icon">👥</div>
                 <div class="stat-card-title">Total Customers</div>
-                <div class="stat-card-value">12,483</div>
+                <div class="stat-card-value" id="totalCustomers">Loading...</div>
             </div>
             
             <div class="stat-card">
-                <div class="stat-card-icon">📧</div>
-                <div class="stat-card-title">Campaign Reach</div>
-                <div class="stat-card-value">45.2K</div>
+                <div class="stat-card-icon">🎯</div>
+                <div class="stat-card-title">Segments</div>
+                <div class="stat-card-value" id="totalSegments">-</div>
             </div>
             
             <div class="stat-card">
                 <div class="stat-card-icon">💰</div>
-                <div class="stat-card-title">Conversion Rate</div>
-                <div class="stat-card-value">12.5%</div>
+                <div class="stat-card-title">Avg Customer Value</div>
+                <div class="stat-card-value" id="avgCustomerValue">Loading...</div>
             </div>
             
             <div class="stat-card">
-                <div class="stat-card-icon">📈</div>
-                <div class="stat-card-title">ROI</div>
-                <div class="stat-card-value">385%</div>
+                <div class="stat-card-icon">�</div>
+                <div class="stat-card-title">Product Bundles</div>
+                <div class="stat-card-value" id="totalBundles">-</div>
+            </div>
+        </div>
+        
+        <!-- Customer Segmentation -->
+        <div class="segment-container">
+            <h2>👥 Customer Segmentation (RFM Analysis)</h2>
+            <p style="color: #666; margin-bottom: 20px;">
+                K-Means clustering based on Recency, Frequency, and Monetary values.
+            </p>
+            
+            <div>
+                <label style="margin-right: 10px; color: #666;">Number of Segments:</label>
+                <select id="segmentCount" style="padding: 8px; border-radius: 6px; border: 1px solid #ddd;">
+                    <option value="3">3 Segments</option>
+                    <option value="4" selected>4 Segments</option>
+                    <option value="5">5 Segments</option>
+                </select>
+                <button class="btn-primary" onclick="runSegmentation()">
+                    🚀 Run Segmentation
+                </button>
+            </div>
+            
+            <div id="segmentsContainer" class="segment-grid">
+                <div class="loading">Click "Run Segmentation" to analyze customers</div>
+            </div>
+        </div>
+        
+        <!-- Market Basket Analysis -->
+        <div class="segment-container">
+            <h2>🛒 Market Basket Analysis - Product Bundles</h2>
+            <p style="color: #666; margin-bottom: 20px;">
+                Frequently bought together products using Apriori algorithm.
+            </p>
+            
+            <button class="btn-primary" onclick="loadProductBundles()">
+                🔍 Find Product Bundles
+            </button>
+            
+            <div id="bundlesContainer">
+                <p class="loading">Click "Find Product Bundles" to discover associations</p>
             </div>
         </div>
         
@@ -246,6 +407,176 @@
             </div>
         </div>
     </div>
+    
+    <script>
+        // API Configuration
+        const MARKETING_API_URL = 'http://localhost:8003';
+        
+        // Calculate and display RFM stats
+        async function loadRFMStats() {
+            try {
+                const response = await fetch(`${MARKETING_API_URL}/calculate-rfm`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                });
+                
+                if (!response.ok) throw new Error('Failed to load RFM stats');
+                
+                const data = await response.json();
+                
+                document.getElementById('totalCustomers').textContent = 
+                    data.customers_analyzed.toLocaleString();
+                    
+                if (data.summary && data.summary.avg_monetary) {
+                    document.getElementById('avgCustomerValue').textContent = 
+                        '$' + data.summary.avg_monetary.toFixed(0);
+                }
+                
+            } catch (error) {
+                console.error('Error loading RFM stats:', error);
+                document.getElementById('totalCustomers').textContent = 'Error';
+            }
+        }
+        
+        // Run customer segmentation
+        async function runSegmentation() {
+            const nSegments = document.getElementById('segmentCount').value;
+            const container = document.getElementById('segmentsContainer');
+            
+            container.innerHTML = '<div class="loading">Running K-Means clustering...</div>';
+            
+            try {
+                const response = await fetch(`${MARKETING_API_URL}/run-segmentation`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        n_segments: parseInt(nSegments),
+                        use_existing_rfm: false
+                    })
+                });
+                
+                if (!response.ok) throw new Error('Segmentation failed');
+                
+                const data = await response.json();
+                
+                // Update stats
+                document.getElementById('totalSegments').textContent = data.n_segments;
+                document.getElementById('totalCustomers').textContent = 
+                    data.total_customers.toLocaleString();
+                
+                // Display segments
+                container.innerHTML = data.segments.map(segment => `
+                    <div class="segment-card">
+                        <h3>${segment.segment_name}</h3>
+                        <p style="font-size: 14px; opacity: 0.9;">${segment.characteristics}</p>
+                        
+                        <div class="segment-stats">
+                            <div class="segment-stat">
+                                <span>Customers:</span>
+                                <strong>${segment.customer_count.toLocaleString()}</strong>
+                            </div>
+                            <div class="segment-stat">
+                                <span>Total Value:</span>
+                                <strong>$${segment.total_value.toLocaleString()}</strong>
+                            </div>
+                            <div class="segment-stat">
+                                <span>Avg Recency:</span>
+                                <strong>${segment.avg_recency.toFixed(0)} days</strong>
+                            </div>
+                            <div class="segment-stat">
+                                <span>Avg Frequency:</span>
+                                <strong>${segment.avg_frequency.toFixed(1)} orders</strong>
+                            </div>
+                        </div>
+                        
+                        <div class="segment-actions">
+                            <strong>📌 Recommended Actions:</strong>
+                            <ul>
+                                ${segment.recommended_actions.map(action => `<li>${action}</li>`).join('')}
+                            </ul>
+                        </div>
+                    </div>
+                `).join('');
+                
+            } catch (error) {
+                console.error('Error running segmentation:', error);
+                container.innerHTML = '<div class="error">Failed to run segmentation. Make sure the Marketing API is running on port 8003.</div>';
+            }
+        }
+        
+        // Load product bundles
+        async function loadProductBundles() {
+            const container = document.getElementById('bundlesContainer');
+            container.innerHTML = '<div class="loading">Mining association rules...</div>';
+            
+            try {
+                const response = await fetch(`${MARKETING_API_URL}/product-bundles`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        min_support: 0.01,
+                        min_confidence: 0.3,
+                        top_n: 10
+                    })
+                });
+                
+                if (!response.ok) throw new Error('Failed to load bundles');
+                
+                const data = await response.json();
+                
+                if (!data.bundles || data.bundles.length === 0) {
+                    container.innerHTML = '<p class="loading">No product bundles found. Try lowering the thresholds.</p>';
+                    return;
+                }
+                
+                // Update stat
+                document.getElementById('totalBundles').textContent = data.bundles.length;
+                
+                // Display bundles in a table
+                container.innerHTML = `
+                    <table class="bundles-table">
+                        <thead>
+                            <tr>
+                                <th>If Customers Buy...</th>
+                                <th>They Also Buy...</th>
+                                <th>Support</th>
+                                <th>Confidence</th>
+                                <th>Lift</th>
+                                <th>Expected Revenue</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${data.bundles.map(bundle => `
+                                <tr>
+                                    <td><strong>${bundle.antecedents.join(', ')}</strong></td>
+                                    <td><strong>${bundle.consequents.join(', ')}</strong></td>
+                                    <td>${(bundle.support * 100).toFixed(2)}%</td>
+                                    <td>${(bundle.confidence * 100).toFixed(1)}%</td>
+                                    <td>${bundle.lift.toFixed(2)}x</td>
+                                    <td>$${bundle.expected_revenue.toFixed(2)}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                `;
+                
+            } catch (error) {
+                console.error('Error loading bundles:', error);
+                container.innerHTML = '<div class="error">Failed to load product bundles. Make sure the Marketing API is running on port 8003.</div>';
+            }
+        }
+        
+        // Load data on page load
+        window.addEventListener('DOMContentLoaded', function() {
+            loadRFMStats();
+        });
+    </script>
 </body>
 </html>
 

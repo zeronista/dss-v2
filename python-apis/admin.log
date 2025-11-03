@@ -1,0 +1,11 @@
+nohup: ignoring input
+INFO:     Started server process [95809]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8001 (Press CTRL+C to quit)
+🚀 Starting Admin API on port 8001...
+📊 Role: Admin/Director - Sales Overview
+📝 Documentation: http://localhost:8001/docs
+🔍 Health check: http://localhost:8001/health
+INFO:     127.0.0.1:59664 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:41020 - "GET /health HTTP/1.1" 200 OK

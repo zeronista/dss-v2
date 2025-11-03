@@ -176,6 +176,55 @@
             display: block;
             margin-bottom: 10px;
         }
+        
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
+        
+        .error {
+            background: #fee;
+            color: #c33;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        
+        .chart-container {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            margin-bottom: 30px;
+        }
+        
+        .chart-container h2 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 24px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+        
+        th {
+            background: #f9f9f9;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        tr:hover {
+            background: #f5f5f5;
+        }
     </style>
 </head>
 <body>
@@ -202,25 +251,75 @@
             <div class="stat-card">
                 <div class="stat-card-icon">📊</div>
                 <div class="stat-card-title">Total Revenue</div>
-                <div class="stat-card-value">$1.2M</div>
+                <div class="stat-card-value" id="totalRevenue">Loading...</div>
             </div>
             
             <div class="stat-card">
                 <div class="stat-card-icon">📦</div>
-                <div class="stat-card-title">Total Orders</div>
-                <div class="stat-card-value">25,431</div>
+                <div class="stat-card-title">Total Transactions</div>
+                <div class="stat-card-value" id="totalTransactions">Loading...</div>
             </div>
             
             <div class="stat-card">
-                <div class="stat-card-icon">👥</div>
-                <div class="stat-card-title">Active Users</div>
-                <div class="stat-card-value">4,892</div>
+                <div class="stat-card-icon">🌍</div>
+                <div class="stat-card-title">Active Countries</div>
+                <div class="stat-card-value" id="activeCountries">Loading...</div>
             </div>
             
             <div class="stat-card">
                 <div class="stat-card-icon">📈</div>
-                <div class="stat-card-title">Growth Rate</div>
-                <div class="stat-card-value">+23%</div>
+                <div class="stat-card-title">Top-10 Share</div>
+                <div class="stat-card-value" id="topNShare">Loading...</div>
+            </div>
+        </div>
+        
+        <!-- Monthly Trend Chart -->
+        <div class="chart-container">
+            <h2>📈 Monthly Revenue Trend</h2>
+            <div id="monthlyTrendContainer">
+                <canvas id="monthlyTrendChart"></canvas>
+            </div>
+        </div>
+        
+        <!-- Top Countries Table -->
+        <div class="chart-container">
+            <h2>🌍 Top 10 Countries by Revenue</h2>
+            <div id="topCountriesContainer">
+                <table id="topCountriesTable">
+                    <thead>
+                        <tr>
+                            <th>Rank</th>
+                            <th>Country</th>
+                            <th>Revenue</th>
+                            <th>Share %</th>
+                            <th>Transactions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td colspan="5" class="loading">Loading...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <!-- Top Products Table -->
+        <div class="chart-container">
+            <h2>🏆 Top 10 Products by Revenue</h2>
+            <div id="topProductsContainer">
+                <table id="topProductsTable">
+                    <thead>
+                        <tr>
+                            <th>Rank</th>
+                            <th>Product</th>
+                            <th>Revenue</th>
+                            <th>Share %</th>
+                            <th>Transactions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td colspan="5" class="loading">Loading...</td></tr>
+                    </tbody>
+                </table>
             </div>
         </div>
         
@@ -246,6 +345,206 @@
             </div>
         </div>
     </div>
+    
+    <!-- Chart.js Library -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    
+    <script>
+        // API Configuration
+        const ADMIN_API_URL = 'http://localhost:8001';
+        
+        // Fetch and display KPIs
+        async function loadKPIs() {
+            try {
+                const response = await fetch(`${ADMIN_API_URL}/kpis`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        top_n: 10,
+                        exclude_cancelled: true
+                    })
+                });
+                
+                if (!response.ok) throw new Error('Failed to load KPIs');
+                
+                const data = await response.json();
+                
+                // Update KPI cards
+                document.getElementById('totalRevenue').textContent = 
+                    '$' + (data.total_revenue / 1000000).toFixed(2) + 'M';
+                document.getElementById('totalTransactions').textContent = 
+                    data.total_transactions.toLocaleString();
+                document.getElementById('activeCountries').textContent = 
+                    data.countries_active;
+                document.getElementById('topNShare').textContent = 
+                    data.top_n_revenue_share.toFixed(1) + '%';
+                    
+            } catch (error) {
+                console.error('Error loading KPIs:', error);
+                document.getElementById('totalRevenue').textContent = 'Error';
+            }
+        }
+        
+        // Fetch and display monthly trend
+        async function loadMonthlyTrend() {
+            try {
+                const response = await fetch(`${ADMIN_API_URL}/monthly-trend`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        top_n: 10,
+                        exclude_cancelled: true
+                    })
+                });
+                
+                if (!response.ok) throw new Error('Failed to load monthly trend');
+                
+                const result = await response.json();
+                const data = result.data;
+                
+                // Prepare chart data
+                const labels = data.map(d => d.year_month);
+                const revenues = data.map(d => d.revenue);
+                
+                // Create chart
+                const ctx = document.getElementById('monthlyTrendChart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Revenue',
+                            data: revenues,
+                            borderColor: '#667eea',
+                            backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                            borderWidth: 3,
+                            fill: true,
+                            tension: 0.4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: {
+                                display: true,
+                                position: 'top'
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return 'Revenue: $' + context.parsed.y.toLocaleString();
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    callback: function(value) {
+                                        return '$' + (value / 1000).toFixed(0) + 'K';
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+                
+            } catch (error) {
+                console.error('Error loading monthly trend:', error);
+                document.getElementById('monthlyTrendContainer').innerHTML = 
+                    '<div class="error">Failed to load monthly trend data</div>';
+            }
+        }
+        
+        // Fetch and display top countries
+        async function loadTopCountries() {
+            try {
+                const response = await fetch(`${ADMIN_API_URL}/top-countries`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        top_n: 10,
+                        exclude_cancelled: true
+                    })
+                });
+                
+                if (!response.ok) throw new Error('Failed to load top countries');
+                
+                const result = await response.json();
+                const data = result.data;
+                
+                // Build table HTML
+                const tbody = document.querySelector('#topCountriesTable tbody');
+                tbody.innerHTML = data.map(country => `
+                    <tr>
+                        <td>${country.rank}</td>
+                        <td><strong>${country.item}</strong></td>
+                        <td>$${country.revenue.toLocaleString()}</td>
+                        <td>${country.share_pct.toFixed(2)}%</td>
+                        <td>${country.transactions.toLocaleString()}</td>
+                    </tr>
+                `).join('');
+                
+            } catch (error) {
+                console.error('Error loading top countries:', error);
+                document.querySelector('#topCountriesTable tbody').innerHTML = 
+                    '<tr><td colspan="5" class="error">Failed to load data</td></tr>';
+            }
+        }
+        
+        // Fetch and display top products
+        async function loadTopProducts() {
+            try {
+                const response = await fetch(`${ADMIN_API_URL}/top-products`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        top_n: 10,
+                        exclude_cancelled: true
+                    })
+                });
+                
+                if (!response.ok) throw new Error('Failed to load top products');
+                
+                const result = await response.json();
+                const data = result.data;
+                
+                // Build table HTML
+                const tbody = document.querySelector('#topProductsTable tbody');
+                tbody.innerHTML = data.map(product => `
+                    <tr>
+                        <td>${product.rank}</td>
+                        <td><strong>${product.item}</strong></td>
+                        <td>$${product.revenue.toLocaleString()}</td>
+                        <td>${product.share_pct.toFixed(2)}%</td>
+                        <td>${product.transactions.toLocaleString()}</td>
+                    </tr>
+                `).join('');
+                
+            } catch (error) {
+                console.error('Error loading top products:', error);
+                document.querySelector('#topProductsTable tbody').innerHTML = 
+                    '<tr><td colspan="5" class="error">Failed to load data</td></tr>';
+            }
+        }
+        
+        // Load all data on page load
+        window.addEventListener('DOMContentLoaded', function() {
+            loadKPIs();
+            loadMonthlyTrend();
+            loadTopCountries();
+            loadTopProducts();
+        });
+    </script>
 </body>
 </html>
 
