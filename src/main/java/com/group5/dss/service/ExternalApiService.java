@@ -42,6 +42,11 @@ public class ExternalApiService {
         String baseUrl = getBaseUrl(apiType);
         String fullUrl = baseUrl + endpoint;
         
+        // Validate method parameter to ensure non-null
+        if (method == null) {
+            throw new IllegalArgumentException("HTTP method cannot be null");
+        }
+        
         try {
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
