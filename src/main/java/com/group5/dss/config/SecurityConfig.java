@@ -44,10 +44,12 @@ public class SecurityConfig {
         http
             .authorizeHttpRequests(authz -> authz
                 .requestMatchers("/login", "/css/**", "/js/**", "/images/**").permitAll()
+                .requestMatchers("/api/gateway/health").permitAll()  // Public health check
                 .requestMatchers("/admin/**").hasRole("ADMIN")
                 .requestMatchers("/inventory/**").hasRole("INVENTORY_MANAGER")
                 .requestMatchers("/marketing/**").hasRole("MARKETING_MANAGER")
                 .requestMatchers("/sales/**").hasRole("SALES_MANAGER")
+                .requestMatchers("/api/**").authenticated()  // All API endpoints need authentication
                 .anyRequest().authenticated()
             )
             .formLogin(form -> form
