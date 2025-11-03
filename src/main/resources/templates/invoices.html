@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invoice Management - DSS</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+        
+        .stats {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .stat-item {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 10px 20px;
+            border-radius: 8px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .stat-item .label {
+            font-size: 12px;
+            opacity: 0.9;
+        }
+        
+        .stat-item .value {
+            font-size: 24px;
+            font-weight: bold;
+            margin-top: 5px;
+        }
+        
+        .content {
+            padding: 30px;
+        }
+        
+        .table-container {
+            overflow-x: auto;
+            margin-bottom: 30px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+        }
+        
+        thead {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        th {
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 14px;
+        }
+        
+        tbody tr {
+            transition: background-color 0.2s;
+        }
+        
+        tbody tr:hover {
+            background-color: #f8f9fa;
+        }
+        
+        tbody tr:nth-child(even) {
+            background-color: #fafafa;
+        }
+        
+        tbody tr:nth-child(even):hover {
+            background-color: #f0f0f0;
+        }
+        
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .pagination a,
+        .pagination span {
+            padding: 10px 16px;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+        
+        .pagination a {
+            background: #f0f0f0;
+            color: #667eea;
+        }
+        
+        .pagination a:hover {
+            background: #667eea;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+        
+        .pagination .current {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-weight: bold;
+        }
+        
+        .pagination .disabled {
+            background: #f0f0f0;
+            color: #ccc;
+            cursor: not-allowed;
+        }
+        
+        .page-size-selector {
+            text-align: center;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        
+        .page-size-selector label {
+            font-weight: 600;
+            margin-right: 10px;
+            color: #333;
+        }
+        
+        .page-size-selector select {
+            padding: 8px 15px;
+            border: 2px solid #667eea;
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
+            background: white;
+            color: #333;
+            transition: all 0.3s;
+        }
+        
+        .page-size-selector select:hover {
+            border-color: #764ba2;
+        }
+        
+        .page-size-selector select:focus {
+            outline: none;
+            border-color: #764ba2;
+            box-shadow: 0 0 0 3px rgba(118, 75, 162, 0.1);
+        }
+        
+        .no-data {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+            font-size: 18px;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                border-radius: 0;
+            }
+            
+            .header h1 {
+                font-size: 24px;
+            }
+            
+            .stats {
+                gap: 10px;
+            }
+            
+            .stat-item {
+                padding: 8px 15px;
+            }
+            
+            .content {
+                padding: 15px;
+            }
+            
+            th, td {
+                padding: 8px;
+                font-size: 12px;
+            }
+            
+            .pagination a,
+            .pagination span {
+                padding: 8px 12px;
+                font-size: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📊 Invoice Management System</h1>
+            <div class="stats">
+                <div class="stat-item">
+                    <div class="label">Total Records</div>
+                    <div class="value" th:text="${totalItems}">0</div>
+                </div>
+                <div class="stat-item">
+                    <div class="label">Current Page</div>
+                    <div class="value" th:text="${currentPage + 1} + ' / ' + ${totalPages}">1 / 1</div>
+                </div>
+                <div class="stat-item">
+                    <div class="label">Records per Page</div>
+                    <div class="value" th:text="${pageSize}">25</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="content">
+            <div class="page-size-selector">
+                <label for="pageSize">Records per page:</label>
+                <select id="pageSize" th:value="${pageSize}" onchange="changePageSize(this.value)">
+                    <option value="10" th:selected="${pageSize == 10}">10</option>
+                    <option value="25" th:selected="${pageSize == 25}">25</option>
+                    <option value="50" th:selected="${pageSize == 50}">50</option>
+                    <option value="100" th:selected="${pageSize == 100}">100</option>
+                </select>
+            </div>
+            
+            <div class="table-container" th:if="${invoices != null and !invoices.isEmpty()}">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Invoice No</th>
+                            <th>Stock Code</th>
+                            <th>Description</th>
+                            <th>Quantity</th>
+                            <th>Unit Price</th>
+                            <th>Invoice Date</th>
+                            <th>Customer ID</th>
+                            <th>Country</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="invoice : ${invoices}">
+                            <td th:text="${invoice.invoiceNo}">-</td>
+                            <td th:text="${invoice.stockCode}">-</td>
+                            <td th:text="${invoice.description}">-</td>
+                            <td th:text="${invoice.quantity}">-</td>
+                            <td th:text="${#numbers.formatDecimal(invoice.unitPrice, 1, 2)}">-</td>
+                            <td th:text="${invoice.invoiceDate}">-</td>
+                            <td th:text="${invoice.customerId}">-</td>
+                            <td th:text="${invoice.country}">-</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="no-data" th:if="${invoices == null or invoices.isEmpty()}">
+                <p>📭 No data available</p>
+            </div>
+            
+            <div class="pagination" th:if="${totalPages > 0}">
+                <a th:if="${hasPrevious}" 
+                   th:href="@{/invoices(page=0, size=${pageSize})}"
+                   title="First Page">⏮️ First</a>
+                <span th:unless="${hasPrevious}" class="disabled">⏮️ First</span>
+                
+                <a th:if="${hasPrevious}" 
+                   th:href="@{/invoices(page=${currentPage - 1}, size=${pageSize})}"
+                   title="Previous Page">◀️ Previous</a>
+                <span th:unless="${hasPrevious}" class="disabled">◀️ Previous</span>
+                
+                <span th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
+                      th:if="${i >= currentPage - 2 and i <= currentPage + 2}">
+                    <a th:if="${i != currentPage}" 
+                       th:href="@{/invoices(page=${i}, size=${pageSize})}"
+                       th:text="${i + 1}">1</a>
+                    <span th:if="${i == currentPage}" 
+                          class="current"
+                          th:text="${i + 1}">1</span>
+                </span>
+                
+                <a th:if="${hasNext}" 
+                   th:href="@{/invoices(page=${currentPage + 1}, size=${pageSize})}"
+                   title="Next Page">Next ▶️</a>
+                <span th:unless="${hasNext}" class="disabled">Next ▶️</span>
+                
+                <a th:if="${hasNext}" 
+                   th:href="@{/invoices(page=${totalPages - 1}, size=${pageSize})}"
+                   title="Last Page">Last ⏭️</a>
+                <span th:unless="${hasNext}" class="disabled">Last ⏭️</span>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        function changePageSize(size) {
+            window.location.href = '/invoices?page=0&size=' + size;
+        }
+    </script>
+</body>
+</html>
+
