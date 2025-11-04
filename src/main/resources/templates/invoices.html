@@ -273,7 +273,10 @@
                             <th>Description</th>
                             <th>Quantity</th>
                             <th>Unit Price</th>
+                            <th>Total Price</th>
                             <th>Invoice Date</th>
+                            <th>Invoice Year</th>
+                            <th>Invoice Month</th>
                             <th>Customer ID</th>
                             <th>Country</th>
                         </tr>
@@ -285,7 +288,10 @@
                             <td th:text="${invoice.description}">-</td>
                             <td th:text="${invoice.quantity}">-</td>
                             <td th:text="${#numbers.formatDecimal(invoice.unitPrice, 1, 2)}">-</td>
+                            <td th:text="${#numbers.formatDecimal(invoice.totalPrice, 1, 2)}">-</td>
                             <td th:text="${invoice.invoiceDate}">-</td>
+                            <td th:text="${invoice.invoiceYear}">-</td>
+                            <td th:text="${invoice.invoiceMonth}">-</td>
                             <td th:text="${invoice.customerId}">-</td>
                             <td th:text="${invoice.country}">-</td>
                         </tr>

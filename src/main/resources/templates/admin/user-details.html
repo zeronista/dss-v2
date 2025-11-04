@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Details - DSS</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f5f5;
+        }
+        
+        .navbar {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .navbar-brand {
+            font-size: 24px;
+            font-weight: bold;
+        }
+        
+        .navbar-user {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .btn-back {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: 2px solid white;
+            padding: 8px 20px;
+            border-radius: 6px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+        
+        .btn-back:hover {
+            background: white;
+            color: #667eea;
+        }
+        
+        .btn-logout {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: 2px solid white;
+            padding: 8px 20px;
+            border-radius: 6px;
+            font-weight: 600;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+        
+        .btn-logout:hover {
+            background: white;
+            color: #667eea;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 30px;
+        }
+        
+        .header-section {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            text-align: center;
+        }
+        
+        .user-avatar {
+            width: 120px;
+            height: 120px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            font-size: 48px;
+            color: white;
+        }
+        
+        .header-section h1 {
+            color: #333;
+            margin-bottom: 5px;
+            font-size: 32px;
+        }
+        
+        .header-section .username {
+            color: #666;
+            font-size: 16px;
+            margin-bottom: 15px;
+        }
+        
+        .role-badge {
+            display: inline-block;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+        }
+        
+        .role-admin {
+            background: #ff6b6b;
+            color: white;
+        }
+        
+        .role-inventory-manager {
+            background: #4ecdc4;
+            color: white;
+        }
+        
+        .role-marketing-manager {
+            background: #95e1d3;
+            color: #333;
+        }
+        
+        .role-sales-manager {
+            background: #f38181;
+            color: white;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+        
+        .status-active {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .status-inactive {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .details-section {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            margin-bottom: 30px;
+        }
+        
+        .details-section h2 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 24px;
+            border-bottom: 2px solid #f0f0f0;
+            padding-bottom: 10px;
+        }
+        
+        .detail-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+        
+        .detail-item {
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        
+        .detail-item .label {
+            font-size: 12px;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+        
+        .detail-item .value {
+            font-size: 16px;
+            color: #333;
+            font-weight: 500;
+        }
+        
+        .info-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        
+        .info-card h3 {
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+        
+        .info-card p {
+            opacity: 0.9;
+            line-height: 1.6;
+        }
+        
+        .actions {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        
+        .btn-action {
+            padding: 12px 30px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s;
+            display: inline-block;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: #5a6268;
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <div class="navbar-brand">👤 User Details</div>
+        <div class="navbar-user">
+            <a href="/admin/users" class="btn-back">← Back to Users</a>
+            <a href="/admin/dashboard" class="btn-back">Dashboard</a>
+            <form action="/logout" method="post" style="margin: 0;">
+                <button type="submit" class="btn-logout">Logout</button>
+            </form>
+        </div>
+    </div>
+    
+    <div class="container">
+        <div class="header-section">
+            <div class="user-avatar">
+                <span th:text="${#strings.substring(user.fullName, 0, 1)}">A</span>
+            </div>
+            <h1 th:text="${user.fullName}">Admin User</h1>
+            <p class="username">@<span th:text="${user.username}">admin</span></p>
+            
+            <div>
+                <span th:class="${'role-badge role-' + #strings.toLowerCase(#strings.replace(user.role.name(), '_', '-'))}"
+                      th:text="${#strings.replace(user.role.name(), '_', ' ')}">
+                    ADMIN
+                </span>
+            </div>
+            
+            <div style="margin-top: 10px;">
+                <span th:class="${user.enabled ? 'status-badge status-active' : 'status-badge status-inactive'}"
+                      th:text="${user.enabled ? '✓ Active Account' : '✗ Inactive Account'}">
+                    Active
+                </span>
+            </div>
+        </div>
+        
+        <div class="details-section">
+            <h2>📋 Account Information</h2>
+            
+            <div class="detail-grid">
+                <div class="detail-item">
+                    <div class="label">User ID</div>
+                    <div class="value" th:text="${user.id}">123456789</div>
+                </div>
+                
+                <div class="detail-item">
+                    <div class="label">Username</div>
+                    <div class="value" th:text="${user.username}">admin</div>
+                </div>
+                
+                <div class="detail-item">
+                    <div class="label">Full Name</div>
+                    <div class="value" th:text="${user.fullName}">Admin User</div>
+                </div>
+                
+                <div class="detail-item">
+                    <div class="label">Email Address</div>
+                    <div class="value" th:text="${user.email}">admin@dss.com</div>
+                </div>
+                
+                <div class="detail-item">
+                    <div class="label">Role</div>
+                    <div class="value" th:text="${#strings.replace(user.role.name(), '_', ' ')}">ADMIN</div>
+                </div>
+                
+                <div class="detail-item">
+                    <div class="label">Account Status</div>
+                    <div class="value" th:text="${user.enabled ? 'Active' : 'Inactive'}">Active</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="info-card">
+            <h3>🔐 Role Permissions</h3>
+            <p th:if="${user.role.name() == 'ADMIN'}">
+                <strong>Administrator</strong> - Full system access including user management, 
+                system settings, all reports, and complete oversight of all departments.
+            </p>
+            <p th:if="${user.role.name() == 'INVENTORY_MANAGER'}">
+                <strong>Inventory Manager</strong> - Access to inventory analytics, stock 
+                predictions, risk management, and return policy optimization.
+            </p>
+            <p th:if="${user.role.name() == 'MARKETING_MANAGER'}">
+                <strong>Marketing Manager</strong> - Access to customer segmentation, RFM analysis, 
+                market basket analysis, and customer targeting features.
+            </p>
+            <p th:if="${user.role.name() == 'SALES_MANAGER'}">
+                <strong>Sales Manager</strong> - Access to sales analytics, product recommendations, 
+                cross-sell insights, and customer purchase predictions.
+            </p>
+        </div>
+        
+        <div class="actions">
+            <a href="/admin/users" class="btn-action btn-secondary">
+                ← Back to User List
+            </a>
+            <a href="/admin/dashboard" class="btn-action btn-primary">
+                🏠 Go to Dashboard
+            </a>
+        </div>
+    </div>
+</body>
+</html>

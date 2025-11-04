@@ -95,6 +95,36 @@ def get_transactions_df(filters: Dict[str, Any] = None, exclude_cancelled: bool 
     
     return df
 
+def filter_by_date_range(df: pd.DataFrame, start_date: str = None, end_date: str = None) -> pd.DataFrame:
+    """
+    Filter transactions by date range (PHASE 1 - Enhanced RFM)
+    
+    Args:
+        df: DataFrame with InvoiceDate column
+        start_date: Start date in 'YYYY-MM-DD' format (optional)
+        end_date: End date in 'YYYY-MM-DD' format (optional)
+    
+    Returns:
+        Filtered DataFrame
+    """
+    if df.empty:
+        return df
+    
+    # Ensure InvoiceDate is datetime
+    if 'InvoiceDate' in df.columns:
+        df['InvoiceDate'] = pd.to_datetime(df['InvoiceDate'])
+    
+    # Apply filters
+    if start_date:
+        df = df[df['InvoiceDate'] >= pd.to_datetime(start_date)]
+    
+    if end_date:
+        # Include the entire end date (up to 23:59:59)
+        end_datetime = pd.to_datetime(end_date) + pd.Timedelta(days=1) - pd.Timedelta(seconds=1)
+        df = df[df['InvoiceDate'] <= end_datetime]
+    
+    return df.copy()
+
 def get_customers_rfm(as_dataframe: bool = True) -> pd.DataFrame | List[Dict]:
     """
     Get RFM scores from MongoDB
