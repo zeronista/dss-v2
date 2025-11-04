@@ -290,6 +290,86 @@
             justify-content: space-between;
             align-items: center;
         }
+        
+        /* Pagination Styles */
+        .pagination-container {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin-top: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        .pagination-info {
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .pagination {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+        
+        .page-link {
+            padding: 10px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            text-decoration: none;
+            color: #333;
+            font-weight: 600;
+            transition: all 0.3s;
+            background: white;
+        }
+        
+        .page-link:hover {
+            border-color: #667eea;
+            color: #667eea;
+            transform: translateY(-2px);
+        }
+        
+        .page-link.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: #667eea;
+        }
+        
+        .page-link.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+        
+        .page-size-selector {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .page-size-selector label {
+            color: #666;
+            font-size: 14px;
+            font-weight: 600;
+        }
+        
+        .page-size-selector select {
+            padding: 8px 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .page-size-selector select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
     </style>
 </head>
 <body>
@@ -388,6 +468,80 @@
                 </tbody>
             </table>
         </div>
+        
+        <!-- Pagination -->
+        <div th:if="${!products.isEmpty()}" class="pagination-container">
+            <div class="pagination-info">
+                <span th:text="'Showing ' + ${(currentPage - 1) * pageSize + 1} + ' to ' + ${(currentPage - 1) * pageSize + products.size()} + ' of ' + ${totalProducts} + ' products'">
+                    Showing 1 to 20 of 100 products
+                </span>
+            </div>
+            
+            <div class="pagination">
+                <!-- First Page -->
+                <a th:href="@{/admin/products(page=1, size=${pageSize}, search=${searchQuery})}" 
+                   th:class="${currentPage == 1} ? 'page-link disabled' : 'page-link'"
+                   title="First Page">
+                    ⏮️
+                </a>
+                
+                <!-- Previous Page -->
+                <a th:href="@{/admin/products(page=${currentPage - 1}, size=${pageSize}, search=${searchQuery})}" 
+                   th:class="${currentPage == 1} ? 'page-link disabled' : 'page-link'"
+                   title="Previous">
+                    ◀️
+                </a>
+                
+                <!-- Page Numbers -->
+                <th:block th:each="i : ${#numbers.sequence(1, totalPages)}">
+                    <a th:if="${i == currentPage || (i >= currentPage - 2 && i <= currentPage + 2) || i == 1 || i == totalPages}"
+                       th:href="@{/admin/products(page=${i}, size=${pageSize}, search=${searchQuery})}" 
+                       th:class="${i == currentPage} ? 'page-link active' : 'page-link'"
+                       th:text="${i}">
+                        1
+                    </a>
+                    <span th:if="${(i == currentPage - 3 && currentPage > 4) || (i == currentPage + 3 && currentPage < totalPages - 3)}"
+                          style="color: #666;">
+                        ...
+                    </span>
+                </th:block>
+                
+                <!-- Next Page -->
+                <a th:href="@{/admin/products(page=${currentPage + 1}, size=${pageSize}, search=${searchQuery})}" 
+                   th:class="${currentPage == totalPages} ? 'page-link disabled' : 'page-link'"
+                   title="Next">
+                    ▶️
+                </a>
+                
+                <!-- Last Page -->
+                <a th:href="@{/admin/products(page=${totalPages}, size=${pageSize}, search=${searchQuery})}" 
+                   th:class="${currentPage == totalPages} ? 'page-link disabled' : 'page-link'"
+                   title="Last Page">
+                    ⏭️
+                </a>
+            </div>
+            
+            <div class="page-size-selector">
+                <label for="pageSize">Items per page:</label>
+                <select id="pageSize" onchange="changePageSize(this.value)">
+                    <option th:value="10" th:selected="${pageSize == 10}">10</option>
+                    <option th:value="20" th:selected="${pageSize == 20}">20</option>
+                    <option th:value="50" th:selected="${pageSize == 50}">50</option>
+                    <option th:value="100" th:selected="${pageSize == 100}">100</option>
+                </select>
+            </div>
+        </div>
     </div>
+    
+    <script th:inline="javascript">
+        function changePageSize(size) {
+            const searchQuery = /*[[${searchQuery}]]*/ null;
+            let url = '/admin/products?page=1&size=' + size;
+            if (searchQuery) {
+                url += '&search=' + encodeURIComponent(searchQuery);
+            }
+            window.location.href = url;
+        }
+    </script>
 </body>
 </html>
