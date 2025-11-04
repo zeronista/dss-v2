@@ -18,6 +18,9 @@ public class ExternalApiService {
     @Autowired
     private RestTemplate restTemplate;
     
+    @Value("${api.admin.url}")
+    private String adminApiUrl;
+    
     @Value("${api.inventory.url}")
     private String inventoryApiUrl;
     
@@ -26,9 +29,6 @@ public class ExternalApiService {
     
     @Value("${api.sales.url}")
     private String salesApiUrl;
-    
-    @Value("${api.analytics.url}")
-    private String analyticsApiUrl;
     
     /**
      * Generic method to call external API
@@ -129,14 +129,14 @@ public class ExternalApiService {
      */
     private String getBaseUrl(String apiType) {
         switch (apiType.toLowerCase()) {
+            case "admin":
+                return adminApiUrl;
             case "inventory":
                 return inventoryApiUrl;
             case "marketing":
                 return marketingApiUrl;
             case "sales":
                 return salesApiUrl;
-            case "analytics":
-                return analyticsApiUrl;
             default:
                 throw new IllegalArgumentException("Unknown API type: " + apiType);
         }
@@ -147,10 +147,10 @@ public class ExternalApiService {
      */
     public Map<String, Boolean> getAllApiStatuses() {
         Map<String, Boolean> statuses = new HashMap<>();
+        statuses.put("admin", isApiAvailable("admin"));
         statuses.put("inventory", isApiAvailable("inventory"));
         statuses.put("marketing", isApiAvailable("marketing"));
         statuses.put("sales", isApiAvailable("sales"));
-        statuses.put("analytics", isApiAvailable("analytics"));
         return statuses;
     }
 }

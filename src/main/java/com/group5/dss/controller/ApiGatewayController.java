@@ -15,6 +15,24 @@ public class ApiGatewayController {
     @Autowired
     private ExternalApiService externalApiService;
     
+    // ============ ADMIN APIs ============
+    
+    @PostMapping("/admin/{endpoint}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Map<String, Object>> callAdminApi(
+            @PathVariable String endpoint,
+            @RequestBody(required = false) Map<String, Object> requestBody) {
+        Map<String, Object> result = externalApiService.post("admin", "/" + endpoint, requestBody);
+        return ResponseEntity.ok(result);
+    }
+    
+    @GetMapping("/admin/{endpoint}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Map<String, Object>> getAdminApi(@PathVariable String endpoint) {
+        Map<String, Object> result = externalApiService.get("admin", "/" + endpoint);
+        return ResponseEntity.ok(result);
+    }
+    
     // ============ INVENTORY APIs ============
     
     @PostMapping("/inventory/{endpoint}")
@@ -66,24 +84,6 @@ public class ApiGatewayController {
     @PreAuthorize("hasAnyRole('ADMIN', 'SALES_MANAGER')")
     public ResponseEntity<Map<String, Object>> getSalesApi(@PathVariable String endpoint) {
         Map<String, Object> result = externalApiService.get("sales", "/" + endpoint);
-        return ResponseEntity.ok(result);
-    }
-    
-    // ============ ANALYTICS APIs ============
-    
-    @PostMapping("/analytics/{endpoint}")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Map<String, Object>> callAnalyticsApi(
-            @PathVariable String endpoint,
-            @RequestBody(required = false) Map<String, Object> requestBody) {
-        Map<String, Object> result = externalApiService.post("analytics", "/" + endpoint, requestBody);
-        return ResponseEntity.ok(result);
-    }
-    
-    @GetMapping("/analytics/{endpoint}")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Map<String, Object>> getAnalyticsApi(@PathVariable String endpoint) {
-        Map<String, Object> result = externalApiService.get("analytics", "/" + endpoint);
         return ResponseEntity.ok(result);
     }
     

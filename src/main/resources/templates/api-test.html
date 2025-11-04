@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>API Integration Test</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            border-bottom: 3px solid #4CAF50;
+            padding-bottom: 10px;
+        }
+        .api-section {
+            margin: 20px 0;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .api-section h2 {
+            color: #4CAF50;
+            margin-top: 0;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .response {
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            padding: 15px;
+            margin-top: 10px;
+            border-radius: 5px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .status {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 3px;
+            margin-left: 10px;
+        }
+        .status.online {
+            background-color: #4CAF50;
+            color: white;
+        }
+        .status.offline {
+            background-color: #f44336;
+            color: white;
+        }
+        .loading {
+            color: #666;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔗 Python APIs Integration Test</h1>
+        
+        <div class="api-section">
+            <h2>Health Check - All APIs</h2>
+            <button onclick="checkAllApis()">Check All APIs Status</button>
+            <div id="healthResponse" class="response"></div>
+        </div>
+
+        <div class="api-section">
+            <h2>📊 Admin API (Port 8001) - Sales Overview</h2>
+            <button onclick="testAdminKPIs()">Get KPIs</button>
+            <button onclick="testMonthlyTrend()">Get Monthly Trend</button>
+            <button onclick="testTopCountries()">Get Top Countries</button>
+            <div id="adminResponse" class="response"></div>
+        </div>
+
+        <div class="api-section">
+            <h2>📦 Inventory API (Port 8002) - Risk Management</h2>
+            <button onclick="testRiskScore()">Calculate Risk Score</button>
+            <button onclick="testPolicySimulation()">Simulate Policy</button>
+            <button onclick="testOptimalThreshold()">Find Optimal Threshold</button>
+            <div id="inventoryResponse" class="response"></div>
+        </div>
+
+        <div class="api-section">
+            <h2>📈 Marketing API (Port 8003) - Customer Segmentation</h2>
+            <button onclick="testCalculateRFM()">Calculate RFM</button>
+            <button onclick="testSegmentation()">Run Segmentation</button>
+            <button onclick="testMarketBasket()">Market Basket Analysis</button>
+            <div id="marketingResponse" class="response"></div>
+        </div>
+
+        <div class="api-section">
+            <h2>🎯 Sales API (Port 8004) - Recommendations</h2>
+            <button onclick="testRecommendations()">Get Product Recommendations</button>
+            <button onclick="testTopBundles()">Get Top Bundles</button>
+            <button onclick="testProductNetwork()">Get Product Network</button>
+            <div id="salesResponse" class="response"></div>
+        </div>
+    </div>
+
+    <script>
+        // Utility function to display response
+        function displayResponse(elementId, data, loading = false) {
+            const element = document.getElementById(elementId);
+            if (loading) {
+                element.innerHTML = '<span class="loading">Loading...</span>';
+                return;
+            }
+            element.textContent = JSON.stringify(data, null, 2);
+        }
+
+        // Health Check All APIs
+        async function checkAllApis() {
+            displayResponse('healthResponse', null, true);
+            try {
+                const response = await fetch('/api/gateway/health');
+                const data = await response.json();
+                displayResponse('healthResponse', data);
+            } catch (error) {
+                displayResponse('healthResponse', { error: error.message });
+            }
+        }
+
+        // ============ ADMIN API TESTS ============
+        
+        async function testAdminKPIs() {
+            displayResponse('adminResponse', null, true);
+            try {
+                const response = await fetch('/api/gateway/admin/kpis', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        exclude_cancelled: true,
+                        top_n: 10
+                    })
+                });
+                const data = await response.json();
+                displayResponse('adminResponse', data);
+            } catch (error) {
+                displayResponse('adminResponse', { error: error.message });
+            }
+        }
+
+        async function testMonthlyTrend() {
+            displayResponse('adminResponse', null, true);
+            try {
+                const response = await fetch('/api/gateway/admin/monthly-trend', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        exclude_cancelled: true
+                    })
+                });
+                const data = await response.json();
+                displayResponse('adminResponse', data);
+            } catch (error) {
+                displayResponse('adminResponse', { error: error.message });
+            }
+        }
+
+        async function testTopCountries() {
+            displayResponse('adminResponse', null, true);
+            try {
+                const response = await fetch('/api/gateway/admin/top-countries', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        top_n: 5,
+                        exclude_cancelled: true
+                    })
+                });
+                const data = await response.json();
+                displayResponse('adminResponse', data);
+            } catch (error) {
+                displayResponse('adminResponse', { error: error.message });
+            }
+        }
+
+        // ============ INVENTORY API TESTS ============
+        
+        async function testRiskScore() {
+            displayResponse('inventoryResponse', null, true);
+            try {
+                const response = await fetch('/api/gateway/inventory/calculate-risk-score', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        customer_id: "17850",
+                        stock_code: "85123A",
+                        quantity: 10,
+                        unit_price: 2.55,
+                        country: "United Kingdom"
+                    })
+                });
+                const data = await response.json();
+                displayResponse('inventoryResponse', data);
+            } catch (error) {
+                displayResponse('inventoryResponse', { error: error.message });
+            }
+        }
+
+        async function testPolicySimulation() {
+            displayResponse('inventoryResponse', null, true);
+            try {
+                const response = await fetch('/api/gateway/inventory/simulate-policy', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        threshold_tau: 50,
+                        return_processing_cost: 10,
+                        conversion_impact: 0.2,
+                        sample_size: 1000
+                    })
+                });
+                const data = await response.json();
+                displayResponse('inventoryResponse', data);
+            } catch (error) {
+                displayResponse('inventoryResponse', { error: error.message });
+            }
+        }
+
+        async function testOptimalThreshold() {
+            displayResponse('inventoryResponse', null, true);
+            try {
+                const response = await fetch('/api/gateway/inventory/find-optimal-threshold', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        return_processing_cost: 10,
+                        conversion_impact: 0.2,
+                        sample_size: 500
+                    })
+                });
+                const data = await response.json();
+                displayResponse('inventoryResponse', data);
+            } catch (error) {
+                displayResponse('inventoryResponse', { error: error.message });
+            }
+        }
+
+        // ============ MARKETING API TESTS ============
+        
+        async function testCalculateRFM() {
+            displayResponse('marketingResponse', null, true);
+            try {
+                const response = await fetch('/api/gateway/marketing/calculate-rfm', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                const data = await response.json();
+                displayResponse('marketingResponse', data);
+            } catch (error) {
+                displayResponse('marketingResponse', { error: error.message });
+            }
+        }
+
+        async function testSegmentation() {
+            displayResponse('marketingResponse', null, true);
+            try {
+                const response = await fetch('/api/gateway/marketing/run-segmentation', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        n_segments: 3,
+                        use_existing_rfm: true
+                    })
+                });
+                const data = await response.json();
+                displayResponse('marketingResponse', data);
+            } catch (error) {
+                displayResponse('marketingResponse', { error: error.message });
+            }
+        }
+
+        async function testMarketBasket() {
+            displayResponse('marketingResponse', null, true);
+            try {
+                const response = await fetch('/api/gateway/marketing/market-basket-analysis', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        min_support: 0.01,
+                        min_confidence: 0.3,
+                        top_n: 10
+                    })
+                });
+                const data = await response.json();
+                displayResponse('marketingResponse', data);
+            } catch (error) {
+                displayResponse('marketingResponse', { error: error.message });
+            }
+        }
+
+        // ============ SALES API TESTS ============
+        
+        async function testRecommendations() {
+            displayResponse('salesResponse', null, true);
+            try {
+                const response = await fetch('/api/gateway/sales/generate-recommendations', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        stock_code: "85123A",
+                        confidence_threshold: 0.3,
+                        top_n: 5,
+                        min_support: 0.01
+                    })
+                });
+                const data = await response.json();
+                displayResponse('salesResponse', data);
+            } catch (error) {
+                displayResponse('salesResponse', { error: error.message });
+            }
+        }
+
+        async function testTopBundles() {
+            displayResponse('salesResponse', null, true);
+            try {
+                const response = await fetch('/api/gateway/sales/top-bundles', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        min_support: 0.01,
+                        min_confidence: 0.3,
+                        top_n: 10
+                    })
+                });
+                const data = await response.json();
+                displayResponse('salesResponse', data);
+            } catch (error) {
+                displayResponse('salesResponse', { error: error.message });
+            }
+        }
+
+        async function testProductNetwork() {
+            displayResponse('salesResponse', null, true);
+            try {
+                const response = await fetch('/api/gateway/sales/product-network', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        min_confidence: 0.3,
+                        top_n: 20
+                    })
+                });
+                const data = await response.json();
+                displayResponse('salesResponse', data);
+            } catch (error) {
+                displayResponse('salesResponse', { error: error.message });
+            }
+        }
+
+        // Auto-check health on load
+        window.onload = function() {
+            checkAllApis();
+        };
+    </script>
+</body>
+</html>
