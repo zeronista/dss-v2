@@ -104,35 +104,40 @@
         }
         
         .stat-card {
-            background: white;
-            padding: 25px;
-            border-radius: 12px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(102, 126, 234, 0.3);
             transition: all 0.3s;
+            text-align: center;
         }
         
         .stat-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            transform: translateY(-8px);
+            box-shadow: 0 8px 30px rgba(102, 126, 234, 0.4);
         }
         
         .stat-card-icon {
-            font-size: 40px;
+            font-size: 48px;
             margin-bottom: 15px;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
         }
         
         .stat-card-title {
-            color: #666;
+            color: rgba(255,255,255,0.95);
             font-size: 14px;
             margin-bottom: 10px;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
+            letter-spacing: 1px;
+            font-weight: 600;
         }
         
         .stat-card-value {
-            color: #333;
-            font-size: 32px;
-            font-weight: bold;
+            color: white;
+            font-size: 42px;
+            font-weight: 800;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
         }
         
         .quick-actions {
@@ -207,23 +212,72 @@
         
         table {
             width: 100%;
-            border-collapse: collapse;
+            border-collapse: separate;
+            border-spacing: 0;
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
         }
         
         th, td {
-            padding: 12px;
+            padding: 15px 12px;
             text-align: left;
-            border-bottom: 1px solid #eee;
+            border-bottom: 1px solid #f0f0f0;
         }
         
         th {
-            background: #f9f9f9;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             font-weight: 600;
-            color: #333;
+            color: white;
+            text-transform: uppercase;
+            font-size: 12px;
+            letter-spacing: 0.5px;
         }
         
-        tr:hover {
-            background: #f5f5f5;
+        tbody tr {
+            transition: all 0.2s ease;
+        }
+        
+        tbody tr:hover {
+            background: #f8f9fa;
+            transform: scale(1.01);
+        }
+        
+        tbody tr:last-child td {
+            border-bottom: none;
+        }
+        
+        td:nth-child(2),
+        td:nth-child(3),
+        td:nth-child(4) {
+            font-weight: 600;
+            color: #667eea;
+        }
+        
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .stat-card {
+            animation: fadeInUp 0.5s ease-out;
+        }
+        
+        .stat-card:nth-child(1) { animation-delay: 0.1s; }
+        .stat-card:nth-child(2) { animation-delay: 0.2s; }
+        .stat-card:nth-child(3) { animation-delay: 0.3s; }
+        .stat-card:nth-child(4) { animation-delay: 0.4s; }
+        
+        .chart-container {
+            animation: fadeInUp 0.6s ease-out 0.5s both;
         }
     </style>
 </head>
@@ -367,9 +421,12 @@
                     })
                 });
                 
-                if (!response.ok) throw new Error('Failed to load KPIs');
-                
                 const data = await response.json();
+                
+                if (!response.ok) {
+                    const errorMsg = data.detail || data.error || data.message || 'Failed to load KPIs';
+                    throw new Error(errorMsg);
+                }
                 
                 // Update KPI cards
                 document.getElementById('totalRevenue').textContent = 
@@ -401,9 +458,13 @@
                     })
                 });
                 
-                if (!response.ok) throw new Error('Failed to load monthly trend');
-                
                 const result = await response.json();
+                
+                if (!response.ok) {
+                    const errorMsg = result.detail || result.error || result.message || 'Failed to load monthly trend';
+                    throw new Error(errorMsg);
+                }
+                
                 const data = result.data;
                 
                 // Prepare chart data
