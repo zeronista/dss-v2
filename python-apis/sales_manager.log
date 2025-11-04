@@ -61,3 +61,13 @@ INFO:     127.0.0.1:44822 - "POST /generate-recommendations HTTP/1.1" 200 OK
 /home/ubuntu/anaconda3/lib/python3.12/site-packages/pydantic/main.py:979: PydanticDeprecatedSince20: The `dict` method is deprecated; use `model_dump` instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.5/migration/
   warnings.warn('The `dict` method is deprecated; use `model_dump` instead.', DeprecationWarning)
 INFO:     127.0.0.1:44822 - "POST /cross-sell-insights HTTP/1.1" 200 OK
+/home/ubuntu/anaconda3/lib/python3.12/site-packages/mlxtend/frequent_patterns/fpcommon.py:110: DeprecationWarning: DataFrames with non-bool types result in worse computationalperformance and their support might be discontinued in the future.Please use a DataFrame with bool type
+  warnings.warn(
+INFO:     127.0.0.1:34246 - "POST /generate-recommendations HTTP/1.1" 200 OK
+/home/ubuntu/anaconda3/lib/python3.12/site-packages/mlxtend/frequent_patterns/fpcommon.py:110: DeprecationWarning: DataFrames with non-bool types result in worse computationalperformance and their support might be discontinued in the future.Please use a DataFrame with bool type
+  warnings.warn(
+/home/ubuntu/DataScience/MyProject/dss-v2/python-apis/sales_manager_api.py:689: PydanticDeprecatedSince20: The `dict` method is deprecated; use `model_dump` instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.5/migration/
+  recommendations = [rec.dict() for rec in recs.recommendations]
+/home/ubuntu/anaconda3/lib/python3.12/site-packages/pydantic/main.py:979: PydanticDeprecatedSince20: The `dict` method is deprecated; use `model_dump` instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.5/migration/
+  warnings.warn('The `dict` method is deprecated; use `model_dump` instead.', DeprecationWarning)
+INFO:     127.0.0.1:34246 - "POST /cross-sell-insights HTTP/1.1" 200 OK
