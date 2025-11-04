@@ -151,6 +151,7 @@ async def root():
         "dss_type": "Descriptive",
         "endpoints": [
             "/health",
+            "/countries",
             "/kpis",
             "/monthly-trend",
             "/top-countries",
@@ -158,6 +159,29 @@ async def root():
             "/revenue-summary"
         ]
     }
+
+@app.get("/countries")
+async def get_countries() -> Dict[str, Any]:
+    """
+    Get list of all available countries for filter dropdown
+    """
+    try:
+        df = get_local_transactions_df()
+        
+        if df.empty:
+            raise HTTPException(status_code=404, detail="No data found")
+        
+        # Get unique countries sorted alphabetically
+        countries = sorted(df['Country'].unique().tolist())
+        
+        return {
+            "success": True,
+            "countries": countries,
+            "count": len(countries)
+        }
+    
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error getting countries: {str(e)}")
 
 @app.post("/kpis", response_model=KPIResponse)
 async def get_kpis(filters: FilterRequest):
