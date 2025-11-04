@@ -87,5 +87,32 @@ public class AuthController {
         model.addAttribute("user", user);
         return "dashboard/sales";
     }
+    
+    @GetMapping("/sales/deals")
+    public String salesDeals(Model model) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String username = auth.getName();
+        User user = userService.findByUsername(username).orElse(null);
+        model.addAttribute("user", user);
+        return "dashboard/deals";
+    }
+    
+    @GetMapping("/sales/leads")
+    public String salesLeads(Model model) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String username = auth.getName();
+        User user = userService.findByUsername(username).orElse(null);
+        model.addAttribute("user", user);
+        return "dashboard/leads";
+    }
+    
+    @GetMapping("/sales/reports")
+    public String salesReports(Model model) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String username = auth.getName();
+        User user = userService.findByUsername(username).orElse(null);
+        model.addAttribute("user", user);
+        return "dashboard/reports";
+    }
 }
 
