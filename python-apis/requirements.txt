@@ -11,6 +11,7 @@ dnspython==2.4.2
 # Data processing & Analytics
 pandas==2.1.3
 numpy==1.26.2
+pyarrow>=14.0.0  # For fast parquet file reading (auto-installed with compatible version)
 
 # Machine Learning
 scikit-learn==1.3.2

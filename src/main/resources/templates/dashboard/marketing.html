@@ -135,6 +135,44 @@
             font-weight: bold;
         }
         
+        .stats-row {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        
+        .stats-row .stat-card {
+            flex: 1;
+            min-width: 200px;
+            max-width: 300px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-align: center;
+            border: none;
+        }
+        
+        .stats-row .stat-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+        
+        .stat-value {
+            color: white;
+            font-size: 48px;
+            font-weight: 800;
+            margin-bottom: 8px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        .stat-label {
+            color: rgba(255,255,255,0.95);
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+        }
+        
         .quick-actions {
             background: white;
             padding: 30px;
@@ -193,17 +231,59 @@
         
         .segment-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 20px;
-            margin-top: 20px;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 25px;
+            margin-top: 25px;
         }
         
         .segment-card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            overflow: hidden;
+            transition: all 0.3s ease;
+            border: 2px solid #f0f0f0;
+        }
+        
+        .segment-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+            border-color: #fa709a;
+        }
+        
+        .segment-card-header {
             background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
             color: white;
+            padding: 20px 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .segment-card-header h3 {
+            margin: 0;
+            font-size: 22px;
+            font-weight: 700;
+        }
+        
+        .segment-emoji {
+            font-size: 36px;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+        }
+        
+        .segment-card-body {
             padding: 25px;
-            border-radius: 12px;
-            box-shadow: 0 3px 15px rgba(0,0,0,0.1);
+        }
+        
+        .segment-characteristics {
+            color: #555;
+            font-size: 14px;
+            line-height: 1.6;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #fa709a;
         }
         
         .segment-card h3 {
@@ -212,59 +292,125 @@
         }
         
         .segment-stats {
-            margin: 15px 0;
-            padding: 15px 0;
-            border-top: 1px solid rgba(255,255,255,0.3);
-            border-bottom: 1px solid rgba(255,255,255,0.3);
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin: 20px 0;
+            padding: 20px 0;
+            border-top: 2px solid #f0f0f0;
+            border-bottom: 2px solid #f0f0f0;
         }
         
         .segment-stat {
             display: flex;
-            justify-content: space-between;
-            margin: 8px 0;
-            font-size: 14px;
+            flex-direction: column;
+            gap: 5px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        
+        .segment-stat span {
+            font-size: 12px;
+            color: #666;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .segment-stat strong {
+            font-size: 18px;
+            color: #fa709a;
+            font-weight: 700;
         }
         
         .segment-actions {
-            margin-top: 15px;
+            margin-top: 20px;
+        }
+        
+        .segment-actions strong {
+            display: block;
+            color: #333;
+            margin-bottom: 12px;
+            font-size: 15px;
         }
         
         .segment-actions ul {
             list-style: none;
             padding: 0;
+            margin: 0;
         }
         
         .segment-actions li {
-            padding: 5px 0;
+            padding: 10px 12px;
             font-size: 14px;
+            background: #fff;
+            margin-bottom: 8px;
+            border-radius: 6px;
+            border-left: 3px solid #fa709a;
+            color: #444;
+            transition: all 0.2s;
+        }
+        
+        .segment-actions li:hover {
+            background: #fff5f7;
+            transform: translateX(5px);
         }
         
         .segment-actions li:before {
-            content: "✓ ";
-            margin-right: 8px;
+            content: "✓";
+            margin-right: 10px;
+            color: #fa709a;
+            font-weight: bold;
+            font-size: 16px;
         }
         
         .bundles-table {
             width: 100%;
-            border-collapse: collapse;
+            border-collapse: separate;
+            border-spacing: 0;
             margin-top: 20px;
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
         }
         
         .bundles-table th,
         .bundles-table td {
-            padding: 12px;
+            padding: 15px 12px;
             text-align: left;
-            border-bottom: 1px solid #eee;
+            border-bottom: 1px solid #f0f0f0;
         }
         
         .bundles-table th {
-            background: #f9f9f9;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             font-weight: 600;
-            color: #333;
+            color: white;
+            text-transform: uppercase;
+            font-size: 12px;
+            letter-spacing: 0.5px;
         }
         
-        .bundles-table tr:hover {
-            background: #f5f5f5;
+        .bundles-table th:first-child {
+            border-top-left-radius: 12px;
+        }
+        
+        .bundles-table th:last-child {
+            border-top-right-radius: 12px;
+        }
+        
+        .bundles-table tbody tr {
+            transition: all 0.2s ease;
+        }
+        
+        .bundles-table tbody tr:hover {
+            background: #f8f9fa;
+            transform: scale(1.01);
+        }
+        
+        .bundles-table tbody tr:last-child td {
+            border-bottom: none;
         }
         
         .loading {
@@ -379,6 +525,74 @@
             box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
         }
         
+        /* Segment-specific header gradients */
+        .segment-card[data-segment="Champions"] .segment-card-header {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+        
+        .segment-card[data-segment="Loyal"] .segment-card-header {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+        
+        .segment-card[data-segment="Regulars"] .segment-card-header {
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+        }
+        
+        .segment-card[data-segment="Hibernating"] .segment-card-header {
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+        }
+        
+        .segment-card[data-segment="At-Risk"] .segment-card-header {
+            background: linear-gradient(135deg, #ff6b6b 0%, #feca57 100%);
+        }
+        
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .segment-card {
+            animation: fadeInUp 0.5s ease-out;
+        }
+        
+        .segment-card:nth-child(1) { animation-delay: 0.1s; }
+        .segment-card:nth-child(2) { animation-delay: 0.2s; }
+        .segment-card:nth-child(3) { animation-delay: 0.3s; }
+        .segment-card:nth-child(4) { animation-delay: 0.4s; }
+        .segment-card:nth-child(5) { animation-delay: 0.5s; }
+        
+        /* Responsive Design */
+        @media (max-width: 1200px) {
+            .segment-grid {
+                grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .segment-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .segment-stats {
+                grid-template-columns: 1fr;
+            }
+            
+            .stats-row {
+                flex-direction: column;
+            }
+            
+            .stats-row .stat-card {
+                max-width: 100%;
+            }
+        }
+        
         .top-recommendation-banner h3 {
             margin-bottom: 15px;
             font-size: 18px;
@@ -443,12 +657,29 @@
         
         /* Phase 5: Enhanced Bundle Table */
         .bundles-table .strength-indicator {
-            font-size: 20px;
+            font-size: 24px;
+            text-align: center;
+            width: 50px;
         }
         
         .bundles-table .product-display {
-            font-size: 13px;
+            font-size: 14px;
             color: #333;
+            max-width: 300px;
+        }
+        
+        .bundles-table .product-display strong {
+            color: #fa709a;
+            font-weight: 600;
+        }
+        
+        .bundles-table td:nth-child(4),
+        .bundles-table td:nth-child(5),
+        .bundles-table td:nth-child(6),
+        .bundles-table td:nth-child(7) {
+            text-align: center;
+            font-weight: 600;
+            color: #667eea;
         }
         
         .filter-applied-badge {
@@ -460,6 +691,82 @@
             font-size: 12px;
             font-weight: 600;
             margin-left: 10px;
+        }
+        
+        /* Tab Navigation Styles */
+        .tabs-container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            overflow: hidden;
+        }
+        
+        .tab-navigation {
+            display: flex;
+            background: #f8f9fa;
+            border-bottom: 2px solid #e9ecef;
+        }
+        
+        .tab-button {
+            flex: 1;
+            padding: 18px 30px;
+            background: none;
+            border: none;
+            font-size: 16px;
+            font-weight: 600;
+            color: #666;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .tab-button:hover {
+            background: rgba(250, 112, 154, 0.05);
+            color: #fa709a;
+        }
+        
+        .tab-button.active {
+            color: #fa709a;
+            background: white;
+        }
+        
+        .tab-button.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+        }
+        
+        .tab-icon {
+            font-size: 20px;
+        }
+        
+        .tab-content {
+            display: none;
+            padding: 30px;
+            animation: fadeIn 0.3s ease-in;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
     </style>
 </head>
@@ -483,127 +790,130 @@
             <p>Track and analyze your marketing campaigns.</p>
         </div>
         
-        <div class="dashboard-grid">
-            <div class="stat-card">
-                <div class="stat-card-icon">👥</div>
-                <div class="stat-card-title">Total Customers</div>
-                <div class="stat-card-value" id="totalCustomers">Loading...</div>
-            </div>
-            
-            <div class="stat-card">
-                <div class="stat-card-icon">🎯</div>
-                <div class="stat-card-title">Segments</div>
-                <div class="stat-card-value" id="totalSegments">-</div>
-            </div>
-            
-            <div class="stat-card">
-                <div class="stat-card-icon">💰</div>
-                <div class="stat-card-title">Avg Customer Value</div>
-                <div class="stat-card-value" id="avgCustomerValue">Loading...</div>
-            </div>
-            
-            <div class="stat-card">
-                <div class="stat-card-icon">�</div>
-                <div class="stat-card-title">Product Bundles</div>
-                <div class="stat-card-value" id="totalBundles">-</div>
-            </div>
-        </div>
-        
-        <!-- Customer Segmentation -->
-        <div class="segment-container">
-            <h2>👥 Customer Segmentation (RFM Analysis)</h2>
-            <p style="color: #666; margin-bottom: 20px;">
-                Heuristic segmentation based on Recency, Frequency, and Monetary values.
-            </p>
-            
-            <!-- Phase 5: Date Range Filter -->
-            <div class="date-filter-section">
-                <label>📅 Analysis Date Range</label>
-                <div class="date-inputs">
-                    <div class="date-input-group">
-                        <label>Start Date</label>
-                        <input type="date" id="segmentStartDate" />
-                    </div>
-                    <div class="date-input-group">
-                        <label>End Date</label>
-                        <input type="date" id="segmentEndDate" />
-                    </div>
-                    <button class="btn-secondary" onclick="resetSegmentDates()">
-                        🔄 Reset to Full Range
-                    </button>
-                </div>
-                <div class="date-range-info" id="segmentDateInfo">
-                    Loading date range information...
-                </div>
-            </div>
-            
-            <div>
-                <label style="margin-right: 10px; color: #666;">Number of Segments:</label>
-                <select id="segmentCount" style="padding: 8px; border-radius: 6px; border: 1px solid #ddd;">
-                    <option value="3">3 Segments</option>
-                    <option value="4">4 Segments</option>
-                    <option value="5" selected>5 Segments</option>
-                </select>
-                <button class="btn-primary" onclick="runSegmentation()">
-                    🚀 Run Segmentation
+        <!-- Tabbed Interface -->
+        <div class="tabs-container">
+            <div class="tab-navigation">
+                <button class="tab-button active" onclick="switchTab('segmentation')">
+                    <span class="tab-icon">👥</span>
+                    Customer Segmentation
+                </button>
+                <button class="tab-button" onclick="switchTab('market-basket')">
+                    <span class="tab-icon">🛒</span>
+                    Market Basket Analysis
                 </button>
             </div>
             
-            <div id="segmentsContainer" class="segment-grid">
-                <div class="loading">Click "Run Segmentation" to analyze customers</div>
-            </div>
-        </div>
-        
-        <!-- Market Basket Analysis -->
-        <div class="segment-container">
-            <h2>🛒 Market Basket Analysis - Product Bundles</h2>
-            <p style="color: #666; margin-bottom: 20px;">
-                Frequently bought together products using Apriori algorithm with segment-specific insights.
-            </p>
-            
-            <!-- Phase 5: Date Range Filter -->
-            <div class="date-filter-section">
-                <label>📅 Analysis Date Range</label>
-                <div class="date-inputs">
-                    <div class="date-input-group">
-                        <label>Start Date</label>
-                        <input type="date" id="basketStartDate" />
+            <!-- Tab 1: Customer Segmentation -->
+            <div id="segmentation-tab" class="tab-content active">
+                <h2>👥 Customer Segmentation (RFM Analysis)</h2>
+                <p style="color: #666; margin-bottom: 20px;">
+                    Heuristic segmentation based on Recency, Frequency, and Monetary values.
+                </p>
+                
+                <!-- Phase 5: Date Range Filter -->
+                <div class="date-filter-section">
+                    <label>📅 Analysis Date Range</label>
+                    <div class="date-inputs">
+                        <div class="date-input-group">
+                            <label>Start Date</label>
+                            <input type="date" id="segmentStartDate" />
+                        </div>
+                        <div class="date-input-group">
+                            <label>End Date</label>
+                            <input type="date" id="segmentEndDate" />
+                        </div>
+                        <button class="btn-secondary" onclick="resetSegmentDates()">
+                            🔄 Reset to Full Range
+                        </button>
                     </div>
-                    <div class="date-input-group">
-                        <label>End Date</label>
-                        <input type="date" id="basketEndDate" />
+                    <div class="date-range-info" id="segmentDateInfo">
+                        Loading date range information...
                     </div>
-                    <button class="btn-secondary" onclick="resetBasketDates()">
-                        🔄 Reset to Full Range
+                </div>
+                
+                <div>
+                    <button class="btn-primary" onclick="runSegmentation()">
+                        🚀 Run Segmentation
                     </button>
                 </div>
-                <div class="date-range-info" id="basketDateInfo">
-                    Loading date range information...
+                
+                <!-- Segmentation Stats -->
+                <div class="stats-row" style="margin: 20px 0; display: none;" id="segmentationStats">
+                    <div class="stat-card">
+                        <div class="stat-value" id="totalSegments">-</div>
+                        <div class="stat-label">Total Segments</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="totalCustomers">-</div>
+                        <div class="stat-label">Total Customers</div>
+                    </div>
+                </div>
+                
+                <div id="segmentsContainer" class="segment-grid">
+                    <div class="loading">Click "Run Segmentation" to analyze customers</div>
                 </div>
             </div>
             
-            <!-- Phase 5: Segment Selector -->
-            <div class="segment-selector">
-                <label style="color: #666; margin-right: 10px;">Analyze Segment:</label>
-                <select id="basketSegment" style="padding: 10px; border-radius: 6px; border: 1px solid #ddd;">
-                    <option value="">All Customers</option>
-                    <option value="Champions">🏆 Champions</option>
-                    <option value="Loyal">💎 Loyal</option>
-                    <option value="At-Risk">⚠️ At-Risk</option>
-                    <option value="Hibernating">😴 Hibernating</option>
-                    <option value="Regulars">👥 Regulars</option>
-                </select>
-            </div>
-            
-            <button class="btn-primary" onclick="loadProductBundles()">
-                🔍 Find Product Bundles
-            </button>
-            
-            <div id="bundlesContainer">
-                <p class="loading">Click "Find Product Bundles" to discover associations</p>
+            <!-- Tab 2: Market Basket Analysis -->
+            <div id="market-basket-tab" class="tab-content">
+                <h2>🛒 Market Basket Analysis - Product Bundles</h2>
+                <p style="color: #666; margin-bottom: 20px;">
+                    Frequently bought together products using Apriori algorithm with segment-specific insights.
+                </p>
+                
+                <!-- Phase 5: Date Range Filter -->
+                <div class="date-filter-section">
+                    <label>📅 Analysis Date Range</label>
+                    <div class="date-inputs">
+                        <div class="date-input-group">
+                            <label>Start Date</label>
+                            <input type="date" id="basketStartDate" />
+                        </div>
+                        <div class="date-input-group">
+                            <label>End Date</label>
+                            <input type="date" id="basketEndDate" />
+                        </div>
+                        <button class="btn-secondary" onclick="resetBasketDates()">
+                            🔄 Reset to Full Range
+                        </button>
+                    </div>
+                    <div class="date-range-info" id="basketDateInfo">
+                        Loading date range information...
+                    </div>
+                </div>
+                
+                <!-- Phase 5: Segment Selector -->
+                <div class="segment-selector">
+                    <label style="color: #666; margin-right: 10px;">Analyze Segment:</label>
+                    <select id="basketSegment" style="padding: 10px; border-radius: 6px; border: 1px solid #ddd;">
+                        <option value="">All Customers</option>
+                        <option value="Champions">🏆 Champions</option>
+                        <option value="Loyal">💎 Loyal</option>
+                        <option value="At-Risk">⚠️ At-Risk</option>
+                        <option value="Hibernating">😴 Hibernating</option>
+                        <option value="Regulars">👥 Regulars</option>
+                    </select>
+                </div>
+                
+                <button class="btn-primary" onclick="loadProductBundles()">
+                    🔍 Find Product Bundles
+                </button>
+                
+                <!-- Bundles Stats -->
+                <div class="stats-row" style="margin: 20px 0; display: none;" id="bundlesStats">
+                    <div class="stat-card">
+                        <div class="stat-value" id="totalBundles">-</div>
+                        <div class="stat-label">Product Bundles Found</div>
+                    </div>
+                </div>
+                
+                <div id="bundlesContainer">
+                    <p class="loading">Click "Find Product Bundles" to discover associations</p>
+                </div>
             </div>
         </div>
         
+        <!-- Quick Actions -->
         <div class="quick-actions">
             <h2>Quick Actions</h2>
             <div class="action-grid">
@@ -611,23 +921,31 @@
                     <span class="action-btn-icon">📋</span>
                     View Invoices
                 </a>
-                <a href="/marketing/campaigns" class="action-btn">
-                    <span class="action-btn-icon">📢</span>
-                    Campaigns
-                </a>
-                <a href="/marketing/customers" class="action-btn">
-                    <span class="action-btn-icon">👥</span>
-                    Customer Analytics
-                </a>
-                <a href="/marketing/reports" class="action-btn">
-                    <span class="action-btn-icon">📊</span>
-                    Marketing Reports
-                </a>
             </div>
         </div>
     </div>
     
     <script>
+        // Tab switching function
+        function switchTab(tabName) {
+            // Hide all tabs
+            const tabs = document.querySelectorAll('.tab-content');
+            tabs.forEach(tab => tab.classList.remove('active'));
+            
+            // Remove active from all buttons
+            const buttons = document.querySelectorAll('.tab-button');
+            buttons.forEach(btn => btn.classList.remove('active'));
+            
+            // Show selected tab
+            const selectedTab = document.getElementById(tabName + '-tab');
+            if (selectedTab) {
+                selectedTab.classList.add('active');
+            }
+            
+            // Activate button
+            event.target.closest('.tab-button').classList.add('active');
+        }
+        
         // API Configuration
         const MARKETING_API_URL = 'http://localhost:8003';
         
@@ -699,37 +1017,8 @@
             return emojiMap[segmentName] || '📊';
         }
         
-        // Calculate and display RFM stats
-        async function loadRFMStats() {
-            try {
-                const response = await fetch(`${MARKETING_API_URL}/calculate-rfm`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    }
-                });
-                
-                if (!response.ok) throw new Error('Failed to load RFM stats');
-                
-                const data = await response.json();
-                
-                document.getElementById('totalCustomers').textContent = 
-                    data.customers_analyzed.toLocaleString();
-                    
-                if (data.summary && data.summary.avg_monetary) {
-                    document.getElementById('avgCustomerValue').textContent = 
-                        '$' + data.summary.avg_monetary.toFixed(0);
-                }
-                
-            } catch (error) {
-                console.error('Error loading RFM stats:', error);
-                document.getElementById('totalCustomers').textContent = 'Error';
-            }
-        }
-        
-        // Run customer segmentation (Phase 5 Enhanced)
+        // Run customer segmentation (Phase 5 Enhanced) - Fixed to 5 segments
         async function runSegmentation() {
-            const nSegments = document.getElementById('segmentCount').value;
             const startDate = document.getElementById('segmentStartDate').value;
             const endDate = document.getElementById('segmentEndDate').value;
             const container = document.getElementById('segmentsContainer');
@@ -738,7 +1027,7 @@
             
             try {
                 const requestBody = {
-                    n_segments: parseInt(nSegments),
+                    n_segments: 5,  // Fixed to 5 segments
                     use_existing_rfm: false
                 };
                 
@@ -754,9 +1043,15 @@
                     body: JSON.stringify(requestBody)
                 });
                 
-                if (!response.ok) throw new Error('Segmentation failed');
-                
                 const data = await response.json();
+                
+                if (!response.ok) {
+                    const errorMsg = data.detail || data.error || data.message || 'Segmentation failed';
+                    throw new Error(errorMsg);
+                }
+                
+                // Show stats section
+                document.getElementById('segmentationStats').style.display = 'flex';
                 
                 // Update stats
                 document.getElementById('totalSegments').textContent = data.n_segments;
@@ -765,41 +1060,45 @@
                 
                 // Display segments (Phase 5 Enhanced)
                 container.innerHTML = data.segments.map(segment => `
-                    <div class="segment-card">
+                    <div class="segment-card" data-segment="${segment.segment_name}">
                         <div class="segment-card-header">
                             <h3>${segment.segment_name}</h3>
                             <span class="segment-emoji">${getSegmentEmoji(segment.segment_name)}</span>
                         </div>
-                        <p style="font-size: 14px; opacity: 0.9; margin-bottom: 10px;">${segment.characteristics}</p>
-                        
-                        <div class="segment-stats">
-                            <div class="segment-stat">
-                                <span>Customers:</span>
-                                <strong>${segment.customer_count.toLocaleString()}</strong>
+                        <div class="segment-card-body">
+                            <div class="segment-characteristics">
+                                ${segment.characteristics}
                             </div>
-                            <div class="segment-stat">
-                                <span>Total Value:</span>
-                                <strong>$${segment.total_value.toLocaleString()}</strong>
+                            
+                            <div class="segment-stats">
+                                <div class="segment-stat">
+                                    <span>Customers</span>
+                                    <strong>${segment.customer_count.toLocaleString()}</strong>
+                                </div>
+                                <div class="segment-stat">
+                                    <span>Total Value</span>
+                                    <strong>$${segment.total_value.toLocaleString(undefined, {maximumFractionDigits: 0})}</strong>
+                                </div>
+                                <div class="segment-stat">
+                                    <span>Avg Recency</span>
+                                    <strong>${segment.avg_recency.toFixed(0)} days</strong>
+                                </div>
+                                <div class="segment-stat">
+                                    <span>Avg Frequency</span>
+                                    <strong>${segment.avg_frequency.toFixed(1)} orders</strong>
+                                </div>
+                                <div class="segment-stat">
+                                    <span>Avg Monetary</span>
+                                    <strong>$${segment.avg_monetary.toFixed(0)}</strong>
+                                </div>
                             </div>
-                            <div class="segment-stat">
-                                <span>Avg Recency:</span>
-                                <strong>${segment.avg_recency.toFixed(0)} days</strong>
+                            
+                            <div class="segment-actions">
+                                <strong>📌 Recommended Actions:</strong>
+                                <ul>
+                                    ${segment.recommended_actions.map(action => `<li>${action}</li>`).join('')}
+                                </ul>
                             </div>
-                            <div class="segment-stat">
-                                <span>Avg Frequency:</span>
-                                <strong>${segment.avg_frequency.toFixed(1)} orders</strong>
-                            </div>
-                            <div class="segment-stat">
-                                <span>Avg Monetary:</span>
-                                <strong>$${segment.avg_monetary.toFixed(0)}</strong>
-                            </div>
-                        </div>
-                        
-                        <div class="segment-actions">
-                            <strong>📌 Recommended Actions:</strong>
-                            <ul>
-                                ${segment.recommended_actions.map(action => `<li>${action}</li>`).join('')}
-                            </ul>
                         </div>
                     </div>
                 `).join('');
@@ -815,7 +1114,11 @@
                 
             } catch (error) {
                 console.error('Error running segmentation:', error);
-                container.innerHTML = '<div class="error">Failed to run segmentation. Make sure the Marketing API is running on port 8003.</div>';
+                container.innerHTML = `<div class="error">
+                    <strong>Failed to run segmentation</strong><br>
+                    <span style="font-size: 14px; margin-top: 5px; display: block;">Error: ${error.message || error}</span>
+                    <span style="font-size: 12px; margin-top: 5px; display: block; opacity: 0.8;">Make sure the Marketing API is running on port 8003.</span>
+                </div>`;
             }
         }
         
@@ -829,7 +1132,7 @@
             container.innerHTML = '<div class="loading">Mining association rules...</div>';
             
             try {
-                let response, data;
+                let response;
                 
                 // Choose endpoint based on segment selection (Phase 5)
                 if (segmentName) {
@@ -863,14 +1166,22 @@
                     });
                 }
                 
-                if (!response.ok) throw new Error('Failed to load bundles');
+                const data = await response.json();
                 
-                data = await response.json();
+                if (!response.ok) {
+                    const errorMsg = data.detail || data.error || data.message || 'Failed to load bundles';
+                    throw new Error(errorMsg);
+                }
                 
                 if (!data.bundles || data.bundles.length === 0) {
                     container.innerHTML = '<p class="loading">No product bundles found. Try lowering the thresholds or selecting a different segment.</p>';
+                    // Hide stats
+                    document.getElementById('bundlesStats').style.display = 'none';
                     return;
                 }
+                
+                // Show stats section
+                document.getElementById('bundlesStats').style.display = 'flex';
                 
                 // Update stat
                 document.getElementById('totalBundles').textContent = data.bundles.length;
@@ -960,14 +1271,19 @@
                 
             } catch (error) {
                 console.error('Error loading bundles:', error);
-                container.innerHTML = '<div class="error">Failed to load product bundles. Make sure the Marketing API is running on port 8003.</div>';
+                // Hide stats on error
+                document.getElementById('bundlesStats').style.display = 'none';
+                container.innerHTML = `<div class="error">
+                    <strong>Failed to load product bundles</strong><br>
+                    <span style="font-size: 14px; margin-top: 5px; display: block;">Error: ${error.message || error}</span>
+                    <span style="font-size: 12px; margin-top: 5px; display: block; opacity: 0.8;">Make sure the Marketing API is running on port 8003.</span>
+                </div>`;
             }
         }
         
         // Load data on page load (Phase 5 Enhanced)
         window.addEventListener('DOMContentLoaded', function() {
-            loadDateRangeInfo();  // Phase 5: Load date range first
-            loadRFMStats();
+            loadDateRangeInfo();  // Only load date range info for faster loading
         });
     </script>
 </body>

@@ -14,9 +14,100 @@ from datetime import datetime, timedelta
 from sklearn.cluster import KMeans
 from sklearn.preprocessing import StandardScaler
 from mlxtend.frequent_patterns import apriori, association_rules
+import os
 
 # Import database utilities
-from db_utils import get_transactions_df, get_customers_rfm, get_db, filter_by_date_range
+from db_utils import get_transactions_df, get_customers_rfm, get_db, filter_by_date_range, get_date_range_fast
+
+# ============ Local Data Configuration ============
+# Path to local cleaned data file (faster than MongoDB)
+DATA_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'data')
+PARQUET_FILE = os.path.join(DATA_DIR, 'online_retail_cleaned.parquet')
+CSV_FILE = os.path.join(DATA_DIR, 'online_retail_cleaned.csv')
+
+# Cache for loaded data
+_cached_df = None
+_cache_timestamp = None
+_cache_ttl = 3600  # Cache for 1 hour
+
+def get_local_transactions_df() -> pd.DataFrame:
+    """
+    Load transactions from local parquet/CSV file (FAST!)
+    Uses caching to avoid repeated file reads
+    
+    Returns:
+        pandas DataFrame with cleaned transactions
+    """
+    global _cached_df, _cache_timestamp
+    
+    # Check if cache is valid
+    if _cached_df is not None and _cache_timestamp is not None:
+        if (datetime.now() - _cache_timestamp).seconds < _cache_ttl:
+            print(f"✅ Using cached data ({len(_cached_df)} rows)")
+            df_copy = _cached_df.copy()
+            # Ensure InvoiceDate is datetime type (in case cache lost the type)
+            if df_copy['InvoiceDate'].dtype == 'object':
+                df_copy['InvoiceDate'] = pd.to_datetime(df_copy['InvoiceDate'])
+            return df_copy
+    
+    print(f"📂 Loading data from local file...")
+    
+    try:
+        # Use CSV file (as requested)
+        if os.path.exists(CSV_FILE):
+            print(f"📊 Loading from CSV: {CSV_FILE}")
+            df = pd.read_csv(CSV_FILE)
+            # Convert InvoiceDate to datetime
+            df['InvoiceDate'] = pd.to_datetime(df['InvoiceDate'], errors='coerce')
+            print(f"✅ Loaded {len(df)} transactions from CSV")
+        # Fallback to parquet if CSV not found
+        elif os.path.exists(PARQUET_FILE):
+            print(f"📊 Loading from parquet: {PARQUET_FILE}")
+            df = pd.read_parquet(PARQUET_FILE)
+            # Ensure datetime conversion for parquet too
+            if df['InvoiceDate'].dtype == 'object':
+                df['InvoiceDate'] = pd.to_datetime(df['InvoiceDate'], errors='coerce')
+            print(f"✅ Loaded {len(df)} transactions from parquet (fallback)")
+        else:
+            raise FileNotFoundError(f"No data file found in {DATA_DIR}")
+        
+        # Ensure required columns
+        if 'Revenue' not in df.columns and 'Quantity' in df.columns and 'UnitPrice' in df.columns:
+            df['Revenue'] = df['Quantity'] * df['UnitPrice']
+        
+        # Cache the data
+        _cached_df = df.copy()
+        _cache_timestamp = datetime.now()
+        
+        return df
+    
+    except Exception as e:
+        print(f"❌ Error loading local data: {e}")
+        print(f"💡 Falling back to MongoDB...")
+        # Fallback to MongoDB if local file fails
+        return get_transactions_df()
+
+def get_date_range_from_local() -> Dict[str, datetime]:
+    """
+    Get date range info from local data (FAST!)
+    
+    Returns:
+        Dictionary with min_date and max_date
+    """
+    try:
+        df = get_local_transactions_df()
+        if df.empty or 'InvoiceDate' not in df.columns:
+            # Fallback to MongoDB
+            return get_date_range_fast()
+        
+        return {
+            'min_date': df['InvoiceDate'].min(),
+            'max_date': df['InvoiceDate'].max()
+        }
+    except Exception as e:
+        print(f"⚠️ Error getting date range from local: {e}")
+        # Fallback to MongoDB
+        return get_date_range_fast()
 
 app = FastAPI(
     title="Marketing API - Customer Segmentation",
@@ -250,15 +341,17 @@ def segment_rules_text(seg_name: str) -> List[str]:
 async def get_date_range_info() -> Dict[str, Any]:
     """
     Get available date range from transaction data (PHASE 1)
+    NOW USING LOCAL DATA FOR FASTER PERFORMANCE! 🚀
     """
     try:
-        df = get_transactions_df()
+        # Use local data instead of MongoDB
+        date_info = get_date_range_from_local()
         
-        if df.empty or 'InvoiceDate' not in df.columns:
+        min_date = date_info['min_date']
+        max_date = date_info['max_date']
+        
+        if not min_date or not max_date:
             raise HTTPException(status_code=404, detail="No transaction data found")
-        
-        min_date = df['InvoiceDate'].min()
-        max_date = df['InvoiceDate'].max()
         
         # Default: last 12 months from max date
         default_start = max_date - timedelta(days=365)
@@ -279,9 +372,11 @@ async def calculate_rfm() -> Dict[str, Any]:
     """
     Calculate RFM (Recency, Frequency, Monetary) scores for all customers
     LEGACY ENDPOINT - Use /calculate-rfm-advanced for enhanced features
+    NOW USING LOCAL DATA FOR FASTER PERFORMANCE! 🚀
     """
     try:
-        df = get_transactions_df()
+        # Get transactions from LOCAL FILE (much faster!)
+        df = get_local_transactions_df()
         
         if df.empty:
             raise HTTPException(status_code=404, detail="No transaction data found")
@@ -329,10 +424,11 @@ async def calculate_rfm_advanced(request: RFMRequest) -> Dict[str, Any]:
     - Date range filtering
     - Quantile calculation
     - Optional save to MongoDB
+    NOW USING LOCAL DATA FOR FASTER PERFORMANCE! 🚀
     """
     try:
-        # Get all transactions
-        df = get_transactions_df()
+        # Get all transactions from LOCAL FILE (much faster!)
+        df = get_local_transactions_df()
         
         if df.empty:
             raise HTTPException(status_code=404, detail="No transaction data found")
@@ -410,10 +506,11 @@ async def run_segmentation(request: SegmentationRequest) -> Dict[str, Any]:
     """
     Run customer segmentation using heuristic RFM-based naming (PHASE 2)
     Uses your Streamlit app's 5-category logic
+    NOW USING LOCAL DATA FOR FASTER PERFORMANCE! 🚀
     """
     try:
-        # Get transactions
-        df = get_transactions_df()
+        # Get transactions from LOCAL FILE (much faster!)
+        df = get_local_transactions_df()
         
         if df.empty:
             raise HTTPException(status_code=404, detail="No transaction data found")
@@ -584,10 +681,11 @@ async def segment_basket_analysis(
         top_n: Number of top bundles to return
         start_date: Start date for filtering transactions (YYYY-MM-DD)
         end_date: End date for filtering transactions (YYYY-MM-DD)
+    NOW USING LOCAL DATA FOR FASTER PERFORMANCE! 🚀
     """
     try:
-        # Get all transactions
-        df = get_transactions_df()
+        # Get all transactions from LOCAL FILE (much faster!)
+        df = get_local_transactions_df()
         
         if df.empty:
             raise HTTPException(status_code=404, detail="No transaction data found")
@@ -734,9 +832,11 @@ async def segment_basket_analysis(
 async def market_basket_analysis(request: BasketAnalysisRequest) -> Dict[str, Any]:
     """
     Run Market Basket Analysis (Apriori Algorithm) for all customers (PHASE 3, Enhanced in PHASE 4)
+    NOW USING LOCAL DATA FOR FASTER PERFORMANCE! 🚀
     """
     try:
-        df = get_transactions_df()
+        # Get transactions from LOCAL FILE (much faster!)
+        df = get_local_transactions_df()
         
         if df.empty:
             raise HTTPException(status_code=404, detail="No transaction data found")
