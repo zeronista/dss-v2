@@ -1,211 +1,169 @@
 package com.group5.dss.service;
 
 import com.group5.dss.model.ProductDTO;
+import com.group5.dss.model.Invoice;
+import com.group5.dss.util.LocalDataLoader;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.data.mongodb.core.aggregation.Aggregation;
-import org.springframework.data.mongodb.core.aggregation.AddFieldsOperation;
-import org.springframework.data.mongodb.core.aggregation.AggregationResults;
-import org.springframework.data.mongodb.core.aggregation.GroupOperation;
-import org.springframework.data.mongodb.core.aggregation.MatchOperation;
-import org.springframework.data.mongodb.core.aggregation.ConditionalOperators;
-import org.springframework.data.mongodb.core.aggregation.ConvertOperators;
-import org.springframework.data.mongodb.core.aggregation.ArithmeticOperators;
-import org.springframework.data.mongodb.core.aggregation.ComparisonOperators;
-import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Optional;
-
-import static org.springframework.data.mongodb.core.aggregation.Aggregation.*;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class ProductService {
     
     @Autowired
-    private MongoTemplate mongoTemplate;
+    private LocalDataLoader localDataLoader;
     
     /**
-     * Get all products aggregated from invoices
+     * Get all products aggregated from LOCAL CSV file
      * Groups by stockCode and calculates statistics
      */
     public List<ProductDTO> getAllProducts() {
-        // Normalize stock code for consistent grouping
-        AddFieldsOperation normalizeStockCode = addFields()
-            .addFieldWithValue("normalizedStockCode", ConvertOperators.ToString.toString("$StockCode"))
-            .build();
-
-        // Match only valid products (positive quantity and price)
-        MatchOperation matchStage = match(
-            new Criteria().andOperator(
-                Criteria.where("Quantity").gt(0),
-                Criteria.where("UnitPrice").gt(0),
-                Criteria.where("StockCode").ne(null).ne("")
-            )
-        );
+        System.out.println("📦 Loading products from LOCAL CSV...");
         
-        // Group by stockCode and calculate aggregates
-        GroupOperation groupStage = group("normalizedStockCode")
-            .first("Description").as("description")
-            .sum("Quantity").as("totalQuantitySold")
-            .avg("UnitPrice").as("averagePrice")
-            .count().as("totalTransactions")
-            .min("UnitPrice").as("minPrice")
-            .max("UnitPrice").as("maxPrice")
-            .addToSet("CustomerID").as("customers")
-            .sum("TotalPrice").as("totalRevenueFromTotalPrice");
+        List<Invoice> invoices = localDataLoader.loadCleanedTransactions();
         
-        // Project to match ProductDTO structure and calculate revenue
-        var projectStage = project()
-            .and("_id").as("stockCode")
-            .andInclude("description", "totalQuantitySold", 
-                       "averagePrice", "totalTransactions", "minPrice", "maxPrice")
-            .and("customers").size().as("uniqueCustomers")
-            .and(
-                ConditionalOperators.when(
-                    ComparisonOperators.Eq.valueOf("totalRevenueFromTotalPrice").equalToValue(0)
-                ).thenValueOf(
-                    ArithmeticOperators.Multiply.valueOf("totalQuantitySold").multiplyBy("averagePrice")
-                ).otherwiseValueOf("$totalRevenueFromTotalPrice")
-            ).as("totalRevenue");
+        // Filter valid products (positive quantity and price)
+        List<Invoice> validInvoices = invoices.stream()
+                .filter(inv -> inv.getQuantity() != null && inv.getQuantity() > 0)
+                .filter(inv -> inv.getUnitPrice() != null && inv.getUnitPrice() > 0)
+                .filter(inv -> inv.getStockCode() != null && !inv.getStockCode().isEmpty())
+                .collect(Collectors.toList());
+        
+        // Group by stock code
+        Map<String, List<Invoice>> groupedByStockCode = validInvoices.stream()
+                .collect(Collectors.groupingBy(Invoice::getStockCode));
+        
+        // Build product DTOs
+        List<ProductDTO> products = new ArrayList<>();
+        
+        for (Map.Entry<String, List<Invoice>> entry : groupedByStockCode.entrySet()) {
+            String stockCode = entry.getKey();
+            List<Invoice> productInvoices = entry.getValue();
+            
+            ProductDTO product = buildProductDTO(stockCode, productInvoices);
+            products.add(product);
+        }
         
         // Sort by total revenue descending
-        var sortStage = sort(Sort.by(Sort.Direction.DESC, "totalRevenue"));
+        products.sort(Comparator.comparing(ProductDTO::getTotalRevenue).reversed());
         
-        Aggregation aggregation = newAggregation(
-            normalizeStockCode,
-            matchStage,
-            groupStage,
-            projectStage,
-            sortStage
-        );
-        
-        AggregationResults<ProductDTO> results = mongoTemplate.aggregate(
-            aggregation, "DSS", ProductDTO.class
-        );
-        
-        return results.getMappedResults();
+        System.out.println("✅ Loaded " + products.size() + " products from LOCAL CSV");
+        return products;
     }
     
     /**
-     * Get product details by stock code
+     * Get product details by stock code from LOCAL CSV
      */
     public Optional<ProductDTO> getProductByStockCode(String stockCode) {
-        AddFieldsOperation normalizeStockCode = addFields()
-            .addFieldWithValue("normalizedStockCode", ConvertOperators.ToString.toString("$StockCode"))
-            .build();
-
-        // Match specific product
-        MatchOperation matchStage = match(
-            new Criteria().andOperator(
-                Criteria.where("normalizedStockCode").is(stockCode),
-                Criteria.where("Quantity").gt(0),
-                Criteria.where("UnitPrice").gt(0)
-            )
-        );
+        System.out.println("📦 Loading product " + stockCode + " from LOCAL CSV...");
         
-        // Group by stockCode and calculate aggregates
-        GroupOperation groupStage = group("normalizedStockCode")
-            .first("Description").as("description")
-            .sum("Quantity").as("totalQuantitySold")
-            .avg("UnitPrice").as("averagePrice")
-            .count().as("totalTransactions")
-            .min("UnitPrice").as("minPrice")
-            .max("UnitPrice").as("maxPrice")
-            .addToSet("CustomerID").as("customers")
-            .sum("TotalPrice").as("totalRevenueFromTotalPrice");
+        List<Invoice> invoices = localDataLoader.loadCleanedTransactions();
         
-        // Project to match ProductDTO structure and calculate revenue
-        var projectStage = project()
-            .and("_id").as("stockCode")
-            .andInclude("description", "totalQuantitySold", 
-                       "averagePrice", "totalTransactions", "minPrice", "maxPrice")
-            .and("customers").size().as("uniqueCustomers")
-            .and(
-                ConditionalOperators.when(
-                    ComparisonOperators.Eq.valueOf("totalRevenueFromTotalPrice").equalToValue(0)
-                ).thenValueOf(
-                    ArithmeticOperators.Multiply.valueOf("totalQuantitySold").multiplyBy("averagePrice")
-                ).otherwiseValueOf("$totalRevenueFromTotalPrice")
-            ).as("totalRevenue");
+        // Filter for this specific product
+        List<Invoice> productInvoices = invoices.stream()
+                .filter(inv -> stockCode.equals(inv.getStockCode()))
+                .filter(inv -> inv.getQuantity() != null && inv.getQuantity() > 0)
+                .filter(inv -> inv.getUnitPrice() != null && inv.getUnitPrice() > 0)
+                .collect(Collectors.toList());
         
-        Aggregation aggregation = newAggregation(
-            normalizeStockCode,
-            matchStage,
-            groupStage,
-            projectStage
-        );
+        if (productInvoices.isEmpty()) {
+            return Optional.empty();
+        }
         
-        AggregationResults<ProductDTO> results = mongoTemplate.aggregate(
-            aggregation, "DSS", ProductDTO.class
-        );
+        ProductDTO product = buildProductDTO(stockCode, productInvoices);
+        System.out.println("✅ Found product: " + product.getDescription());
         
-        return results.getMappedResults().stream().findFirst();
+        return Optional.of(product);
     }
     
     /**
-     * Get total product count
-     */
-    public long getTotalProductCount() {
-        return getAllProducts().size();
-    }
-    
-    /**
-     * Search products by description or stock code
+     * Search products by stock code or description from LOCAL CSV
      */
     public List<ProductDTO> searchProducts(String query) {
-        AddFieldsOperation normalizeStockCode = addFields()
-            .addFieldWithValue("normalizedStockCode", ConvertOperators.ToString.toString("$StockCode"))
-            .build();
-
-        MatchOperation matchStage = match(
-            new Criteria().orOperator(
-                Criteria.where("normalizedStockCode").regex(query, "i"),
-                Criteria.where("Description").regex(query, "i")
-            ).andOperator(
-                Criteria.where("Quantity").gt(0),
-                Criteria.where("UnitPrice").gt(0),
-                Criteria.where("StockCode").ne(null).ne("")
-            )
-        );
+        System.out.println("🔍 Searching products in LOCAL CSV: " + query);
         
-        GroupOperation groupStage = group("normalizedStockCode")
-            .first("Description").as("description")
-            .sum("Quantity").as("totalQuantitySold")
-            .avg("UnitPrice").as("averagePrice")
-            .count().as("totalTransactions")
-            .addToSet("CustomerID").as("customers")
-            .sum("TotalPrice").as("totalRevenueFromTotalPrice");
+        List<ProductDTO> allProducts = getAllProducts();
         
-        var projectStage = project()
-            .and("_id").as("stockCode")
-            .andInclude("description", "totalQuantitySold", 
-                       "averagePrice", "totalTransactions")
-            .and("customers").size().as("uniqueCustomers")
-            .and(
-                ConditionalOperators.when(
-                    ComparisonOperators.Eq.valueOf("totalRevenueFromTotalPrice").equalToValue(0)
-                ).thenValueOf(
-                    ArithmeticOperators.Multiply.valueOf("totalQuantitySold").multiplyBy("averagePrice")
-                ).otherwiseValueOf("$totalRevenueFromTotalPrice")
-            ).as("totalRevenue");
+        String queryLower = query.toLowerCase();
+        return allProducts.stream()
+                .filter(p -> 
+                    p.getStockCode().toLowerCase().contains(queryLower) ||
+                    (p.getDescription() != null && p.getDescription().toLowerCase().contains(queryLower))
+                )
+                .collect(Collectors.toList());
+    }
+    
+    /**
+     * Build ProductDTO from list of invoices
+     */
+    private ProductDTO buildProductDTO(String stockCode, List<Invoice> invoices) {
+        ProductDTO product = new ProductDTO();
+        product.setStockCode(stockCode);
         
-        var sortStage = sort(Sort.by(Sort.Direction.DESC, "totalRevenue"));
+        // Description (use first non-null)
+        String description = invoices.stream()
+                .map(Invoice::getDescription)
+                .filter(Objects::nonNull)
+                .findFirst()
+                .orElse("No description");
+        product.setDescription(description);
         
-        Aggregation aggregation = newAggregation(
-            normalizeStockCode,
-            matchStage,
-            groupStage,
-            projectStage,
-            sortStage
-        );
+        // Total quantity sold
+        long totalQuantity = invoices.stream()
+                .mapToLong(inv -> inv.getQuantity() != null ? inv.getQuantity() : 0)
+                .sum();
+        product.setTotalQuantitySold(totalQuantity);
         
-        AggregationResults<ProductDTO> results = mongoTemplate.aggregate(
-            aggregation, "DSS", ProductDTO.class
-        );
+        // Average price
+        double avgPrice = invoices.stream()
+                .filter(inv -> inv.getUnitPrice() != null)
+                .mapToDouble(Invoice::getUnitPrice)
+                .average()
+                .orElse(0.0);
+        product.setAveragePrice(avgPrice);
         
-        return results.getMappedResults();
+        // Total transactions
+        long totalTransactions = invoices.size();
+        product.setTotalTransactions(totalTransactions);
+        
+        // Min and Max price
+        double minPrice = invoices.stream()
+                .filter(inv -> inv.getUnitPrice() != null)
+                .mapToDouble(Invoice::getUnitPrice)
+                .min()
+                .orElse(0.0);
+        product.setMinPrice(minPrice);
+        
+        double maxPrice = invoices.stream()
+                .filter(inv -> inv.getUnitPrice() != null)
+                .mapToDouble(Invoice::getUnitPrice)
+                .max()
+                .orElse(0.0);
+        product.setMaxPrice(maxPrice);
+        
+        // Unique customers
+        long uniqueCustomers = invoices.stream()
+                .map(Invoice::getCustomerId)
+                .filter(Objects::nonNull)
+                .distinct()
+                .count();
+        product.setUniqueCustomers((int) uniqueCustomers);
+        
+        // Total revenue (use TotalPrice if available, otherwise calculate)
+        double totalRevenue = invoices.stream()
+                .mapToDouble(inv -> {
+                    if (inv.getTotalPrice() != null && inv.getTotalPrice() != 0) {
+                        return inv.getTotalPrice();
+                    } else if (inv.getQuantity() != null && inv.getUnitPrice() != null) {
+                        return inv.getQuantity() * inv.getUnitPrice();
+                    }
+                    return 0.0;
+                })
+                .sum();
+        product.setTotalRevenue(totalRevenue);
+        
+        return product;
     }
 }
