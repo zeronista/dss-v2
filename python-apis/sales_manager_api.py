@@ -142,6 +142,42 @@ class NetworkEdge(BaseModel):
     lift: float
     width: float
 
+class Deal(BaseModel):
+    deal_id: str
+    customer_id: str
+    customer_name: str
+    deal_value: float
+    status: str  # Active/Won/Lost/Pending
+    probability: float  # 0-100
+    expected_close_date: str
+    products: List[str]
+    last_contact: str
+    days_in_pipeline: int
+    stage: str  # Prospecting/Qualification/Proposal/Negotiation/Closing
+
+class Lead(BaseModel):
+    lead_id: str
+    customer_id: str
+    customer_name: str
+    lead_score: float  # 0-100
+    source: str  # Website/Referral/Email/Cold Call
+    status: str  # New/Contacted/Qualified/Unqualified
+    potential_value: float
+    last_activity: str
+    days_since_contact: int
+    next_action: str
+    country: Optional[str] = None
+
+class SalesReport(BaseModel):
+    period: str
+    total_revenue: float
+    total_orders: int
+    avg_order_value: float
+    total_customers: int
+    top_products: List[Dict[str, Any]]
+    revenue_by_country: List[Dict[str, Any]]
+    growth_rate: float
+
 class RecommendationResponse(BaseModel):
     success: bool
     source_product: Dict[str, str]
@@ -989,6 +1025,347 @@ async def revenue_forecast_analysis() -> Dict[str, Any]:
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Forecast error: {str(e)}")
+
+# ============ Active Deals Management ============
+
+@app.get("/deals", tags=["Sales Pipeline"])
+async def get_active_deals(
+    status: Optional[str] = Query(None, description="Filter by status: Active/Won/Lost/Pending"),
+    min_value: Optional[float] = Query(None, description="Minimum deal value"),
+    stage: Optional[str] = Query(None, description="Filter by stage")
+):
+    """
+    Get active sales deals with pipeline information
+    
+    Returns deals based on customer purchase patterns and potential value
+    """
+    try:
+        df = TRANSACTION_DATA.copy()
+        
+        # Calculate customer metrics
+        customer_metrics = df.groupby('CustomerID').agg({
+            'InvoiceNo': 'nunique',
+            'Revenue': 'sum',
+            'InvoiceDate': ['min', 'max'],
+            'StockCode': 'nunique'
+        }).reset_index()
+        
+        customer_metrics.columns = ['CustomerID', 'TotalOrders', 'TotalRevenue', 'FirstPurchase', 'LastPurchase', 'UniqueProducts']
+        
+        # Calculate days since last purchase
+        customer_metrics['DaysSinceLastPurchase'] = (
+            pd.Timestamp.now() - customer_metrics['LastPurchase']
+        ).dt.days
+        
+        # Create deals from top customers
+        deals = []
+        for idx, row in customer_metrics.nlargest(20, 'TotalRevenue').iterrows():
+            customer_id = str(int(row['CustomerID'])) if pd.notna(row['CustomerID']) else f"CUST{idx}"
+            
+            # Get customer's top products
+            customer_products = df[df['CustomerID'] == row['CustomerID']].groupby('StockCode')['Quantity'].sum().nlargest(3).index.tolist()
+            
+            # Determine deal status and stage based on activity
+            days_since = row['DaysSinceLastPurchase']
+            if days_since < 30:
+                status_val = "Active"
+                stage = "Closing"
+                probability = 85
+            elif days_since < 60:
+                status_val = "Active"
+                stage = "Negotiation"
+                probability = 65
+            elif days_since < 90:
+                status_val = "Pending"
+                stage = "Proposal"
+                probability = 45
+            else:
+                status_val = "Active"
+                stage = "Qualification"
+                probability = 30
+            
+            # Calculate expected deal value (avg order value * 1.2 for upsell)
+            avg_order = row['TotalRevenue'] / row['TotalOrders']
+            deal_value = avg_order * 1.2
+            
+            # Expected close date
+            expected_close = (pd.Timestamp.now() + pd.Timedelta(days=30)).strftime('%Y-%m-%d')
+            last_contact = (pd.Timestamp.now() - pd.Timedelta(days=days_since % 15)).strftime('%Y-%m-%d')
+            
+            deal = Deal(
+                deal_id=f"DEAL{idx:04d}",
+                customer_id=customer_id,
+                customer_name=f"Customer {customer_id}",
+                deal_value=round(deal_value, 2),
+                status=status_val,
+                probability=probability,
+                expected_close_date=expected_close,
+                products=customer_products[:3],
+                last_contact=last_contact,
+                days_in_pipeline=min(days_since, 120),
+                stage=stage
+            )
+            
+            # Apply filters
+            if status and deal.status != status:
+                continue
+            if min_value and deal.deal_value < min_value:
+                continue
+            if stage and deal.stage != stage:
+                continue
+            
+            deals.append(deal)
+        
+        # Calculate summary metrics
+        total_value = sum(d.deal_value for d in deals)
+        weighted_value = sum(d.deal_value * (d.probability / 100) for d in deals)
+        
+        return {
+            "success": True,
+            "deals": [d.dict() for d in deals],
+            "summary": {
+                "total_deals": len(deals),
+                "total_pipeline_value": round(total_value, 2),
+                "weighted_pipeline_value": round(weighted_value, 2),
+                "avg_deal_size": round(total_value / len(deals), 2) if deals else 0,
+                "avg_probability": round(sum(d.probability for d in deals) / len(deals), 1) if deals else 0
+            }
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error fetching deals: {str(e)}")
+
+
+# ============ Lead Pipeline Management ============
+
+@app.get("/leads", tags=["Sales Pipeline"])
+async def get_lead_pipeline(
+    status: Optional[str] = Query(None, description="Filter by status: New/Contacted/Qualified/Unqualified"),
+    min_score: Optional[float] = Query(None, description="Minimum lead score (0-100)"),
+    source: Optional[str] = Query(None, description="Filter by source")
+):
+    """
+    Get sales leads with scoring and prioritization
+    
+    Analyzes customer behavior to identify high-potential leads
+    """
+    try:
+        df = TRANSACTION_DATA.copy()
+        
+        # Get customers with recent but limited activity (potential leads)
+        customer_metrics = df.groupby('CustomerID').agg({
+            'InvoiceNo': 'nunique',
+            'Revenue': 'sum',
+            'InvoiceDate': 'max',
+            'StockCode': 'nunique',
+            'Quantity': 'sum'
+        }).reset_index()
+        
+        customer_metrics.columns = ['CustomerID', 'TotalOrders', 'TotalRevenue', 'LastPurchase', 'UniqueProducts', 'TotalQuantity']
+        
+        # Calculate recency
+        customer_metrics['DaysSinceLastPurchase'] = (
+            pd.Timestamp.now() - customer_metrics['LastPurchase']
+        ).dt.days
+        
+        # Focus on customers with 1-5 orders (leads, not established customers)
+        leads_df = customer_metrics[(customer_metrics['TotalOrders'] >= 1) & (customer_metrics['TotalOrders'] <= 5)].copy()
+        
+        # Calculate lead score (0-100)
+        # Factors: Recency (40%), Revenue (30%), Engagement (30%)
+        if len(leads_df) > 0:
+            leads_df['RecencyScore'] = 100 - (leads_df['DaysSinceLastPurchase'] / leads_df['DaysSinceLastPurchase'].max() * 100)
+            leads_df['RecencyScore'] = leads_df['RecencyScore'].clip(0, 100)
+            
+            leads_df['RevenueScore'] = (leads_df['TotalRevenue'] / leads_df['TotalRevenue'].max() * 100).clip(0, 100)
+            leads_df['EngagementScore'] = (leads_df['UniqueProducts'] / leads_df['UniqueProducts'].max() * 100).clip(0, 100)
+            
+            leads_df['LeadScore'] = (
+                leads_df['RecencyScore'] * 0.4 +
+                leads_df['RevenueScore'] * 0.3 +
+                leads_df['EngagementScore'] * 0.3
+            )
+        
+        # Create leads
+        sources = ['Website', 'Referral', 'Email Campaign', 'Social Media', 'Cold Call', 'Trade Show']
+        leads = []
+        
+        for idx, row in leads_df.nlargest(30, 'LeadScore').iterrows():
+            customer_id = str(int(row['CustomerID'])) if pd.notna(row['CustomerID']) else f"LEAD{idx}"
+            
+            # Determine status based on lead score and recency
+            lead_score = row['LeadScore']
+            days_since = row['DaysSinceLastPurchase']
+            
+            if lead_score >= 70:
+                status_val = "Qualified"
+                next_action = "Schedule demo call"
+            elif lead_score >= 50:
+                status_val = "Contacted"
+                next_action = "Send product catalog"
+            elif lead_score >= 30:
+                status_val = "New"
+                next_action = "Initial outreach email"
+            else:
+                status_val = "New"
+                next_action = "Research and segment"
+            
+            # Get country from data
+            customer_data = df[df['CustomerID'] == row['CustomerID']]
+            country = customer_data['Country'].iloc[0] if 'Country' in customer_data.columns and len(customer_data) > 0 else "Unknown"
+            
+            lead = Lead(
+                lead_id=f"LEAD{idx:05d}",
+                customer_id=customer_id,
+                customer_name=f"Lead {customer_id}",
+                lead_score=round(lead_score, 1),
+                source=sources[idx % len(sources)],
+                status=status_val,
+                potential_value=round(row['TotalRevenue'] * 1.5, 2),  # Estimated potential
+                last_activity=(pd.Timestamp.now() - pd.Timedelta(days=days_since % 30)).strftime('%Y-%m-%d'),
+                days_since_contact=min(days_since, 90),
+                next_action=next_action,
+                country=country
+            )
+            
+            # Apply filters
+            if status and lead.status != status_val:
+                continue
+            if min_score and lead.lead_score < min_score:
+                continue
+            if source and lead.source != source:
+                continue
+            
+            leads.append(lead)
+        
+        # Calculate summary
+        qualified_leads = [l for l in leads if l.status == "Qualified"]
+        contacted_leads = [l for l in leads if l.status == "Contacted"]
+        
+        return {
+            "success": True,
+            "leads": [l.dict() for l in leads],
+            "summary": {
+                "total_leads": len(leads),
+                "qualified_leads": len(qualified_leads),
+                "contacted_leads": len(contacted_leads),
+                "avg_lead_score": round(sum(l.lead_score for l in leads) / len(leads), 1) if leads else 0,
+                "total_potential_value": round(sum(l.potential_value for l in leads), 2),
+                "high_priority_leads": len([l for l in leads if l.lead_score >= 70])
+            }
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error fetching leads: {str(e)}")
+
+
+# ============ Sales Reports ============
+
+@app.get("/reports", tags=["Analytics"])
+async def get_sales_reports(
+    period: str = Query("monthly", description="Report period: daily/weekly/monthly/quarterly"),
+    limit: int = Query(12, description="Number of periods to include")
+):
+    """
+    Generate comprehensive sales reports and analytics
+    
+    Provides insights on revenue, orders, customers, and product performance
+    """
+    try:
+        df = TRANSACTION_DATA.copy()
+        
+        # Period-based aggregation
+        if period == "daily":
+            df['Period'] = df['InvoiceDate'].dt.date
+            period_format = '%Y-%m-%d'
+        elif period == "weekly":
+            df['Period'] = df['InvoiceDate'].dt.to_period('W').dt.start_time
+            period_format = '%Y-W%U'
+        elif period == "quarterly":
+            df['Period'] = df['InvoiceDate'].dt.to_period('Q').dt.start_time
+            period_format = '%Y-Q%q'
+        else:  # monthly
+            df['Period'] = df['InvoiceDate'].dt.to_period('M').dt.start_time
+            period_format = '%Y-%m'
+        
+        # Revenue by period
+        period_metrics = df.groupby('Period').agg({
+            'Revenue': 'sum',
+            'InvoiceNo': 'nunique',
+            'CustomerID': 'nunique'
+        }).reset_index().tail(limit)
+        
+        period_metrics.columns = ['period', 'revenue', 'orders', 'customers']
+        period_metrics['avg_order_value'] = period_metrics['revenue'] / period_metrics['orders']
+        period_metrics['period'] = period_metrics['period'].dt.strftime(period_format)
+        
+        # Calculate growth rate
+        if len(period_metrics) >= 2:
+            recent_revenue = period_metrics['revenue'].iloc[-1]
+            previous_revenue = period_metrics['revenue'].iloc[-2]
+            growth_rate = ((recent_revenue - previous_revenue) / previous_revenue * 100) if previous_revenue > 0 else 0
+        else:
+            growth_rate = 0
+        
+        # Top products
+        top_products = df.groupby('StockCode').agg({
+            'Description': 'first',
+            'Revenue': 'sum',
+            'Quantity': 'sum',
+            'InvoiceNo': 'nunique'
+        }).nlargest(10, 'Revenue').reset_index()
+        
+        top_products_list = [
+            {
+                'stock_code': row['StockCode'],
+                'description': row['Description'],
+                'revenue': round(row['Revenue'], 2),
+                'quantity_sold': int(row['Quantity']),
+                'orders': int(row['InvoiceNo'])
+            }
+            for _, row in top_products.iterrows()
+        ]
+        
+        # Revenue by country
+        if 'Country' in df.columns:
+            country_revenue = df.groupby('Country')['Revenue'].sum().nlargest(10).reset_index()
+            revenue_by_country = [
+                {'country': row['Country'], 'revenue': round(row['Revenue'], 2)}
+                for _, row in country_revenue.iterrows()
+            ]
+        else:
+            revenue_by_country = []
+        
+        # Overall metrics
+        total_revenue = float(df['Revenue'].sum())
+        total_orders = int(df['InvoiceNo'].nunique())
+        total_customers = int(df['CustomerID'].nunique())
+        avg_order_value = total_revenue / total_orders if total_orders > 0 else 0
+        
+        return {
+            "success": True,
+            "report": {
+                "period": period,
+                "total_revenue": round(total_revenue, 2),
+                "total_orders": total_orders,
+                "avg_order_value": round(avg_order_value, 2),
+                "total_customers": total_customers,
+                "growth_rate": round(growth_rate, 2),
+                "top_products": top_products_list,
+                "revenue_by_country": revenue_by_country
+            },
+            "trend": period_metrics.to_dict('records'),
+            "summary": {
+                "best_period": period_metrics.loc[period_metrics['revenue'].idxmax()]['period'] if len(period_metrics) > 0 else None,
+                "best_period_revenue": round(period_metrics['revenue'].max(), 2) if len(period_metrics) > 0 else 0,
+                "avg_period_revenue": round(period_metrics['revenue'].mean(), 2) if len(period_metrics) > 0 else 0,
+                "avg_customers_per_period": round(period_metrics['customers'].mean(), 1) if len(period_metrics) > 0 else 0
+            }
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error generating report: {str(e)}")
+
 
 # ============ Run Server ============
 
