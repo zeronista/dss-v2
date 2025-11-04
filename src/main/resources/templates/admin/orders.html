@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Customer Management - DSS</title>
+    <title>Order Management - DSS</title>
     <style>
         * {
             margin: 0;
@@ -70,7 +70,7 @@
         }
         
         .container {
-            max-width: 1400px;
+            max-width: 1600px;
             margin: 0 auto;
             padding: 30px;
         }
@@ -106,15 +106,16 @@
             color: white;
             padding: 20px;
             border-radius: 8px;
+            text-align: center;
         }
         
         .stat-item .icon {
-            font-size: 28px;
+            font-size: 32px;
             margin-bottom: 10px;
         }
         
         .stat-item .value {
-            font-size: 32px;
+            font-size: 28px;
             font-weight: bold;
             margin-bottom: 5px;
         }
@@ -124,22 +125,63 @@
             opacity: 0.9;
         }
         
-        .search-bar {
+        .search-section {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
             margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
         }
         
-        .search-bar input {
-            width: 100%;
+        .search-form {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .search-input {
+            flex: 1;
             padding: 12px 20px;
-            border: 2px solid #ddd;
+            border: 2px solid #e0e0e0;
             border-radius: 8px;
-            font-size: 16px;
+            font-size: 14px;
             transition: all 0.3s;
         }
         
-        .search-bar input:focus {
+        .search-input:focus {
             outline: none;
             border-color: #667eea;
+        }
+        
+        .btn-search {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .btn-search:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-clear {
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .btn-clear:hover {
+            background: #5a6268;
         }
         
         .table-container {
@@ -147,6 +189,7 @@
             padding: 30px;
             border-radius: 12px;
             box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            overflow-x: auto;
         }
         
         table {
@@ -166,26 +209,70 @@
             font-weight: 600;
             font-size: 14px;
             text-transform: uppercase;
+            letter-spacing: 0.5px;
+            white-space: nowrap;
         }
         
         td {
-            padding: 15px;
+            padding: 12px 15px;
             border-bottom: 1px solid #f0f0f0;
+            font-size: 14px;
         }
         
-        tr:hover {
-            background: #f9f9f9;
+        tbody tr:hover {
+            background-color: #f8f9fa;
+        }
+        
+        tbody tr:last-child td {
+            border-bottom: none;
+        }
+        
+        .invoice-no {
+            font-family: monospace;
+            background: #f0f0f0;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-weight: 600;
+        }
+        
+        .number {
+            text-align: right;
+        }
+        
+        .currency {
+            color: #28a745;
+            font-weight: 600;
+        }
+        
+        .status {
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            display: inline-block;
+        }
+        
+        .status-completed {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .status-cancelled {
+            background: #f8d7da;
+            color: #721c24;
         }
         
         .btn-view {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
-            padding: 8px 20px;
+            padding: 8px 16px;
             border-radius: 6px;
             text-decoration: none;
+            font-size: 13px;
             font-weight: 600;
             transition: all 0.3s;
             display: inline-block;
+            white-space: nowrap;
         }
         
         .btn-view:hover {
@@ -193,57 +280,26 @@
             box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
         }
         
-        .badge {
-            display: inline-block;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 600;
-        }
-        
-        .badge-vip {
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-            color: white;
-        }
-        
-        .badge-premium {
-            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-            color: white;
-        }
-        
-        .badge-regular {
-            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
-            color: white;
-        }
-        
-        .badge-new {
-            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
-            color: white;
-        }
-        
-        .badge-basic {
-            background: #e0e0e0;
+        .no-orders {
+            text-align: center;
+            padding: 60px;
             color: #666;
         }
         
-        .status-active {
-            color: #28a745;
-            font-weight: 600;
+        .no-orders-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
         }
         
-        .status-at-risk {
-            color: #ffc107;
-            font-weight: 600;
-        }
-        
-        .status-inactive {
-            color: #dc3545;
-            font-weight: 600;
-        }
-        
-        .status-churned {
-            color: #6c757d;
-            font-weight: 600;
+        .search-info {
+            background: #d1ecf1;
+            color: #0c5460;
+            padding: 12px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
         
         /* Pagination Styles */
@@ -328,26 +384,26 @@
     </style>
 </head>
 <body>
-    <nav class="navbar">
-        <div class="navbar-brand">👥 Customer Management</div>
+    <div class="navbar">
+        <div class="navbar-brand">📋 Order Management</div>
         <div class="navbar-user">
-            <a th:href="@{/admin/dashboard}" class="btn-back">← Back to Dashboard</a>
-            <form th:action="@{/logout}" method="post" style="margin: 0;">
+            <a href="/admin/dashboard" class="btn-back">← Back to Dashboard</a>
+            <form action="/logout" method="post" style="margin: 0;">
                 <button type="submit" class="btn-logout">Logout</button>
             </form>
         </div>
-    </nav>
+    </div>
     
     <div class="container">
         <div class="header-section">
-            <h1>👥 Customer Management</h1>
-            <p>View and manage customer information and statistics</p>
+            <h1>Order List</h1>
+            <p>View and manage all customer orders</p>
             
             <div class="stats">
                 <div class="stat-item">
-                    <div class="icon">👥</div>
-                    <div class="value" th:text="${totalCustomers}">0</div>
-                    <div class="label">Total Customers</div>
+                    <div class="icon">📋</div>
+                    <div class="value" th:text="${totalOrders}">0</div>
+                    <div class="label">Total Orders</div>
                 </div>
                 <div class="stat-item">
                     <div class="icon">💰</div>
@@ -355,95 +411,105 @@
                     <div class="label">Total Revenue</div>
                 </div>
                 <div class="stat-item">
-                    <div class="icon">📊</div>
-                    <div class="value" th:text="${'$' + #numbers.formatDecimal(averageRevenue, 0, 'COMMA', 2, 'POINT')}">$0</div>
-                    <div class="label">Avg Revenue/Customer</div>
-                </div>
-                <div class="stat-item">
-                    <div class="icon">⭐</div>
-                    <div class="value" th:text="${vipCustomers}">0</div>
-                    <div class="label">VIP Customers</div>
+                    <div class="icon">📦</div>
+                    <div class="value" th:text="${#numbers.formatInteger(totalItems, 0, 'COMMA')}">0</div>
+                    <div class="label">Total Items</div>
                 </div>
                 <div class="stat-item">
                     <div class="icon">✅</div>
-                    <div class="value" th:text="${activeCustomers}">0</div>
-                    <div class="label">Active Customers</div>
+                    <div class="value" th:text="${completedOrders}">0</div>
+                    <div class="label">Completed</div>
+                </div>
+                <div class="stat-item">
+                    <div class="icon">❌</div>
+                    <div class="value" th:text="${cancelledOrders}">0</div>
+                    <div class="label">Cancelled</div>
                 </div>
             </div>
         </div>
         
+        <div class="search-section">
+            <form action="/admin/orders" method="get" class="search-form">
+                <input type="text" name="search" class="search-input" 
+                       placeholder="Search by invoice number, customer ID, or country..." 
+                       th:value="${searchQuery}">
+                <button type="submit" class="btn-search">🔍 Search</button>
+                <a href="/admin/orders" class="btn-clear">✕ Clear</a>
+            </form>
+        </div>
+        
+        <div th:if="${searchQuery}" class="search-info">
+            <span>Search results for: "<strong th:text="${searchQuery}">query</strong>"</span>
+            <span th:text="${totalOrders + ' order(s) found'}">0 orders found</span>
+        </div>
+        
         <div class="table-container">
-            <div class="search-bar">
-                <form method="get" th:action="@{/admin/customers}">
-                    <input type="text" name="search" placeholder="🔍 Search by Customer ID or Country..." 
-                           th:value="${searchQuery}">
-                </form>
+            <div th:if="${orders.isEmpty()}" class="no-orders">
+                <div class="no-orders-icon">🔍</div>
+                <h3>No orders found</h3>
+                <p th:if="${searchQuery}">Try a different search term</p>
+                <p th:unless="${searchQuery}">No orders available in the system</p>
             </div>
             
-            <table>
+            <table th:if="${!orders.isEmpty()}">
                 <thead>
                     <tr>
+                        <th>Invoice No</th>
+                        <th>Date</th>
                         <th>Customer ID</th>
                         <th>Country</th>
-                        <th>Segment</th>
+                        <th>Items</th>
+                        <th>Products</th>
+                        <th>Total Amount</th>
                         <th>Status</th>
-                        <th>Orders</th>
-                        <th>Revenue</th>
-                        <th>Avg Order Value</th>
-                        <th>Return Rate</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr th:each="customer : ${customers}">
-                        <td th:text="${customer.customerId}">12345</td>
-                        <td th:text="${customer.country}">United Kingdom</td>
+                    <tr th:each="order : ${orders}">
                         <td>
-                            <span class="badge"
-                                  th:classappend="${customer.customerSegment == 'VIP' ? 'badge-vip' : 
-                                                   customer.customerSegment == 'Premium' ? 'badge-premium' : 
-                                                   customer.customerSegment == 'Regular' ? 'badge-regular' : 
-                                                   customer.customerSegment == 'New' ? 'badge-new' : 'badge-basic'}"
-                                  th:text="${customer.customerSegment}">Regular</span>
+                            <span class="invoice-no" th:text="${order.invoiceNo}">123456</span>
+                        </td>
+                        <td th:text="${order.invoiceDate}">12/1/2010 8:26</td>
+                        <td th:text="${order.customerId}">17850</td>
+                        <td th:text="${order.country}">United Kingdom</td>
+                        <td class="number" th:text="${#numbers.formatInteger(order.totalItems, 0, 'COMMA')}">12</td>
+                        <td class="number" th:text="${order.uniqueProducts}">3</td>
+                        <td class="number currency" th:text="${'$' + #numbers.formatDecimal(order.totalAmount, 0, 'COMMA', 2, 'POINT')}">$139.12</td>
+                        <td>
+                            <span th:class="${order.status == 'Completed' ? 'status status-completed' : 'status status-cancelled'}"
+                                  th:text="${order.status}">
+                                Completed
+                            </span>
                         </td>
                         <td>
-                            <span th:class="${'status-' + #strings.toLowerCase(customer.status)}"
-                                  th:text="${customer.status}">Active</span>
-                        </td>
-                        <td th:text="${customer.totalOrders}">10</td>
-                        <td th:text="${'$' + #numbers.formatDecimal(customer.totalRevenue, 0, 'COMMA', 2, 'POINT')}">$1,234.56</td>
-                        <td th:text="${'$' + #numbers.formatDecimal(customer.averageOrderValue, 0, 'COMMA', 2, 'POINT')}">$123.45</td>
-                        <td th:text="${#numbers.formatDecimal(customer.returnRate, 0, 2) + '%'}">5.00%</td>
-                        <td>
-                            <a th:href="@{/admin/customers/{id}(id=${customer.customerId})}" class="btn-view">View Details</a>
+                            <a th:href="@{/admin/orders/{invoiceNo}(invoiceNo=${order.invoiceNo})}" class="btn-view">
+                                👁️ Details
+                            </a>
                         </td>
                     </tr>
                 </tbody>
             </table>
-            
-            <div th:if="${customers.isEmpty()}" style="text-align: center; padding: 40px; color: #999;">
-                <p style="font-size: 18px;">No customers found.</p>
-            </div>
         </div>
         
         <!-- Pagination -->
-        <div th:if="${!customers.isEmpty()}" class="pagination-container">
+        <div th:if="${!orders.isEmpty()}" class="pagination-container">
             <div class="pagination-info">
-                <span th:text="'Showing ' + ${(currentPage - 1) * pageSize + 1} + ' to ' + ${(currentPage - 1) * pageSize + customers.size()} + ' of ' + ${totalCustomers} + ' customers'">
-                    Showing 1 to 20 of 100 customers
+                <span th:text="'Showing ' + ${(currentPage - 1) * pageSize + 1} + ' to ' + ${(currentPage - 1) * pageSize + orders.size()} + ' of ' + ${totalOrders} + ' orders'">
+                    Showing 1 to 20 of 100 orders
                 </span>
             </div>
             
             <div class="pagination">
                 <!-- First Page -->
-                <a th:href="@{/admin/customers(page=1, size=${pageSize}, search=${searchQuery})}" 
+                <a th:href="@{/admin/orders(page=1, size=${pageSize}, search=${searchQuery})}" 
                    th:class="${currentPage == 1} ? 'page-link disabled' : 'page-link'"
                    title="First Page">
                     ⏮️
                 </a>
                 
                 <!-- Previous Page -->
-                <a th:href="@{/admin/customers(page=${currentPage - 1}, size=${pageSize}, search=${searchQuery})}" 
+                <a th:href="@{/admin/orders(page=${currentPage - 1}, size=${pageSize}, search=${searchQuery})}" 
                    th:class="${currentPage == 1} ? 'page-link disabled' : 'page-link'"
                    title="Previous">
                     ◀️
@@ -452,7 +518,7 @@
                 <!-- Page Numbers -->
                 <th:block th:each="i : ${#numbers.sequence(1, totalPages)}">
                     <a th:if="${i == currentPage || (i >= currentPage - 2 && i <= currentPage + 2) || i == 1 || i == totalPages}"
-                       th:href="@{/admin/customers(page=${i}, size=${pageSize}, search=${searchQuery})}" 
+                       th:href="@{/admin/orders(page=${i}, size=${pageSize}, search=${searchQuery})}" 
                        th:class="${i == currentPage} ? 'page-link active' : 'page-link'"
                        th:text="${i}">
                         1
@@ -464,14 +530,14 @@
                 </th:block>
                 
                 <!-- Next Page -->
-                <a th:href="@{/admin/customers(page=${currentPage + 1}, size=${pageSize}, search=${searchQuery})}" 
+                <a th:href="@{/admin/orders(page=${currentPage + 1}, size=${pageSize}, search=${searchQuery})}" 
                    th:class="${currentPage == totalPages} ? 'page-link disabled' : 'page-link'"
                    title="Next">
                     ▶️
                 </a>
                 
                 <!-- Last Page -->
-                <a th:href="@{/admin/customers(page=${totalPages}, size=${pageSize}, search=${searchQuery})}" 
+                <a th:href="@{/admin/orders(page=${totalPages}, size=${pageSize}, search=${searchQuery})}" 
                    th:class="${currentPage == totalPages} ? 'page-link disabled' : 'page-link'"
                    title="Last Page">
                     ⏭️
@@ -493,7 +559,7 @@
     <script th:inline="javascript">
         function changePageSize(size) {
             const searchQuery = /*[[${searchQuery}]]*/ null;
-            let url = '/admin/customers?page=1&size=' + size;
+            let url = '/admin/orders?page=1&size=' + size;
             if (searchQuery) {
                 url += '&search=' + encodeURIComponent(searchQuery);
             }

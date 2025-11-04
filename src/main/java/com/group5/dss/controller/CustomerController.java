@@ -24,33 +24,47 @@ public class CustomerController {
     @GetMapping("/customers")
     public String listCustomers(
             @RequestParam(required = false) String search,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "20") int size,
             Model model) {
         
-        List<CustomerDTO> customers;
+        List<CustomerDTO> allCustomers;
         
         if (search != null && !search.trim().isEmpty()) {
-            customers = customerService.searchCustomers(search);
+            allCustomers = customerService.searchCustomers(search);
             model.addAttribute("searchQuery", search);
         } else {
-            customers = customerService.getAllCustomers();
+            allCustomers = customerService.getAllCustomers();
         }
         
-        // Calculate summary statistics
-        long totalCustomers = customers.size();
+        // Calculate summary statistics from all customers
+        long totalCustomers = allCustomers.size();
         
-        double totalRevenue = customers.stream()
+        double totalRevenue = allCustomers.stream()
                 .mapToDouble(CustomerDTO::getTotalRevenue)
                 .sum();
         
         double averageRevenue = totalCustomers > 0 ? totalRevenue / totalCustomers : 0.0;
         
-        long vipCustomers = customers.stream()
+        long vipCustomers = allCustomers.stream()
                 .filter(c -> "VIP".equals(c.getCustomerSegment()))
                 .count();
         
-        long activeCustomers = customers.stream()
+        long activeCustomers = allCustomers.stream()
                 .filter(c -> "Active".equals(c.getStatus()))
                 .count();
+        
+        // Pagination logic
+        int totalPages = (int) Math.ceil((double) totalCustomers / size);
+        
+        // Ensure page is within bounds
+        if (page < 1) page = 1;
+        if (page > totalPages && totalPages > 0) page = totalPages;
+        
+        // Get customers for current page
+        int startIndex = (page - 1) * size;
+        int endIndex = Math.min(startIndex + size, (int) totalCustomers);
+        List<CustomerDTO> customers = allCustomers.subList(startIndex, endIndex);
         
         model.addAttribute("customers", customers);
         model.addAttribute("totalCustomers", totalCustomers);
@@ -58,6 +72,9 @@ public class CustomerController {
         model.addAttribute("averageRevenue", averageRevenue);
         model.addAttribute("vipCustomers", vipCustomers);
         model.addAttribute("activeCustomers", activeCustomers);
+        model.addAttribute("currentPage", page);
+        model.addAttribute("pageSize", size);
+        model.addAttribute("totalPages", totalPages);
         
         return "admin/customers";
     }
