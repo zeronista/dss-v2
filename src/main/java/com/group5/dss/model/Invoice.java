@@ -17,7 +17,7 @@ public class Invoice {
     private String id;
     
     @Field("InvoiceNo")
-    private String invoiceNo;
+    private Long invoiceNo;
     
     @Field("StockCode")
     private String stockCode;
@@ -39,5 +39,13 @@ public class Invoice {
     
     @Field("Country")
     private String country;
-}
 
+    @Field("TotalPrice")
+    private Double totalPrice;
+
+    @Field("InvoiceYear")
+    private Integer invoiceYear;
+
+    @Field("InvoiceMonth")
+    private Integer invoiceMonth;
+}

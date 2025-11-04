@@ -1,0 +1,13 @@
+{
+  "raw_rows": 541909,
+  "cleaned_rows": 524878,
+  "dropped_duplicates": 5226,
+  "dropped_cancelled": 9288,
+  "dropped_non_positive": 2517,
+  "missing_description_before": 1454,
+  "missing_description_after": 0,
+  "missing_customer_id_before": 135080,
+  "missing_customer_id_after": 132186,
+  "unique_stock_codes": 3812,
+  "processing_timestamp": "2025-11-04T08:36:31+00:00"
+}
