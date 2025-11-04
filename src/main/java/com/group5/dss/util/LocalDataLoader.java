@@ -229,7 +229,9 @@ public class LocalDataLoader {
     
     private Integer parseInt(String value) {
         try {
-            return Integer.parseInt(value);
+            // Handle both integer and decimal formats (e.g., "17850" or "17850.0")
+            double doubleValue = Double.parseDouble(value);
+            return (int) doubleValue;
         } catch (NumberFormatException e) {
             return null;
         }

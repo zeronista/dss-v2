@@ -19,12 +19,19 @@ public class CustomerService {
     
     /**
      * Get all customers with aggregated statistics from LOCAL CSV
+     * Using FULL dataset including cancelled orders for Admin role
      */
     public List<CustomerDTO> getAllCustomers() {
-        System.out.println("👥 Loading customers from LOCAL CSV...");
+        System.out.println("👥 Loading customers from FULL LOCAL CSV (including cancelled orders)...");
         
-        // Get all invoices from local file
-        List<Invoice> allInvoices = localDataLoader.loadCleanedTransactions();
+        // Get all invoices from local file (including cancelled/returned items)
+        List<Invoice> allInvoices = localDataLoader.loadFullTransactions();
+        
+        // Debug: Count invoices with CustomerID
+        long invoicesWithCustomerId = allInvoices.stream()
+                .filter(invoice -> invoice.getCustomerId() != null)
+                .count();
+        System.out.println("📊 Total invoices: " + allInvoices.size() + ", with CustomerID: " + invoicesWithCustomerId);
         
         // Group by customer ID
         Map<Integer, List<Invoice>> invoicesByCustomer = allInvoices.stream()
@@ -43,11 +50,12 @@ public class CustomerService {
     
     /**
      * Get customer details by ID from LOCAL CSV
+     * Using FULL dataset including cancelled orders for Admin role
      */
     public Optional<CustomerDTO> getCustomerById(Integer customerId) {
-        System.out.println("👤 Loading customer " + customerId + " from LOCAL CSV...");
+        System.out.println("👤 Loading customer " + customerId + " from FULL LOCAL CSV (including cancelled orders)...");
         
-        List<Invoice> allInvoices = localDataLoader.loadCleanedTransactions();
+        List<Invoice> allInvoices = localDataLoader.loadFullTransactions();
         List<Invoice> customerInvoices = allInvoices.stream()
                 .filter(inv -> customerId.equals(inv.getCustomerId()))
                 .collect(Collectors.toList());

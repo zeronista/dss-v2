@@ -18,11 +18,12 @@ public class ProductService {
     /**
      * Get all products aggregated from LOCAL CSV file
      * Groups by stockCode and calculates statistics
+     * Using FULL dataset including cancelled orders for Admin role
      */
     public List<ProductDTO> getAllProducts() {
-        System.out.println("📦 Loading products from LOCAL CSV...");
+        System.out.println("📦 Loading products from FULL LOCAL CSV (including cancelled orders)...");
         
-        List<Invoice> invoices = localDataLoader.loadCleanedTransactions();
+        List<Invoice> invoices = localDataLoader.loadFullTransactions();
         
         // Filter valid products (positive quantity and price)
         List<Invoice> validInvoices = invoices.stream()
@@ -49,17 +50,18 @@ public class ProductService {
         // Sort by total revenue descending
         products.sort(Comparator.comparing(ProductDTO::getTotalRevenue).reversed());
         
-        System.out.println("✅ Loaded " + products.size() + " products from LOCAL CSV");
+        System.out.println("✅ Loaded " + products.size() + " products from FULL LOCAL CSV");
         return products;
     }
     
     /**
      * Get product details by stock code from LOCAL CSV
+     * Using FULL dataset including cancelled orders for Admin role
      */
     public Optional<ProductDTO> getProductByStockCode(String stockCode) {
-        System.out.println("📦 Loading product " + stockCode + " from LOCAL CSV...");
+        System.out.println("📦 Loading product " + stockCode + " from FULL LOCAL CSV (including cancelled orders)...");
         
-        List<Invoice> invoices = localDataLoader.loadCleanedTransactions();
+        List<Invoice> invoices = localDataLoader.loadFullTransactions();
         
         // Filter for this specific product
         List<Invoice> productInvoices = invoices.stream()

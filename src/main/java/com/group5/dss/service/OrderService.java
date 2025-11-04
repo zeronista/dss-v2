@@ -21,10 +21,11 @@ public class OrderService {
     
     /**
      * Get all orders aggregated from LOCAL CSV file
+     * Using FULL dataset including cancelled orders for Admin role
      */
     public List<OrderDTO> getAllOrders() {
-        System.out.println("📋 Loading orders from LOCAL CSV...");
-        List<Invoice> invoices = localDataLoader.loadCleanedTransactions();
+        System.out.println("📋 Loading orders from FULL LOCAL CSV (including cancelled orders)...");
+        List<Invoice> invoices = localDataLoader.loadFullTransactions();
         
         // Group invoices by InvoiceNo
         Map<Long, List<Invoice>> groupedByInvoice = invoices.stream()
@@ -59,10 +60,11 @@ public class OrderService {
     
     /**
      * Get order by invoice number
+     * Using FULL dataset including cancelled orders for Admin role
      */
     public Optional<OrderDTO> getOrderByInvoiceNo(Long invoiceNo) {
-        System.out.println("🔍 Finding order: " + invoiceNo);
-        List<Invoice> invoices = localDataLoader.loadCleanedTransactions();
+        System.out.println("🔍 Finding order: " + invoiceNo + " from FULL dataset...");
+        List<Invoice> invoices = localDataLoader.loadFullTransactions();
         
         List<Invoice> orderInvoices = invoices.stream()
                 .filter(inv -> invoiceNo.equals(inv.getInvoiceNo()))
