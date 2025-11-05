@@ -1,0 +1,13 @@
+/home/ubuntu/anaconda3/lib/python3.12/site-packages/websockets/legacy/__init__.py:6: DeprecationWarning: websockets.legacy is deprecated; see https://websockets.readthedocs.io/en/stable/howto/upgrade.html for upgrade instructions
+  warnings.warn(  # deprecated in 14.0 - 2024-11-09
+/home/ubuntu/anaconda3/lib/python3.12/site-packages/uvicorn/protocols/websockets/websockets_impl.py:22: DeprecationWarning: websockets.server.WebSocketServerProtocol is deprecated
+  from websockets.server import WebSocketServerProtocol
+INFO:     Started server process [49800]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8003 (Press CTRL+C to quit)
+🚀 Starting Marketing API on port 8003...
+💖 Role: Marketing Manager - Customer Segmentation
+📝 Documentation: http://localhost:8003/docs
+🔍 Health check: http://localhost:8003/health
+INFO:     127.0.0.1:38550 - "GET /health HTTP/1.1" 200 OK

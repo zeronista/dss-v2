@@ -33,3 +33,4 @@ INFO:     127.0.0.1:46576 - "POST /generate-recommendations HTTP/1.1" 200 OK
 INFO:     127.0.0.1:48858 - "POST /generate-recommendations HTTP/1.1" 422 Unprocessable Entity
 INFO:     127.0.0.1:34876 - "GET /health HTTP/1.1" 200 OK
 INFO:     127.0.0.1:34756 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52812 - "GET /health HTTP/1.1" 200 OK

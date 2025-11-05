@@ -1,0 +1,9 @@
+INFO:     Started server process [49681]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8002 (Press CTRL+C to quit)
+🚀 Starting Inventory API on port 8002...
+📦 Role: Inventory Manager - Return Risk Management
+📝 Documentation: http://localhost:8002/docs
+🔍 Health check: http://localhost:8002/health
+INFO:     127.0.0.1:47716 - "GET /health HTTP/1.1" 200 OK
