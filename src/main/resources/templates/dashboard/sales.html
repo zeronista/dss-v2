@@ -521,14 +521,101 @@
                     })
                 });
                 
+                // Handle HTTP errors (404, 500, etc.)
                 if (!response.ok) {
-                    throw new Error('Failed to generate recommendations');
+                    const errorData = await response.json().catch(() => ({ detail: 'Unknown error' }));
+                    
+                    // Check if error has structured format
+                    let errorDetail = errorData.detail;
+                    if (typeof errorDetail === 'object') {
+                        // New structured error format
+                        if (errorDetail.error === 'product_not_in_recent_data') {
+                            container.innerHTML = `
+                                <div class="error" style="background: #fef3c7; color: #92400e; border-left: 4px solid #f59e0b;">
+                                    <strong>⚠️ Product Exists But Not in Recent Data</strong>
+                                    <p>${errorDetail.message}</p>
+                                    <p style="margin-top: 10px;">
+                                        ${errorDetail.suggestion}
+                                    </p>
+                                    <p style="margin-top: 15px; font-size: 13px; color: #666;">
+                                        <strong>Note:</strong> System analyzes most recent 50,000 transactions for performance optimization.
+                                        This product was sold in older periods and is not included in current analysis.
+                                    </p>
+                                </div>
+                            `;
+                        } else if (errorDetail.error === 'product_not_found') {
+                            container.innerHTML = `
+                                <div class="error">
+                                    <strong>❌ Product Not Found</strong>
+                                    <p>${errorDetail.message}</p>
+                                    <p style="margin-top: 10px;">
+                                        ${errorDetail.suggestion}
+                                    </p>
+                                </div>
+                            `;
+                        } else {
+                            container.innerHTML = `
+                                <div class="error">
+                                    <strong>❌ Error</strong>
+                                    <p>${errorDetail.message || JSON.stringify(errorDetail)}</p>
+                                </div>
+                            `;
+                        }
+                    } else if (response.status === 404 || (typeof errorDetail === 'string' && errorDetail.includes('not found'))) {
+                        // Old error format (string)
+                        container.innerHTML = `
+                            <div class="error">
+                                <strong>❌ Product Not Found</strong>
+                                <p>${errorDetail}</p>
+                                <p style="margin-top: 10px;">
+                                    <strong>Try these popular products:</strong><br>
+                                    85123A, 22086, 22752, 84879, 22623, 22622, 21754, 21755
+                                </p>
+                            </div>
+                        `;
+                    } else {
+                        throw new Error(typeof errorDetail === 'string' ? errorDetail : JSON.stringify(errorDetail));
+                    }
+                    
+                    // Hide insights
+                    document.getElementById('insightsContainer').style.display = 'none';
+                    return;
                 }
                 
                 const data = await response.json();
                 
+                // Handle successful response but no recommendations
                 if (!data.recommendations || data.recommendations.length === 0) {
-                    container.innerHTML = '<p class="loading">No recommendations found for this product. Try a different StockCode.</p>';
+                    container.innerHTML = `
+                        <div class="error" style="background: #fef3c7; color: #92400e; border-left: 4px solid #f59e0b;">
+                            <strong>⚠️ No Recommendations Available</strong>
+                            <p>Product "${stockCode}" (${data.source_product?.description || 'Unknown'}) exists but has no strong cross-sell patterns.</p>
+                            <p style="margin-top: 10px;">
+                                This could mean:<br>
+                                • Product is rarely bought with other items<br>
+                                • Not enough transaction history<br>
+                                • Try lowering confidence threshold or try another product
+                            </p>
+                            <p style="margin-top: 10px;">
+                                <strong>Suggested products with good patterns:</strong><br>
+                                85123A, 22086, 22752, 84879
+                            </p>
+                        </div>
+                    `;
+                    
+                    // Update stats to 0
+                    document.getElementById('recsFound').textContent = '0';
+                    document.getElementById('potentialRevenue').textContent = '$0';
+                    document.getElementById('avgConfidence').textContent = '0%';
+                    document.getElementById('avgLift').textContent = '0x';
+                    
+                    // Show insights with available data
+                    if (data.revenue_impact || data.timing_strategy) {
+                        loadCrossSellInsightsFromData(data);
+                    } else {
+                        document.getElementById('insightsContainer').style.display = 'none';
+                    }
+                    
                     return;
                 }
                 
@@ -585,8 +672,45 @@
                 
             } catch (error) {
                 console.error('Error generating recommendations:', error);
-                container.innerHTML = '<div class="error">Failed to generate recommendations. Make sure the Sales API is running on port 8004.</div>';
+                container.innerHTML = `
+                    <div class="error">
+                        <strong>❌ Failed to Connect to API</strong>
+                        <p>${error.message}</p>
+                        <p style="margin-top: 10px;">
+                            <strong>Troubleshooting:</strong><br>
+                            • Make sure Sales API is running on port 8004<br>
+                            • Check: <a href="http://localhost:8004/health" target="_blank">http://localhost:8004/health</a><br>
+                            • Run: <code>bash start.sh</code> to start services
+                        </p>
+                    </div>
+                `;
+                document.getElementById('insightsContainer').style.display = 'none';
             }
+        }
+        
+        // Helper function to load insights from existing data
+        function loadCrossSellInsightsFromData(data) {
+            if (!data.revenue_impact && !data.timing_strategy) {
+                document.getElementById('insightsContainer').style.display = 'none';
+                return;
+            }
+            
+            document.getElementById('insightsContainer').style.display = 'block';
+            
+            // Bundle opportunity
+            const bundleMsg = data.bundle_opportunity?.message || 
+                              'No strong bundle patterns detected for this product.';
+            document.getElementById('bundleOpportunity').textContent = bundleMsg;
+            
+            // Timing strategy
+            const timingMsg = data.timing_strategy?.message || 
+                             'Insufficient data for timing recommendations.';
+            document.getElementById('timingStrategy').textContent = timingMsg;
+            
+            // AOV increase
+            const aovIncrease = data.revenue_impact?.max_percent || 0;
+            document.getElementById('aovIncrease').textContent = 
+                aovIncrease > 0 ? `+${aovIncrease}%` : 'Not available';
         }
         
         // Load cross-sell insights

@@ -66,10 +66,11 @@ def load_data() -> pd.DataFrame:
         # Remove cancelled invoices
         df = df[~df['InvoiceNo'].astype(str).str.startswith('C')]
         
-        # MEMORY OPTIMIZATION: Limit data to prevent OOM
-        # Use most recent 50K transactions for faster processing (reduced from 100K)
-        df = df.sort_values('InvoiceDate', ascending=False).head(50000)
-        print(f"⚡ Optimized to {len(df):,} recent transactions")
+        # FULL DATA MODE: Load all transactions for complete analysis
+        print(f"📊 Loaded {len(df):,} total transactions (FULL DATA)")
+        print(f"📅 Date range: {df['InvoiceDate'].min()} to {df['InvoiceDate'].max()}")
+        print(f"🛍️  Unique products: {df['StockCode'].nunique():,}")
+        print(f"👥 Unique customers: {df['CustomerID'].nunique():,}")
         
         return df
     except Exception as e:
@@ -192,7 +193,7 @@ class RecommendationResponse(BaseModel):
 # ============ Helper Functions ============
 
 def search_product(search_term: str, df: pd.DataFrame) -> Optional[pd.Series]:
-    """Search product by StockCode or Description"""
+    """Search product by StockCode or Description in loaded data"""
     # Try exact match with StockCode first
     exact_match = df[df['StockCode'].astype(str).str.upper() == search_term.upper()]
     if not exact_match.empty:
@@ -464,12 +465,17 @@ async def generate_recommendations(request: RecommendationRequest) -> Recommenda
         if df.empty:
             raise HTTPException(status_code=404, detail="No transaction data available")
         
-        # 1. Find source product
+        # 1. Find source product in full dataset
         product = search_product(request.stock_code, df)
         if product is None:
+            # Product doesn't exist in database at all
             raise HTTPException(
-                status_code=404, 
-                detail=f"Product '{request.stock_code}' not found in database"
+                status_code=404,
+                detail={
+                    "error": "product_not_found",
+                    "message": f"Product '{request.stock_code}' not found in database",
+                    "suggestion": "Try these popular products: 85123A, 22423, 85099B, 47566, 84879, 22086, 22720, 10002"
+                }
             )
         
         source_code = str(product['StockCode'])
@@ -480,18 +486,24 @@ async def generate_recommendations(request: RecommendationRequest) -> Recommenda
         if request.customer_id:
             customer_segment = get_customer_segment(request.customer_id, df)
         
-        # 3. Prepare data for Apriori (optimized to avoid memory issues)
-        # Limit to top 50 most frequent products (reduced from 100)
+        # 3. Prepare data for Apriori (optimized for full dataset)
+        # Strategy: Use top 100 most frequent products + source product
+        # This balances accuracy with computational efficiency
         product_counts = df['StockCode'].value_counts()
-        top_products = product_counts.head(50).index.tolist()
+        top_products = product_counts.head(100).index.tolist()
         
         # Ensure source product is included
         if source_code not in top_products:
             top_products.append(source_code)
         
-        # Filter and limit data - reduced to 10K transactions
+        # Filter data for selected products
         df_filtered = df[df['StockCode'].isin(top_products)].copy()
-        df_filtered = df_filtered.nlargest(10000, 'InvoiceDate')  # Last 10K transactions
+        
+        # Use most recent 20K transactions for basket analysis
+        # (sufficient for pattern detection while keeping performance good)
+        df_filtered = df_filtered.nlargest(20000, 'InvoiceDate')
+        
+        print(f"🔍 Analyzing {len(df_filtered):,} transactions with {len(top_products)} products")
         
         # Create transaction basket
         basket = df_filtered.groupby(['InvoiceNo', 'StockCode'])['Quantity'].sum().unstack().fillna(0)
