@@ -24,30 +24,48 @@ public class ProductController {
     @GetMapping("/products")
     public String listProducts(
             @RequestParam(required = false) String search,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "20") int size,
             Model model) {
         
-        List<ProductDTO> products;
+        List<ProductDTO> allProducts;
         
         if (search != null && !search.trim().isEmpty()) {
-            products = productService.searchProducts(search);
+            allProducts = productService.searchProducts(search);
             model.addAttribute("searchQuery", search);
         } else {
-            products = productService.getAllProducts();
+            allProducts = productService.getAllProducts();
         }
         
-        // Calculate totals
-        double totalRevenue = products.stream()
+        // Calculate totals from all products
+        double totalRevenue = allProducts.stream()
                 .mapToDouble(ProductDTO::getTotalRevenue)
                 .sum();
         
-        long totalQuantity = products.stream()
+        long totalQuantity = allProducts.stream()
                 .mapToLong(ProductDTO::getTotalQuantitySold)
                 .sum();
         
+        // Pagination logic
+        int totalProducts = allProducts.size();
+        int totalPages = (int) Math.ceil((double) totalProducts / size);
+        
+        // Ensure page is within bounds
+        if (page < 1) page = 1;
+        if (page > totalPages && totalPages > 0) page = totalPages;
+        
+        // Get products for current page
+        int startIndex = (page - 1) * size;
+        int endIndex = Math.min(startIndex + size, totalProducts);
+        List<ProductDTO> products = allProducts.subList(startIndex, endIndex);
+        
         model.addAttribute("products", products);
-        model.addAttribute("totalProducts", products.size());
+        model.addAttribute("totalProducts", totalProducts);
         model.addAttribute("totalRevenue", totalRevenue);
         model.addAttribute("totalQuantity", totalQuantity);
+        model.addAttribute("currentPage", page);
+        model.addAttribute("pageSize", size);
+        model.addAttribute("totalPages", totalPages);
         
         return "admin/products";
     }

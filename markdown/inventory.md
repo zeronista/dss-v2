@@ -15,6 +15,21 @@
 | **Deploy Policy** | [cite_start]Nút nhấn để áp dụng ngưỡng $\tau$ đã chọn vào hệ thống vận hành thực tế[cite: 71, 95]. | [cite_start]**X**[cite: 71]. |
 
 ## III. Dữ Liệu & Quy Trình Hoạt Động
+
+### 0. Nguồn dữ liệu đặc biệt
+> ⚠️ **LƯU Ý QUAN TRỌNG:** Role Inventory Manager sử dụng **FULL DATASET** (`online_retail.csv`) bao gồm **TẤT CẢ giao dịch** (kể cả cancelled/returned orders - InvoiceNo bắt đầu bằng 'C').
+> 
+> **Lý do:**
+> - Để phân tích chính xác return patterns và risk scoring
+> - Các giao dịch cancelled/returned là dữ liệu cốt lõi cho return risk management
+> - Khác với các role khác (Sales, Marketing, Admin) chỉ dùng cleaned dataset
+> 
+> **Dữ liệu bao gồm:**
+> - ✅ Normal orders (positive quantities, normal InvoiceNo)
+> - ✅ Cancelled/Returned orders (InvoiceNo starts with 'C')
+> - ✅ Negative quantities (returns)
+> - ✅ All customer return history
+
 ### 1. Dữ liệu đầu vào & Mô hình
 * [cite_start]**Dữ liệu nguồn:** Điểm rủi ro (Return\_Risk\_Score) của đơn hàng, chi phí xử lý trả hàng, tỷ lệ ảnh hưởng chuyển đổi[cite: 89, 157].
 * [cite_start]**Mô hình chính:** Mô hình tính toán **Expected Profit** (Lợi nhuận kỳ vọng) theo công thức mô phỏng[cite: 160, 161].

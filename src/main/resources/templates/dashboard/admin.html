@@ -1,550 +1,1588 @@
-<!DOCTYPE html>
+<!doctype html>
 <html xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Admin Dashboard - DSS</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: #f5f5f5;
+      }
+
+      .navbar {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 15px 30px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      }
+
+      .navbar-brand {
+        font-size: 24px;
+        font-weight: bold;
+      }
+
+      .navbar-user {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+      }
+
+      .user-info {
+        text-align: right;
+      }
+
+      .user-name {
+        font-weight: 600;
+        font-size: 16px;
+      }
+
+      .user-role {
+        font-size: 12px;
+        opacity: 0.9;
+      }
+
+      .btn-logout {
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+        border: 2px solid white;
+        padding: 8px 20px;
+        border-radius: 6px;
+        font-weight: 600;
+        transition: all 0.3s;
+        cursor: pointer;
+      }
+
+      .btn-logout:hover {
+        background: white;
+        color: #667eea;
+      }
+
+      .logout-form {
+        margin: 0;
+      }
+
+      .container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 30px;
+      }
+
+      .welcome-section {
+        background: white;
+        padding: 30px;
+        border-radius: 12px;
+        margin-bottom: 30px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+      }
+
+      .welcome-section h1 {
+        color: #333;
+        margin-bottom: 10px;
+        font-size: 32px;
+      }
+
+      .welcome-section p {
+        color: #666;
+        font-size: 16px;
+      }
+
+      .dashboard-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 20px;
+        margin-bottom: 30px;
+      }
+
+      .stat-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 30px;
+        border-radius: 16px;
+        box-shadow: 0 4px 20px rgba(102, 126, 234, 0.3);
+        transition: all 0.3s;
+        text-align: center;
+      }
+
+      .stat-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 8px 30px rgba(102, 126, 234, 0.4);
+      }
+
+      .stat-card-icon {
+        font-size: 48px;
+        margin-bottom: 15px;
+        filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+      }
+
+      .stat-card-title {
+        color: rgba(255, 255, 255, 0.95);
+        font-size: 14px;
+        margin-bottom: 10px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        font-weight: 600;
+      }
+
+      .stat-card-value {
+        color: white;
+        font-size: 42px;
+        font-weight: 800;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+      }
+
+      .quick-actions {
+        background: white;
+        padding: 30px;
+        border-radius: 12px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+      }
+
+      .quick-actions h2 {
+        color: #333;
+        margin-bottom: 20px;
+        font-size: 24px;
+      }
+
+      .action-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 15px;
+      }
+
+      .action-btn {
+        padding: 20px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        text-decoration: none;
+        border-radius: 10px;
+        text-align: center;
+        font-weight: 600;
+        transition: all 0.3s;
+        display: block;
+      }
+
+      .action-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+      }
+
+      .action-btn-icon {
+        font-size: 32px;
+        display: block;
+        margin-bottom: 10px;
+      }
+
+      .loading {
+        text-align: center;
+        padding: 20px;
+        color: #666;
+      }
+
+      .error {
+        background: #fee;
+        color: #c33;
+        padding: 15px;
+        border-radius: 8px;
+        margin: 20px 0;
+      }
+
+      .chart-container {
+        background: white;
+        padding: 30px;
+        border-radius: 12px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        margin-bottom: 30px;
+      }
+
+      .chart-container h2 {
+        color: #333;
+        margin-bottom: 20px;
+        font-size: 24px;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+        background: white;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+      }
+
+      th,
+      td {
+        padding: 15px 12px;
+        text-align: left;
+        border-bottom: 1px solid #f0f0f0;
+      }
+
+      th {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        font-weight: 600;
+        color: white;
+        text-transform: uppercase;
+        font-size: 12px;
+        letter-spacing: 0.5px;
+      }
+
+      tbody tr {
+        transition: all 0.2s ease;
+      }
+
+      tbody tr:hover {
+        background: #f8f9fa;
+        transform: scale(1.01);
+      }
+
+      tbody tr:last-child td {
+        border-bottom: none;
+      }
+
+      td:nth-child(2),
+      td:nth-child(3),
+      td:nth-child(4) {
+        font-weight: 600;
+        color: #667eea;
+      }
+
+      /* Animations */
+      @keyframes fadeInUp {
+        from {
+          opacity: 0;
+          transform: translateY(30px);
         }
-        
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #f5f5f5;
+        to {
+          opacity: 1;
+          transform: translateY(0);
         }
-        
-        .navbar {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 15px 30px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      }
+
+      .stat-card {
+        animation: fadeInUp 0.5s ease-out;
+      }
+
+      .stat-card:nth-child(1) {
+        animation-delay: 0.1s;
+      }
+      .stat-card:nth-child(2) {
+        animation-delay: 0.2s;
+      }
+      .stat-card:nth-child(3) {
+        animation-delay: 0.3s;
+      }
+      .stat-card:nth-child(4) {
+        animation-delay: 0.4s;
+      }
+
+      .chart-container {
+        animation: fadeInUp 0.6s ease-out 0.5s both;
+      }
+
+      /* Filter Section Styles */
+      .filter-section {
+        background: white;
+        padding: 30px;
+        border-radius: 12px;
+        margin-bottom: 30px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+      }
+
+      .filter-section h2 {
+        color: #333;
+        margin-bottom: 20px;
+        font-size: 24px;
+      }
+
+      .filter-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px;
+        align-items: start;
+      }
+
+      .filter-item {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .filter-item label {
+        font-weight: 600;
+        color: #333;
+        font-size: 14px;
+      }
+
+      .filter-input {
+        padding: 12px;
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+        font-size: 14px;
+        transition: all 0.3s;
+      }
+
+      .filter-input:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+      }
+
+      .filter-slider {
+        width: 100%;
+        height: 6px;
+        border-radius: 3px;
+        background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+        outline: none;
+        -webkit-appearance: none;
+      }
+
+      .filter-slider::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        background: white;
+        border: 3px solid #667eea;
+        cursor: pointer;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+      }
+
+      .filter-slider::-moz-range-thumb {
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        background: white;
+        border: 3px solid #667eea;
+        cursor: pointer;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+      }
+
+      .filter-item output {
+        display: inline-block;
+        background: #667eea;
+        color: white;
+        padding: 4px 12px;
+        border-radius: 6px;
+        font-weight: 600;
+        font-size: 16px;
+        text-align: center;
+      }
+
+      .filter-item small {
+        color: #666;
+        font-size: 12px;
+      }
+
+      .btn-apply {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        padding: 14px 30px;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 16px;
+        cursor: pointer;
+        transition: all 0.3s;
+        width: 100%;
+      }
+
+      .btn-apply:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+      }
+
+      .btn-apply:active {
+        transform: translateY(0);
+      }
+
+      /* Insights Section */
+      .insights-section {
+        background: white;
+        padding: 30px;
+        border-radius: 12px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        margin-bottom: 30px;
+      }
+
+      .insights-section h2 {
+        color: #333;
+        margin-bottom: 20px;
+        font-size: 24px;
+      }
+
+      .insights-actions {
+        display: flex;
+        gap: 15px;
+        margin-top: 20px;
+        flex-wrap: wrap;
+      }
+
+      .btn-save-insights,
+      .btn-export {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        padding: 12px 24px;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 14px;
+        cursor: pointer;
+        transition: all 0.3s;
+      }
+
+      .btn-save-insights:hover,
+      .btn-export:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+      }
+
+      .table-actions {
+        margin-top: 15px;
+        display: flex;
+        justify-content: flex-end;
+      }
+
+      .priority-high {
+        color: #e53e3e;
+        font-weight: bold;
+      }
+
+      .priority-medium {
+        color: #dd6b20;
+        font-weight: bold;
+      }
+
+      .priority-low {
+        color: #38a169;
+        font-weight: bold;
+      }
+
+      /* Modal Styles */
+      .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgba(0, 0, 0, 0.6);
+        animation: fadeIn 0.3s;
+      }
+
+      .modal-content {
+        background-color: white;
+        margin: 5% auto;
+        padding: 30px;
+        border-radius: 12px;
+        width: 80%;
+        max-width: 900px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        animation: slideIn 0.3s;
+      }
+
+      .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        padding-bottom: 15px;
+        border-bottom: 2px solid #f0f0f0;
+      }
+
+      .modal-header h2 {
+        color: #333;
+        margin: 0;
+      }
+
+      .close {
+        color: #aaa;
+        font-size: 32px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.3s;
+      }
+
+      .close:hover,
+      .close:focus {
+        color: #667eea;
+        transform: scale(1.2);
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
         }
-        
-        .navbar-brand {
-            font-size: 24px;
-            font-weight: bold;
+        to {
+          opacity: 1;
         }
-        
-        .navbar-user {
-            display: flex;
-            align-items: center;
-            gap: 20px;
+      }
+
+      @keyframes slideIn {
+        from {
+          opacity: 0;
+          transform: translateY(-50px);
         }
-        
-        .user-info {
-            text-align: right;
+        to {
+          opacity: 1;
+          transform: translateY(0);
         }
-        
-        .user-name {
-            font-weight: 600;
-            font-size: 16px;
-        }
-        
-        .user-role {
-            font-size: 12px;
-            opacity: 0.9;
-        }
-        
-        .btn-logout {
-            background: rgba(255,255,255,0.2);
-            color: white;
-            border: 2px solid white;
-            padding: 8px 20px;
-            border-radius: 6px;
-            font-weight: 600;
-            transition: all 0.3s;
-            cursor: pointer;
-        }
-        
-        .btn-logout:hover {
-            background: white;
-            color: #667eea;
-        }
-        
-        .logout-form {
-            margin: 0;
-        }
-        
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 30px;
-        }
-        
-        .welcome-section {
-            background: white;
-            padding: 30px;
-            border-radius: 12px;
-            margin-bottom: 30px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-        }
-        
-        .welcome-section h1 {
-            color: #333;
-            margin-bottom: 10px;
-            font-size: 32px;
-        }
-        
-        .welcome-section p {
-            color: #666;
-            font-size: 16px;
-        }
-        
-        .dashboard-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-        
-        .stat-card {
-            background: white;
-            padding: 25px;
-            border-radius: 12px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-            transition: all 0.3s;
-        }
-        
-        .stat-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
-        }
-        
-        .stat-card-icon {
-            font-size: 40px;
-            margin-bottom: 15px;
-        }
-        
-        .stat-card-title {
-            color: #666;
-            font-size: 14px;
-            margin-bottom: 10px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-        
-        .stat-card-value {
-            color: #333;
-            font-size: 32px;
-            font-weight: bold;
-        }
-        
-        .quick-actions {
-            background: white;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-        }
-        
-        .quick-actions h2 {
-            color: #333;
-            margin-bottom: 20px;
-            font-size: 24px;
-        }
-        
-        .action-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-        }
-        
-        .action-btn {
-            padding: 20px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            text-decoration: none;
-            border-radius: 10px;
-            text-align: center;
-            font-weight: 600;
-            transition: all 0.3s;
-            display: block;
-        }
-        
-        .action-btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
-        }
-        
-        .action-btn-icon {
-            font-size: 32px;
-            display: block;
-            margin-bottom: 10px;
-        }
-        
-        .loading {
-            text-align: center;
-            padding: 20px;
-            color: #666;
-        }
-        
-        .error {
-            background: #fee;
-            color: #c33;
-            padding: 15px;
-            border-radius: 8px;
-            margin: 20px 0;
-        }
-        
-        .chart-container {
-            background: white;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-            margin-bottom: 30px;
-        }
-        
-        .chart-container h2 {
-            color: #333;
-            margin-bottom: 20px;
-            font-size: 24px;
-        }
-        
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        
-        th, td {
-            padding: 12px;
-            text-align: left;
-            border-bottom: 1px solid #eee;
-        }
-        
-        th {
-            background: #f9f9f9;
-            font-weight: 600;
-            color: #333;
-        }
-        
-        tr:hover {
-            background: #f5f5f5;
-        }
+      }
+
+      .clickable-row {
+        cursor: pointer;
+      }
+
+      .clickable-row:hover {
+        background: #f0f4ff !important;
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
     <nav class="navbar">
-        <div class="navbar-brand">🎯 DSS - Admin Portal</div>
-        <div class="navbar-user">
-            <div class="user-info">
-                <div class="user-name" th:text="${user.fullName}">Admin User</div>
-                <div class="user-role" th:text="${user.role.displayName}">Admin/Director</div>
-            </div>
-            <form th:action="@{/logout}" method="post" class="logout-form">
-                <button type="submit" class="btn-logout">Logout</button>
-            </form>
+      <div class="navbar-brand">🎯 DSS - Admin Portal</div>
+      <div class="navbar-user">
+        <div class="user-info">
+          <div class="user-name" th:text="${user.fullName}">Admin User</div>
+          <div class="user-role" th:text="${user.role.displayName}">
+            Admin/Director
+          </div>
         </div>
+        <form th:action="@{/logout}" method="post" class="logout-form">
+          <button type="submit" class="btn-logout">Logout</button>
+        </form>
+      </div>
     </nav>
-    
+
     <div class="container">
-        <div class="welcome-section">
-            <h1>Welcome back, <span th:text="${user.fullName}">Admin</span>! 👋</h1>
-            <p>Here's what's happening with your business today.</p>
+      <div class="welcome-section">
+        <h1>Welcome back, <span th:text="${user.fullName}">Admin</span>! 👋</h1>
+        <p>Monthly & Country Sales Overview for Top SKUs - Descriptive DSS</p>
+      </div>
+
+      <!-- Filter Section -->
+      <div class="filter-section">
+        <h2>📊 Filter Configuration</h2>
+        <div class="filter-grid">
+          <div class="filter-item">
+            <label for="startDate">📅 Start Date</label>
+            <input type="date" id="startDate" class="filter-input" />
+            <small>Leave empty to use all data</small>
+          </div>
+
+          <div class="filter-item">
+            <label for="endDate">📅 End Date</label>
+            <input type="date" id="endDate" class="filter-input" />
+            <small>Leave empty to use all data</small>
+          </div>
+
+          <div class="filter-item">
+            <label for="countryFilter">🌍 Country Filter</label>
+            <select id="countryFilter" class="filter-input" multiple size="5">
+              <option value="" selected>All Countries</option>
+            </select>
+            <small>Hold Ctrl/Cmd to select multiple</small>
+          </div>
+
+          <div class="filter-item">
+            <label for="topN">🏆 Top-N Items</label>
+            <input
+              type="range"
+              id="topN"
+              class="filter-slider"
+              min="5"
+              max="50"
+              value="10"
+              step="5"
+            />
+            <output id="topNValue">10</output>
+            <small>Number of top items to display (5-50)</small>
+          </div>
+
+          <div class="filter-item">
+            <label
+              for="excludeCancelled"
+              style="display: flex; align-items: center; gap: 10px"
+            >
+              <input
+                type="checkbox"
+                id="excludeCancelled"
+                checked
+                style="width: auto"
+              />
+              🚫 Exclude Cancellations
+            </label>
+            <small>Remove invoices starting with 'C'</small>
+          </div>
+
+          <div class="filter-item" style="display: flex; align-items: flex-end">
+            <button id="applyFilters" class="btn-apply">Apply Filters</button>
+          </div>
         </div>
-        
-        <div class="dashboard-grid">
-            <div class="stat-card">
-                <div class="stat-card-icon">📊</div>
-                <div class="stat-card-title">Total Revenue</div>
-                <div class="stat-card-value" id="totalRevenue">Loading...</div>
-            </div>
-            
-            <div class="stat-card">
-                <div class="stat-card-icon">📦</div>
-                <div class="stat-card-title">Total Transactions</div>
-                <div class="stat-card-value" id="totalTransactions">Loading...</div>
-            </div>
-            
-            <div class="stat-card">
-                <div class="stat-card-icon">🌍</div>
-                <div class="stat-card-title">Active Countries</div>
-                <div class="stat-card-value" id="activeCountries">Loading...</div>
-            </div>
-            
-            <div class="stat-card">
-                <div class="stat-card-icon">📈</div>
-                <div class="stat-card-title">Top-10 Share</div>
-                <div class="stat-card-value" id="topNShare">Loading...</div>
-            </div>
+      </div>
+
+      <div class="dashboard-grid">
+        <div class="stat-card">
+          <div class="stat-card-icon">📊</div>
+          <div class="stat-card-title">Total Revenue</div>
+          <div class="stat-card-value" id="totalRevenue">Loading...</div>
         </div>
-        
-        <!-- Monthly Trend Chart -->
-        <div class="chart-container">
-            <h2>📈 Monthly Revenue Trend</h2>
-            <div id="monthlyTrendContainer">
-                <canvas id="monthlyTrendChart"></canvas>
-            </div>
+
+        <div class="stat-card">
+          <div class="stat-card-icon">📦</div>
+          <div class="stat-card-title">Total Transactions</div>
+          <div class="stat-card-value" id="totalTransactions">Loading...</div>
         </div>
-        
-        <!-- Top Countries Table -->
-        <div class="chart-container">
-            <h2>🌍 Top 10 Countries by Revenue</h2>
-            <div id="topCountriesContainer">
-                <table id="topCountriesTable">
-                    <thead>
-                        <tr>
-                            <th>Rank</th>
-                            <th>Country</th>
-                            <th>Revenue</th>
-                            <th>Share %</th>
-                            <th>Transactions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr><td colspan="5" class="loading">Loading...</td></tr>
-                    </tbody>
-                </table>
-            </div>
+
+        <div class="stat-card">
+          <div class="stat-card-icon">🌍</div>
+          <div class="stat-card-title">Active Countries</div>
+          <div class="stat-card-value" id="activeCountries">Loading...</div>
         </div>
-        
-        <!-- Top Products Table -->
-        <div class="chart-container">
-            <h2>🏆 Top 10 Products by Revenue</h2>
-            <div id="topProductsContainer">
-                <table id="topProductsTable">
-                    <thead>
-                        <tr>
-                            <th>Rank</th>
-                            <th>Product</th>
-                            <th>Revenue</th>
-                            <th>Share %</th>
-                            <th>Transactions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr><td colspan="5" class="loading">Loading...</td></tr>
-                    </tbody>
-                </table>
-            </div>
+
+        <div class="stat-card">
+          <div class="stat-card-icon">📈</div>
+          <div class="stat-card-title">Top-10 Share</div>
+          <div class="stat-card-value" id="topNShare">Loading...</div>
         </div>
-        
-        <div class="quick-actions">
-            <h2>Quick Actions</h2>
-            <div class="action-grid">
-                <a href="/invoices" class="action-btn">
-                    <span class="action-btn-icon">📋</span>
-                    View Invoices
-                </a>
-                <a href="/admin/reports" class="action-btn">
-                    <span class="action-btn-icon">📊</span>
-                    Generate Reports
-                </a>
-                <a href="/admin/users" class="action-btn">
-                    <span class="action-btn-icon">👥</span>
-                    Manage Users
-                </a>
-                <a href="/admin/products" class="action-btn">
-                    <span class="action-btn-icon">📦</span>
-                    Manage Products
-                </a>
-            </div>
+      </div>
+
+      <!-- Monthly Trend Chart -->
+      <div class="chart-container">
+        <h2>📈 Monthly Revenue Trend</h2>
+        <div id="monthlyTrendContainer">
+          <canvas id="monthlyTrendChart"></canvas>
         </div>
+      </div>
+
+      <!-- Top Countries Chart -->
+      <div class="chart-container">
+        <h2>🌍 Top Countries by Revenue (Bar Chart)</h2>
+        <div style="margin-bottom: 20px">
+          <canvas id="topCountriesChart" style="max-height: 400px"></canvas>
+        </div>
+        <small style="color: #666"
+          >💡 Click on a bar to filter dashboard by that country</small
+        >
+      </div>
+
+      <!-- Top Countries Table -->
+      <div class="chart-container">
+        <h2>📊 Country Ranking Details</h2>
+        <div id="topCountriesContainer">
+          <table id="topCountriesTable">
+            <thead>
+              <tr>
+                <th>Rank</th>
+                <th>Country</th>
+                <th>Revenue</th>
+                <th>Share %</th>
+                <th>Transactions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td colspan="5" class="loading">Loading...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="table-actions">
+          <button
+            class="btn-export"
+            onclick="exportTable('topCountriesTable', 'Top_Countries')"
+          >
+            📥 Export to CSV
+          </button>
+        </div>
+      </div>
+
+      <!-- Top Products Chart -->
+      <div class="chart-container">
+        <h2>🏆 Top Products by Revenue (Bar Chart)</h2>
+        <div style="margin-bottom: 20px">
+          <canvas id="topProductsChart" style="max-height: 400px"></canvas>
+        </div>
+        <small style="color: #666"
+          >💡 Click on a bar to view product trend over time</small
+        >
+      </div>
+
+      <!-- Top Products Table -->
+      <div class="chart-container">
+        <h2>📊 SKU Ranking Details</h2>
+        <div id="topProductsContainer">
+          <table id="topProductsTable">
+            <thead>
+              <tr>
+                <th>Rank</th>
+                <th>Product</th>
+                <th>Revenue</th>
+                <th>Share %</th>
+                <th>Transactions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td colspan="5" class="loading">Loading...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="table-actions">
+          <button
+            class="btn-export"
+            onclick="exportTable('topProductsTable', 'Top_Products')"
+          >
+            📥 Export to CSV
+          </button>
+        </div>
+      </div>
+
+      <!-- Action Recommendations -->
+      <div class="insights-section">
+        <h2>💡 Analysis & Recommendations</h2>
+        <div id="recommendationsContainer">
+          <table id="recommendationsTable">
+            <thead>
+              <tr>
+                <th>Category</th>
+                <th>Item</th>
+                <th>Reason</th>
+                <th>Recommended Action</th>
+                <th>Priority</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td colspan="5" class="loading">Analyzing data...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="insights-actions">
+          <button class="btn-save-insights" onclick="saveInsights()">
+            💾 Save Insights
+          </button>
+          <button
+            class="btn-export"
+            onclick="exportTable('recommendationsTable', 'Action_Recommendations')"
+          >
+            📥 Export Recommendations
+          </button>
+        </div>
+      </div>
+
+      <div class="quick-actions">
+        <h2>Quick Actions</h2>
+        <div class="action-grid">
+          <a href="/invoices" class="action-btn">
+            <span class="action-btn-icon">📋</span>
+            View Invoices
+          </a>
+          <a href="/admin/orders" class="action-btn">
+            <span class="action-btn-icon">🛒</span>
+            Manage Orders
+          </a>
+          <a href="/admin/customers" class="action-btn">
+            <span class="action-btn-icon">�</span>
+            Manage Customers
+          </a>
+          <a href="/admin/users" class="action-btn">
+            <span class="action-btn-icon">�</span>
+            Manage Users
+          </a>
+          <a href="/admin/products" class="action-btn">
+            <span class="action-btn-icon">📦</span>
+            Manage Products
+          </a>
+        </div>
+      </div>
     </div>
-    
+
+    <!-- SKU Trend Modal -->
+    <div id="skuTrendModal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2 id="modalProductTitle">Product Trend</h2>
+          <span class="close" onclick="closeModal()">&times;</span>
+        </div>
+        <div id="modalChartContainer">
+          <canvas id="modalTrendChart"></canvas>
+        </div>
+      </div>
+    </div>
+
     <!-- Chart.js Library -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-    
+
     <script>
-        // API Configuration
-        const ADMIN_API_URL = 'http://localhost:8001';
-        
-        // Fetch and display KPIs
-        async function loadKPIs() {
-            try {
-                const response = await fetch(`${ADMIN_API_URL}/kpis`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        top_n: 10,
-                        exclude_cancelled: true
-                    })
-                });
-                
-                if (!response.ok) throw new Error('Failed to load KPIs');
-                
-                const data = await response.json();
-                
-                // Update KPI cards
-                document.getElementById('totalRevenue').textContent = 
-                    '$' + (data.total_revenue / 1000000).toFixed(2) + 'M';
-                document.getElementById('totalTransactions').textContent = 
-                    data.total_transactions.toLocaleString();
-                document.getElementById('activeCountries').textContent = 
-                    data.countries_active;
-                document.getElementById('topNShare').textContent = 
-                    data.top_n_revenue_share.toFixed(1) + '%';
-                    
-            } catch (error) {
-                console.error('Error loading KPIs:', error);
-                document.getElementById('totalRevenue').textContent = 'Error';
-            }
+      // API Configuration
+      const ADMIN_API_URL = "http://localhost:8001";
+
+      // Global state
+      let currentFilters = {
+        start_date: null,
+        end_date: null,
+        countries: [],
+        top_n: 10,
+        exclude_cancelled: true,
+      };
+
+      let currentData = {
+        kpis: null,
+        monthlyTrend: null,
+        topCountries: null,
+        topProducts: null,
+      };
+
+      // Initialize page
+      window.addEventListener("DOMContentLoaded", function () {
+        initializeFilters();
+        loadCountryOptions();
+        loadAllData();
+      });
+
+      // Initialize filter controls
+      function initializeFilters() {
+        // Top-N slider
+        const slider = document.getElementById("topN");
+        const output = document.getElementById("topNValue");
+        slider.oninput = function () {
+          output.value = this.value;
+        };
+
+        // Apply filters button
+        document
+          .getElementById("applyFilters")
+          .addEventListener("click", applyFilters);
+      }
+
+      // Load available countries for filter
+      async function loadCountryOptions() {
+        try {
+          const response = await fetch(`${ADMIN_API_URL}/countries`);
+
+          if (!response.ok) return;
+
+          const result = await response.json();
+          const select = document.getElementById("countryFilter");
+
+          result.countries.forEach((country) => {
+            const option = document.createElement("option");
+            option.value = country;
+            option.textContent = country;
+            select.appendChild(option);
+          });
+        } catch (error) {
+          console.error("Error loading countries:", error);
         }
-        
-        // Fetch and display monthly trend
-        async function loadMonthlyTrend() {
-            try {
-                const response = await fetch(`${ADMIN_API_URL}/monthly-trend`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        top_n: 10,
-                        exclude_cancelled: true
-                    })
-                });
-                
-                if (!response.ok) throw new Error('Failed to load monthly trend');
-                
-                const result = await response.json();
-                const data = result.data;
-                
-                // Prepare chart data
-                const labels = data.map(d => d.year_month);
-                const revenues = data.map(d => d.revenue);
-                
-                // Create chart
-                const ctx = document.getElementById('monthlyTrendChart').getContext('2d');
-                new Chart(ctx, {
-                    type: 'line',
-                    data: {
-                        labels: labels,
-                        datasets: [{
-                            label: 'Revenue',
-                            data: revenues,
-                            borderColor: '#667eea',
-                            backgroundColor: 'rgba(102, 126, 234, 0.1)',
-                            borderWidth: 3,
-                            fill: true,
-                            tension: 0.4
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        plugins: {
-                            legend: {
-                                display: true,
-                                position: 'top'
-                            },
-                            tooltip: {
-                                callbacks: {
-                                    label: function(context) {
-                                        return 'Revenue: $' + context.parsed.y.toLocaleString();
-                                    }
-                                }
-                            }
-                        },
-                        scales: {
-                            y: {
-                                beginAtZero: true,
-                                ticks: {
-                                    callback: function(value) {
-                                        return '$' + (value / 1000).toFixed(0) + 'K';
-                                    }
-                                }
-                            }
-                        }
-                    }
-                });
-                
-            } catch (error) {
-                console.error('Error loading monthly trend:', error);
-                document.getElementById('monthlyTrendContainer').innerHTML = 
-                    '<div class="error">Failed to load monthly trend data</div>';
-            }
+      }
+
+      // Apply filters and reload data
+      function applyFilters() {
+        // Get filter values
+        const startDate = document.getElementById("startDate").value;
+        const endDate = document.getElementById("endDate").value;
+        const topN = parseInt(document.getElementById("topN").value);
+        const excludeCancelled =
+          document.getElementById("excludeCancelled").checked;
+
+        // Get selected countries
+        const countrySelect = document.getElementById("countryFilter");
+        const selectedCountries = Array.from(countrySelect.selectedOptions)
+          .map((option) => option.value)
+          .filter((v) => v !== "");
+
+        // Update global filters
+        currentFilters = {
+          start_date: startDate || null,
+          end_date: endDate || null,
+          countries: selectedCountries.length > 0 ? selectedCountries : null,
+          top_n: topN,
+          exclude_cancelled: excludeCancelled,
+        };
+
+        // Reload all data
+        loadAllData();
+      }
+
+      // Load all dashboard data
+      function loadAllData() {
+        loadKPIs();
+        loadMonthlyTrend();
+        loadTopCountries();
+        loadTopProducts();
+      }
+
+      // Fetch and display KPIs
+      async function loadKPIs() {
+        try {
+          const response = await fetch(`${ADMIN_API_URL}/kpis`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(currentFilters),
+          });
+
+          const data = await response.json();
+
+          if (!response.ok) {
+            throw new Error(data.detail || "Failed to load KPIs");
+          }
+
+          currentData.kpis = data;
+
+          // Update KPI cards
+          document.getElementById("totalRevenue").textContent =
+            "$" + (data.total_revenue / 1000000).toFixed(2) + "M";
+          document.getElementById("totalTransactions").textContent =
+            data.total_transactions.toLocaleString();
+          document.getElementById("activeCountries").textContent =
+            data.countries_active;
+
+          // Show warning if concentration is high
+          const shareElement = document.getElementById("topNShare");
+          shareElement.textContent = data.top_n_revenue_share.toFixed(1) + "%";
+          if (data.top_n_revenue_share > 60) {
+            shareElement.style.color = "#e53e3e";
+            shareElement.title = "⚠️ High concentration risk!";
+          }
+        } catch (error) {
+          console.error("Error loading KPIs:", error);
+          document.getElementById("totalRevenue").textContent = "Error";
         }
-        
-        // Fetch and display top countries
-        async function loadTopCountries() {
-            try {
-                const response = await fetch(`${ADMIN_API_URL}/top-countries`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
+      }
+
+      // Fetch and display monthly trend
+      async function loadMonthlyTrend() {
+        try {
+          const response = await fetch(`${ADMIN_API_URL}/monthly-trend`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(currentFilters),
+          });
+
+          const result = await response.json();
+
+          if (!response.ok) {
+            throw new Error(result.detail || "Failed to load monthly trend");
+          }
+
+          const data = result.data;
+          currentData.monthlyTrend = data;
+
+          // Destroy existing chart if any
+          const existingChart = Chart.getChart("monthlyTrendChart");
+          if (existingChart) {
+            existingChart.destroy();
+          }
+
+          // Prepare chart data
+          const labels = data.map((d) => d.year_month);
+          const revenues = data.map((d) => d.revenue);
+
+          // Find highest and lowest points
+          const maxRevenue = Math.max(...revenues);
+          const minRevenue = Math.min(...revenues);
+
+          // Create chart
+          const ctx = document
+            .getElementById("monthlyTrendChart")
+            .getContext("2d");
+          new Chart(ctx, {
+            type: "line",
+            data: {
+              labels: labels,
+              datasets: [
+                {
+                  label: "Revenue",
+                  data: revenues,
+                  borderColor: "#667eea",
+                  backgroundColor: "rgba(102, 126, 234, 0.1)",
+                  borderWidth: 3,
+                  fill: true,
+                  tension: 0.4,
+                  pointRadius: 5,
+                  pointHoverRadius: 8,
+                  pointBackgroundColor: revenues.map((r) => {
+                    if (r === maxRevenue) return "#38a169";
+                    if (r === minRevenue) return "#e53e3e";
+                    return "#667eea";
+                  }),
+                },
+              ],
+            },
+            options: {
+              responsive: true,
+              plugins: {
+                legend: {
+                  display: true,
+                  position: "top",
+                },
+                tooltip: {
+                  callbacks: {
+                    label: function (context) {
+                      const index = context.dataIndex;
+                      const momGrowth = data[index].mom_growth;
+                      let label =
+                        "Revenue: $" + context.parsed.y.toLocaleString();
+                      if (momGrowth !== null) {
+                        label += "\nMoM: " + momGrowth.toFixed(1) + "%";
+                      }
+                      return label;
                     },
-                    body: JSON.stringify({
-                        top_n: 10,
-                        exclude_cancelled: true
-                    })
-                });
-                
-                if (!response.ok) throw new Error('Failed to load top countries');
-                
-                const result = await response.json();
-                const data = result.data;
-                
-                // Build table HTML
-                const tbody = document.querySelector('#topCountriesTable tbody');
-                tbody.innerHTML = data.map(country => `
-                    <tr>
+                  },
+                },
+              },
+              scales: {
+                y: {
+                  beginAtZero: true,
+                  ticks: {
+                    callback: function (value) {
+                      return "$" + (value / 1000).toFixed(0) + "K";
+                    },
+                  },
+                },
+              },
+            },
+          });
+
+          // Generate recommendations after data loads
+          generateRecommendations();
+        } catch (error) {
+          console.error("Error loading monthly trend:", error);
+          document.getElementById("monthlyTrendContainer").innerHTML =
+            '<div class="error">Failed to load monthly trend data</div>';
+        }
+      }
+
+      // Fetch and display top countries
+      async function loadTopCountries() {
+        try {
+          const response = await fetch(`${ADMIN_API_URL}/top-countries`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(currentFilters),
+          });
+
+          if (!response.ok) throw new Error("Failed to load top countries");
+
+          const result = await response.json();
+          const data = result.data;
+          currentData.topCountries = data;
+
+          // Create bar chart
+          createCountriesBarChart(data);
+
+          // Build table HTML with drill-down
+          const tbody = document.querySelector("#topCountriesTable tbody");
+          tbody.innerHTML = data
+            .map(
+              (country) => `
+                    <tr class="clickable-row" onclick="drillDownCountry('${country.item}')">
                         <td>${country.rank}</td>
                         <td><strong>${country.item}</strong></td>
                         <td>$${country.revenue.toLocaleString()}</td>
                         <td>${country.share_pct.toFixed(2)}%</td>
                         <td>${country.transactions.toLocaleString()}</td>
                     </tr>
-                `).join('');
-                
-            } catch (error) {
-                console.error('Error loading top countries:', error);
-                document.querySelector('#topCountriesTable tbody').innerHTML = 
-                    '<tr><td colspan="5" class="error">Failed to load data</td></tr>';
-            }
+                `
+            )
+            .join("");
+        } catch (error) {
+          console.error("Error loading top countries:", error);
+          document.querySelector("#topCountriesTable tbody").innerHTML =
+            '<tr><td colspan="5" class="error">Failed to load data</td></tr>';
         }
-        
-        // Fetch and display top products
-        async function loadTopProducts() {
-            try {
-                const response = await fetch(`${ADMIN_API_URL}/top-products`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        top_n: 10,
-                        exclude_cancelled: true
-                    })
-                });
-                
-                if (!response.ok) throw new Error('Failed to load top products');
-                
-                const result = await response.json();
-                const data = result.data;
-                
-                // Build table HTML
-                const tbody = document.querySelector('#topProductsTable tbody');
-                tbody.innerHTML = data.map(product => `
-                    <tr>
+      }
+
+      // Create bar chart for countries
+      function createCountriesBarChart(data) {
+        const ctx = document
+          .getElementById("topCountriesChart")
+          .getContext("2d");
+
+        // Destroy existing chart
+        const existingChart = Chart.getChart("topCountriesChart");
+        if (existingChart) {
+          existingChart.destroy();
+        }
+
+        new Chart(ctx, {
+          type: "bar",
+          data: {
+            labels: data.map((d) => d.item),
+            datasets: [
+              {
+                label: "Revenue",
+                data: data.map((d) => d.revenue),
+                backgroundColor: data.map((d, i) => {
+                  const opacity = 1 - i * 0.05;
+                  return `rgba(102, 126, 234, ${opacity})`;
+                }),
+                borderColor: "#667eea",
+                borderWidth: 2,
+              },
+            ],
+          },
+          options: {
+            indexAxis: "y",
+            responsive: true,
+            maintainAspectRatio: false,
+            onClick: (event, elements) => {
+              if (elements.length > 0) {
+                const index = elements[0].index;
+                const country = data[index].item;
+                drillDownCountry(country);
+              }
+            },
+            plugins: {
+              legend: { display: false },
+              tooltip: {
+                callbacks: {
+                  label: function (context) {
+                    const item = data[context.dataIndex];
+                    return [
+                      `Revenue: $${item.revenue.toLocaleString()}`,
+                      `Share: ${item.share_pct.toFixed(2)}%`,
+                      `Transactions: ${item.transactions.toLocaleString()}`,
+                    ];
+                  },
+                },
+              },
+            },
+            scales: {
+              x: {
+                beginAtZero: true,
+                ticks: {
+                  callback: function (value) {
+                    return "$" + (value / 1000).toFixed(0) + "K";
+                  },
+                },
+              },
+            },
+          },
+        });
+      }
+
+      // Drill-down to specific country
+      function drillDownCountry(country) {
+        if (confirm(`Filter dashboard to show only data for ${country}?`)) {
+          const countrySelect = document.getElementById("countryFilter");
+          // Clear all selections
+          Array.from(countrySelect.options).forEach(
+            (opt) => (opt.selected = false)
+          );
+          // Select the clicked country
+          Array.from(countrySelect.options).forEach((opt) => {
+            if (opt.value === country) opt.selected = true;
+          });
+          // Apply filters
+          applyFilters();
+        }
+      }
+
+      // Fetch and display top products
+      async function loadTopProducts() {
+        try {
+          const response = await fetch(`${ADMIN_API_URL}/top-products`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(currentFilters),
+          });
+
+          if (!response.ok) throw new Error("Failed to load top products");
+
+          const result = await response.json();
+          const data = result.data;
+          currentData.topProducts = data;
+
+          // Create bar chart
+          createProductsBarChart(data);
+
+          // Build table HTML with drill-down
+          const tbody = document.querySelector("#topProductsTable tbody");
+          tbody.innerHTML = data
+            .map(
+              (product) => `
+                    <tr class="clickable-row" onclick="showProductTrend('${product.item.split(" - ")[0]}', '${product.item.replace(/'/g, "\\'")}')">
                         <td>${product.rank}</td>
                         <td><strong>${product.item}</strong></td>
                         <td>$${product.revenue.toLocaleString()}</td>
                         <td>${product.share_pct.toFixed(2)}%</td>
                         <td>${product.transactions.toLocaleString()}</td>
                     </tr>
-                `).join('');
-                
-            } catch (error) {
-                console.error('Error loading top products:', error);
-                document.querySelector('#topProductsTable tbody').innerHTML = 
-                    '<tr><td colspan="5" class="error">Failed to load data</td></tr>';
-            }
+                `
+            )
+            .join("");
+        } catch (error) {
+          console.error("Error loading top products:", error);
+          document.querySelector("#topProductsTable tbody").innerHTML =
+            '<tr><td colspan="5" class="error">Failed to load data</td></tr>';
         }
-        
-        // Load all data on page load
-        window.addEventListener('DOMContentLoaded', function() {
-            loadKPIs();
-            loadMonthlyTrend();
-            loadTopCountries();
-            loadTopProducts();
-        });
-    </script>
-</body>
-</html>
+      }
 
+      // Create bar chart for products
+      function createProductsBarChart(data) {
+        const ctx = document
+          .getElementById("topProductsChart")
+          .getContext("2d");
+
+        // Destroy existing chart
+        const existingChart = Chart.getChart("topProductsChart");
+        if (existingChart) {
+          existingChart.destroy();
+        }
+
+        new Chart(ctx, {
+          type: "bar",
+          data: {
+            labels: data.map((d) =>
+              d.item.length > 40 ? d.item.substring(0, 37) + "..." : d.item
+            ),
+            datasets: [
+              {
+                label: "Revenue",
+                data: data.map((d) => d.revenue),
+                backgroundColor: data.map((d, i) => {
+                  const opacity = 1 - i * 0.05;
+                  return `rgba(118, 75, 162, ${opacity})`;
+                }),
+                borderColor: "#764ba2",
+                borderWidth: 2,
+              },
+            ],
+          },
+          options: {
+            indexAxis: "y",
+            responsive: true,
+            maintainAspectRatio: false,
+            onClick: (event, elements) => {
+              if (elements.length > 0) {
+                const index = elements[0].index;
+                const product = data[index];
+                showProductTrend(product.item.split(" - ")[0], product.item);
+              }
+            },
+            plugins: {
+              legend: { display: false },
+              tooltip: {
+                callbacks: {
+                  label: function (context) {
+                    const item = data[context.dataIndex];
+                    return [
+                      `Revenue: $${item.revenue.toLocaleString()}`,
+                      `Share: ${item.share_pct.toFixed(2)}%`,
+                      `Transactions: ${item.transactions.toLocaleString()}`,
+                    ];
+                  },
+                },
+              },
+            },
+            scales: {
+              x: {
+                beginAtZero: true,
+                ticks: {
+                  callback: function (value) {
+                    return "$" + (value / 1000).toFixed(0) + "K";
+                  },
+                },
+              },
+            },
+          },
+        });
+      }
+
+      // Show product trend modal
+      async function showProductTrend(stockCode, productName) {
+        // Show modal
+        document.getElementById("skuTrendModal").style.display = "block";
+        document.getElementById("modalProductTitle").textContent =
+          `Trend: ${productName}`;
+
+        // For now, we'll use the monthly trend data filtered by this product
+        // In a real implementation, you'd call a specific API endpoint
+        if (currentData.monthlyTrend) {
+          createProductTrendChart(currentData.monthlyTrend, productName);
+        }
+      }
+
+      // Create trend chart in modal
+      function createProductTrendChart(data, productName) {
+        const ctx = document.getElementById("modalTrendChart").getContext("2d");
+
+        // Destroy existing chart
+        const existingChart = Chart.getChart("modalTrendChart");
+        if (existingChart) {
+          existingChart.destroy();
+        }
+
+        // Use overall monthly trend as proxy (in real app, filter by product)
+        new Chart(ctx, {
+          type: "line",
+          data: {
+            labels: data.map((d) => d.year_month),
+            datasets: [
+              {
+                label: "Revenue Trend",
+                data: data.map((d) => d.revenue),
+                borderColor: "#764ba2",
+                backgroundColor: "rgba(118, 75, 162, 0.1)",
+                borderWidth: 3,
+                fill: true,
+                tension: 0.4,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            plugins: {
+              legend: { display: true },
+              tooltip: {
+                callbacks: {
+                  label: function (context) {
+                    return "Revenue: $" + context.parsed.y.toLocaleString();
+                  },
+                },
+              },
+            },
+            scales: {
+              y: {
+                beginAtZero: true,
+                ticks: {
+                  callback: function (value) {
+                    return "$" + (value / 1000).toFixed(0) + "K";
+                  },
+                },
+              },
+            },
+          },
+        });
+      }
+
+      // Close modal
+      function closeModal() {
+        document.getElementById("skuTrendModal").style.display = "none";
+      }
+
+      // Close modal when clicking outside
+      window.onclick = function (event) {
+        const modal = document.getElementById("skuTrendModal");
+        if (event.target == modal) {
+          modal.style.display = "none";
+        }
+      };
+
+      // Generate action recommendations based on data
+      function generateRecommendations() {
+        if (
+          !currentData.topCountries ||
+          !currentData.topProducts ||
+          !currentData.monthlyTrend
+        ) {
+          return;
+        }
+
+        const recommendations = [];
+
+        // 1. High concentration warning
+        if (currentData.kpis && currentData.kpis.top_n_revenue_share > 60) {
+          recommendations.push({
+            category: "Risk",
+            item: "Revenue Concentration",
+            reason: `Top ${currentFilters.top_n} items contribute ${currentData.kpis.top_n_revenue_share.toFixed(1)}% of total revenue`,
+            action: "Diversify revenue sources to reduce dependency risk",
+            priority: "High",
+          });
+        }
+
+        // 2. Top country recommendations
+        if (currentData.topCountries.length > 0) {
+          const topCountry = currentData.topCountries[0];
+          recommendations.push({
+            category: "Country",
+            item: topCountry.item,
+            reason: `Highest revenue contributor (${topCountry.share_pct.toFixed(1)}%)`,
+            action: `Increase marketing budget for ${topCountry.item} market`,
+            priority: "High",
+          });
+
+          // Emerging markets (low rank but decent share)
+          if (currentData.topCountries.length >= 5) {
+            const emerging = currentData.topCountries[4];
+            if (emerging.share_pct > 3) {
+              recommendations.push({
+                category: "Country",
+                item: emerging.item,
+                reason: `Emerging market with ${emerging.share_pct.toFixed(1)}% share`,
+                action: `Test expansion campaigns in ${emerging.item}`,
+                priority: "Medium",
+              });
+            }
+          }
+        }
+
+        // 3. Top product recommendations
+        if (currentData.topProducts.length >= 2) {
+          const topProduct = currentData.topProducts[0];
+          const secondProduct = currentData.topProducts[1];
+
+          recommendations.push({
+            category: "Product",
+            item: topProduct.item.split(" - ")[0],
+            reason: `Best seller with ${topProduct.share_pct.toFixed(1)}% revenue share`,
+            action: `Create bundle with #${secondProduct.rank} product for cross-selling`,
+            priority: "Medium",
+          });
+        }
+
+        // 4. Monthly trend analysis
+        if (currentData.monthlyTrend.length >= 3) {
+          const recentMonths = currentData.monthlyTrend.slice(-3);
+          const avgGrowth =
+            recentMonths
+              .filter((m) => m.mom_growth !== null)
+              .reduce((sum, m) => sum + m.mom_growth, 0) / recentMonths.length;
+
+          if (avgGrowth < -5) {
+            recommendations.push({
+              category: "Trend",
+              item: "Revenue Decline",
+              reason: `Average MoM growth: ${avgGrowth.toFixed(1)}% (last 3 months)`,
+              action: "Launch promotional campaign to boost sales",
+              priority: "High",
+            });
+          } else if (avgGrowth > 10) {
+            recommendations.push({
+              category: "Trend",
+              item: "Growth Momentum",
+              reason: `Strong growth trend: ${avgGrowth.toFixed(1)}% MoM`,
+              action: "Increase inventory and prepare for scaling",
+              priority: "Medium",
+            });
+          }
+        }
+
+        // 5. Low performers to optimize
+        if (currentData.topProducts.length >= currentFilters.top_n) {
+          const lowPerformer =
+            currentData.topProducts[currentFilters.top_n - 1];
+          if (lowPerformer.share_pct < 2) {
+            recommendations.push({
+              category: "Product",
+              item: lowPerformer.item.split(" - ")[0],
+              reason: `Low revenue share (${lowPerformer.share_pct.toFixed(2)}%)`,
+              action:
+                "Consider A/B testing price optimization or discontinuation",
+              priority: "Low",
+            });
+          }
+        }
+
+        // Display recommendations
+        const tbody = document.querySelector("#recommendationsTable tbody");
+        if (recommendations.length === 0) {
+          tbody.innerHTML =
+            '<tr><td colspan="5">No specific recommendations at this time.</td></tr>';
+        } else {
+          tbody.innerHTML = recommendations
+            .map(
+              (rec) => `
+                    <tr>
+                        <td><strong>${rec.category}</strong></td>
+                        <td>${rec.item}</td>
+                        <td>${rec.reason}</td>
+                        <td>${rec.action}</td>
+                        <td class="priority-${rec.priority.toLowerCase()}">${rec.priority}</td>
+                    </tr>
+                `
+            )
+            .join("");
+        }
+      }
+
+      // Export table to CSV
+      function exportTable(tableId, filename) {
+        const table = document.getElementById(tableId);
+        const rows = Array.from(table.querySelectorAll("tr"));
+
+        const csv = rows
+          .map((row) => {
+            const cols = Array.from(row.querySelectorAll("th, td"));
+            return cols
+              .map((col) => {
+                let text = col.textContent.trim();
+                // Escape quotes and wrap in quotes if contains comma
+                if (text.includes(",") || text.includes('"')) {
+                  text = '"' + text.replace(/"/g, '""') + '"';
+                }
+                return text;
+              })
+              .join(",");
+          })
+          .join("\n");
+
+        // Download
+        const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = `${filename}_${new Date().toISOString().split("T")[0]}.csv`;
+        link.click();
+      }
+
+      // Save insights snapshot
+      function saveInsights() {
+        const snapshot = {
+          timestamp: new Date().toISOString(),
+          filters: currentFilters,
+          kpis: currentData.kpis,
+          recommendations: Array.from(
+            document.querySelectorAll("#recommendationsTable tbody tr")
+          )
+            .map((row) => {
+              const cols = Array.from(row.querySelectorAll("td"));
+              if (cols.length < 5) return null;
+              return {
+                category: cols[0].textContent.trim(),
+                item: cols[1].textContent.trim(),
+                reason: cols[2].textContent.trim(),
+                action: cols[3].textContent.trim(),
+                priority: cols[4].textContent.trim(),
+              };
+            })
+            .filter((r) => r !== null),
+        };
+
+        // Save to localStorage
+        const savedInsights = JSON.parse(
+          localStorage.getItem("adminInsights") || "[]"
+        );
+        savedInsights.push(snapshot);
+        localStorage.setItem("adminInsights", JSON.stringify(savedInsights));
+
+        // Also download as JSON
+        const blob = new Blob([JSON.stringify(snapshot, null, 2)], {
+          type: "application/json",
+        });
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = `Insights_${new Date().toISOString().split("T")[0]}.json`;
+        link.click();
+
+        alert("✅ Insights saved successfully!");
+      }
+    </script>
+  </body>
+</html>

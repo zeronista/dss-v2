@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Product Management - DSS</title>
+    <title>Order Management - DSS</title>
     <style>
         * {
             margin: 0;
@@ -227,19 +227,12 @@
             border-bottom: none;
         }
         
-        .stock-code {
+        .invoice-no {
             font-family: monospace;
             background: #f0f0f0;
             padding: 4px 8px;
             border-radius: 4px;
             font-weight: 600;
-        }
-        
-        .description {
-            max-width: 300px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
         }
         
         .number {
@@ -249,6 +242,24 @@
         .currency {
             color: #28a745;
             font-weight: 600;
+        }
+        
+        .status {
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            display: inline-block;
+        }
+        
+        .status-completed {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .status-cancelled {
+            background: #f8d7da;
+            color: #721c24;
         }
         
         .btn-view {
@@ -269,13 +280,13 @@
             box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
         }
         
-        .no-products {
+        .no-orders {
             text-align: center;
             padding: 60px;
             color: #666;
         }
         
-        .no-products-icon {
+        .no-orders-icon {
             font-size: 64px;
             margin-bottom: 20px;
         }
@@ -374,7 +385,7 @@
 </head>
 <body>
     <div class="navbar">
-        <div class="navbar-brand">📦 Product Management</div>
+        <div class="navbar-brand">📋 Order Management</div>
         <div class="navbar-user">
             <a href="/admin/dashboard" class="btn-back">← Back to Dashboard</a>
             <form action="/logout" method="post" style="margin: 0;">
@@ -385,14 +396,14 @@
     
     <div class="container">
         <div class="header-section">
-            <h1>Product Catalog</h1>
-            <p>Browse and analyze all products from invoice data</p>
+            <h1>Order List</h1>
+            <p>View and manage all customer orders</p>
             
             <div class="stats">
                 <div class="stat-item">
-                    <div class="icon">📦</div>
-                    <div class="value" th:text="${totalProducts}">0</div>
-                    <div class="label">Total Products</div>
+                    <div class="icon">📋</div>
+                    <div class="value" th:text="${totalOrders}">0</div>
+                    <div class="label">Total Orders</div>
                 </div>
                 <div class="stat-item">
                     <div class="icon">💰</div>
@@ -400,67 +411,79 @@
                     <div class="label">Total Revenue</div>
                 </div>
                 <div class="stat-item">
-                    <div class="icon">📊</div>
-                    <div class="value" th:text="${#numbers.formatInteger(totalQuantity, 0, 'COMMA')}">0</div>
-                    <div class="label">Total Units Sold</div>
+                    <div class="icon">📦</div>
+                    <div class="value" th:text="${#numbers.formatInteger(totalItems, 0, 'COMMA')}">0</div>
+                    <div class="label">Total Items</div>
+                </div>
+                <div class="stat-item">
+                    <div class="icon">✅</div>
+                    <div class="value" th:text="${completedOrders}">0</div>
+                    <div class="label">Completed</div>
+                </div>
+                <div class="stat-item">
+                    <div class="icon">❌</div>
+                    <div class="value" th:text="${cancelledOrders}">0</div>
+                    <div class="label">Cancelled</div>
                 </div>
             </div>
         </div>
         
         <div class="search-section">
-            <form action="/admin/products" method="get" class="search-form">
+            <form action="/admin/orders" method="get" class="search-form">
                 <input type="text" name="search" class="search-input" 
-                       placeholder="Search by product code or description..." 
+                       placeholder="Search by invoice number, customer ID, or country..." 
                        th:value="${searchQuery}">
                 <button type="submit" class="btn-search">🔍 Search</button>
-                <a href="/admin/products" class="btn-clear">✕ Clear</a>
+                <a href="/admin/orders" class="btn-clear">✕ Clear</a>
             </form>
         </div>
         
         <div th:if="${searchQuery}" class="search-info">
             <span>Search results for: "<strong th:text="${searchQuery}">query</strong>"</span>
-            <span th:text="${totalProducts + ' product(s) found'}">0 products found</span>
+            <span th:text="${totalOrders + ' order(s) found'}">0 orders found</span>
         </div>
         
         <div class="table-container">
-            <div th:if="${products.isEmpty()}" class="no-products">
-                <div class="no-products-icon">🔍</div>
-                <h3>No products found</h3>
+            <div th:if="${orders.isEmpty()}" class="no-orders">
+                <div class="no-orders-icon">🔍</div>
+                <h3>No orders found</h3>
                 <p th:if="${searchQuery}">Try a different search term</p>
-                <p th:unless="${searchQuery}">No products available in the system</p>
+                <p th:unless="${searchQuery}">No orders available in the system</p>
             </div>
             
-            <table th:if="${!products.isEmpty()}">
+            <table th:if="${!orders.isEmpty()}">
                 <thead>
                     <tr>
-                        <th>Stock Code</th>
-                        <th>Description</th>
-                        <th>Units Sold</th>
-                        <th>Transactions</th>
-                        <th>Avg Price</th>
-                        <th>Total Revenue</th>
-                        <th>Customers</th>
+                        <th>Invoice No</th>
+                        <th>Date</th>
+                        <th>Customer ID</th>
+                        <th>Country</th>
+                        <th>Items</th>
+                        <th>Products</th>
+                        <th>Total Amount</th>
+                        <th>Status</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr th:each="product : ${products}">
+                    <tr th:each="order : ${orders}">
                         <td>
-                            <span class="stock-code" th:text="${product.stockCode}">10001</span>
+                            <span class="invoice-no" th:text="${order.invoiceNo}">123456</span>
+                        </td>
+                        <td th:text="${order.invoiceDate}">12/1/2010 8:26</td>
+                        <td th:text="${order.customerId}">17850</td>
+                        <td th:text="${order.country}">United Kingdom</td>
+                        <td class="number" th:text="${#numbers.formatInteger(order.totalItems, 0, 'COMMA')}">12</td>
+                        <td class="number" th:text="${order.uniqueProducts}">3</td>
+                        <td class="number currency" th:text="${'$' + #numbers.formatDecimal(order.totalAmount, 0, 'COMMA', 2, 'POINT')}">$139.12</td>
+                        <td>
+                            <span th:class="${order.status == 'Completed' ? 'status status-completed' : 'status status-cancelled'}"
+                                  th:text="${order.status}">
+                                Completed
+                            </span>
                         </td>
                         <td>
-                            <div class="description" th:text="${product.description}" 
-                                 th:title="${product.description}">
-                                Product Description
-                            </div>
-                        </td>
-                        <td class="number" th:text="${#numbers.formatInteger(product.totalQuantitySold, 0, 'COMMA')}">1,000</td>
-                        <td class="number" th:text="${#numbers.formatInteger(product.totalTransactions, 0, 'COMMA')}">50</td>
-                        <td class="number currency" th:text="${'$' + #numbers.formatDecimal(product.averagePrice, 0, 'COMMA', 2, 'POINT')}">$10.00</td>
-                        <td class="number currency" th:text="${'$' + #numbers.formatDecimal(product.totalRevenue, 0, 'COMMA', 2, 'POINT')}">$10,000.00</td>
-                        <td class="number" th:text="${product.uniqueCustomers}">25</td>
-                        <td>
-                            <a th:href="@{/admin/products/{code}(code=${product.stockCode})}" class="btn-view">
+                            <a th:href="@{/admin/orders/{invoiceNo}(invoiceNo=${order.invoiceNo})}" class="btn-view">
                                 👁️ Details
                             </a>
                         </td>
@@ -470,23 +493,23 @@
         </div>
         
         <!-- Pagination -->
-        <div th:if="${!products.isEmpty()}" class="pagination-container">
+        <div th:if="${!orders.isEmpty()}" class="pagination-container">
             <div class="pagination-info">
-                <span th:text="'Showing ' + ${(currentPage - 1) * pageSize + 1} + ' to ' + ${(currentPage - 1) * pageSize + products.size()} + ' of ' + ${totalProducts} + ' products'">
-                    Showing 1 to 20 of 100 products
+                <span th:text="'Showing ' + ${(currentPage - 1) * pageSize + 1} + ' to ' + ${(currentPage - 1) * pageSize + orders.size()} + ' of ' + ${totalOrders} + ' orders'">
+                    Showing 1 to 20 of 100 orders
                 </span>
             </div>
             
             <div class="pagination">
                 <!-- First Page -->
-                <a th:href="@{/admin/products(page=1, size=${pageSize}, search=${searchQuery})}" 
+                <a th:href="@{/admin/orders(page=1, size=${pageSize}, search=${searchQuery})}" 
                    th:class="${currentPage == 1} ? 'page-link disabled' : 'page-link'"
                    title="First Page">
                     ⏮️
                 </a>
                 
                 <!-- Previous Page -->
-                <a th:href="@{/admin/products(page=${currentPage - 1}, size=${pageSize}, search=${searchQuery})}" 
+                <a th:href="@{/admin/orders(page=${currentPage - 1}, size=${pageSize}, search=${searchQuery})}" 
                    th:class="${currentPage == 1} ? 'page-link disabled' : 'page-link'"
                    title="Previous">
                     ◀️
@@ -495,7 +518,7 @@
                 <!-- Page Numbers -->
                 <th:block th:each="i : ${#numbers.sequence(1, totalPages)}">
                     <a th:if="${i == currentPage || (i >= currentPage - 2 && i <= currentPage + 2) || i == 1 || i == totalPages}"
-                       th:href="@{/admin/products(page=${i}, size=${pageSize}, search=${searchQuery})}" 
+                       th:href="@{/admin/orders(page=${i}, size=${pageSize}, search=${searchQuery})}" 
                        th:class="${i == currentPage} ? 'page-link active' : 'page-link'"
                        th:text="${i}">
                         1
@@ -507,14 +530,14 @@
                 </th:block>
                 
                 <!-- Next Page -->
-                <a th:href="@{/admin/products(page=${currentPage + 1}, size=${pageSize}, search=${searchQuery})}" 
+                <a th:href="@{/admin/orders(page=${currentPage + 1}, size=${pageSize}, search=${searchQuery})}" 
                    th:class="${currentPage == totalPages} ? 'page-link disabled' : 'page-link'"
                    title="Next">
                     ▶️
                 </a>
                 
                 <!-- Last Page -->
-                <a th:href="@{/admin/products(page=${totalPages}, size=${pageSize}, search=${searchQuery})}" 
+                <a th:href="@{/admin/orders(page=${totalPages}, size=${pageSize}, search=${searchQuery})}" 
                    th:class="${currentPage == totalPages} ? 'page-link disabled' : 'page-link'"
                    title="Last Page">
                     ⏭️
@@ -536,7 +559,7 @@
     <script th:inline="javascript">
         function changePageSize(size) {
             const searchQuery = /*[[${searchQuery}]]*/ null;
-            let url = '/admin/products?page=1&size=' + size;
+            let url = '/admin/orders?page=1&size=' + size;
             if (searchQuery) {
                 url += '&search=' + encodeURIComponent(searchQuery);
             }

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Product Management - DSS</title>
+    <title>Customer Management - DSS</title>
     <style>
         * {
             margin: 0;
@@ -70,7 +70,7 @@
         }
         
         .container {
-            max-width: 1600px;
+            max-width: 1400px;
             margin: 0 auto;
             padding: 30px;
         }
@@ -106,16 +106,15 @@
             color: white;
             padding: 20px;
             border-radius: 8px;
-            text-align: center;
         }
         
         .stat-item .icon {
-            font-size: 32px;
+            font-size: 28px;
             margin-bottom: 10px;
         }
         
         .stat-item .value {
-            font-size: 28px;
+            font-size: 32px;
             font-weight: bold;
             margin-bottom: 5px;
         }
@@ -125,63 +124,22 @@
             opacity: 0.9;
         }
         
-        .search-section {
-            background: white;
-            padding: 20px;
-            border-radius: 12px;
+        .search-bar {
             margin-bottom: 20px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
         }
         
-        .search-form {
-            display: flex;
-            gap: 10px;
-        }
-        
-        .search-input {
-            flex: 1;
+        .search-bar input {
+            width: 100%;
             padding: 12px 20px;
-            border: 2px solid #e0e0e0;
+            border: 2px solid #ddd;
             border-radius: 8px;
-            font-size: 14px;
+            font-size: 16px;
             transition: all 0.3s;
         }
         
-        .search-input:focus {
+        .search-bar input:focus {
             outline: none;
             border-color: #667eea;
-        }
-        
-        .btn-search {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            padding: 12px 30px;
-            border-radius: 8px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        
-        .btn-search:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
-        }
-        
-        .btn-clear {
-            background: #6c757d;
-            color: white;
-            border: none;
-            padding: 12px 20px;
-            border-radius: 8px;
-            font-weight: 600;
-            cursor: pointer;
-            text-decoration: none;
-            display: inline-block;
-        }
-        
-        .btn-clear:hover {
-            background: #5a6268;
         }
         
         .table-container {
@@ -189,7 +147,6 @@
             padding: 30px;
             border-radius: 12px;
             box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-            overflow-x: auto;
         }
         
         table {
@@ -209,59 +166,26 @@
             font-weight: 600;
             font-size: 14px;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
-            white-space: nowrap;
         }
         
         td {
-            padding: 12px 15px;
+            padding: 15px;
             border-bottom: 1px solid #f0f0f0;
-            font-size: 14px;
         }
         
-        tbody tr:hover {
-            background-color: #f8f9fa;
-        }
-        
-        tbody tr:last-child td {
-            border-bottom: none;
-        }
-        
-        .stock-code {
-            font-family: monospace;
-            background: #f0f0f0;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-weight: 600;
-        }
-        
-        .description {
-            max-width: 300px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-        
-        .number {
-            text-align: right;
-        }
-        
-        .currency {
-            color: #28a745;
-            font-weight: 600;
+        tr:hover {
+            background: #f9f9f9;
         }
         
         .btn-view {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
-            padding: 8px 16px;
+            padding: 8px 20px;
             border-radius: 6px;
             text-decoration: none;
-            font-size: 13px;
             font-weight: 600;
             transition: all 0.3s;
             display: inline-block;
-            white-space: nowrap;
         }
         
         .btn-view:hover {
@@ -269,26 +193,57 @@
             box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
         }
         
-        .no-products {
-            text-align: center;
-            padding: 60px;
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .badge-vip {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+        }
+        
+        .badge-premium {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+        }
+        
+        .badge-regular {
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+            color: white;
+        }
+        
+        .badge-new {
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+            color: white;
+        }
+        
+        .badge-basic {
+            background: #e0e0e0;
             color: #666;
         }
         
-        .no-products-icon {
-            font-size: 64px;
-            margin-bottom: 20px;
+        .status-active {
+            color: #28a745;
+            font-weight: 600;
         }
         
-        .search-info {
-            background: #d1ecf1;
-            color: #0c5460;
-            padding: 12px 20px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+        .status-at-risk {
+            color: #ffc107;
+            font-weight: 600;
+        }
+        
+        .status-inactive {
+            color: #dc3545;
+            font-weight: 600;
+        }
+        
+        .status-churned {
+            color: #6c757d;
+            font-weight: 600;
         }
         
         /* Pagination Styles */
@@ -373,26 +328,26 @@
     </style>
 </head>
 <body>
-    <div class="navbar">
-        <div class="navbar-brand">📦 Product Management</div>
+    <nav class="navbar">
+        <div class="navbar-brand">👥 Customer Management</div>
         <div class="navbar-user">
-            <a href="/admin/dashboard" class="btn-back">← Back to Dashboard</a>
-            <form action="/logout" method="post" style="margin: 0;">
+            <a th:href="@{/admin/dashboard}" class="btn-back">← Back to Dashboard</a>
+            <form th:action="@{/logout}" method="post" style="margin: 0;">
                 <button type="submit" class="btn-logout">Logout</button>
             </form>
         </div>
-    </div>
+    </nav>
     
     <div class="container">
         <div class="header-section">
-            <h1>Product Catalog</h1>
-            <p>Browse and analyze all products from invoice data</p>
+            <h1>👥 Customer Management</h1>
+            <p>View and manage customer information and statistics</p>
             
             <div class="stats">
                 <div class="stat-item">
-                    <div class="icon">📦</div>
-                    <div class="value" th:text="${totalProducts}">0</div>
-                    <div class="label">Total Products</div>
+                    <div class="icon">👥</div>
+                    <div class="value" th:text="${totalCustomers}">0</div>
+                    <div class="label">Total Customers</div>
                 </div>
                 <div class="stat-item">
                     <div class="icon">💰</div>
@@ -401,92 +356,94 @@
                 </div>
                 <div class="stat-item">
                     <div class="icon">📊</div>
-                    <div class="value" th:text="${#numbers.formatInteger(totalQuantity, 0, 'COMMA')}">0</div>
-                    <div class="label">Total Units Sold</div>
+                    <div class="value" th:text="${'$' + #numbers.formatDecimal(averageRevenue, 0, 'COMMA', 2, 'POINT')}">$0</div>
+                    <div class="label">Avg Revenue/Customer</div>
+                </div>
+                <div class="stat-item">
+                    <div class="icon">⭐</div>
+                    <div class="value" th:text="${vipCustomers}">0</div>
+                    <div class="label">VIP Customers</div>
+                </div>
+                <div class="stat-item">
+                    <div class="icon">✅</div>
+                    <div class="value" th:text="${activeCustomers}">0</div>
+                    <div class="label">Active Customers</div>
                 </div>
             </div>
         </div>
         
-        <div class="search-section">
-            <form action="/admin/products" method="get" class="search-form">
-                <input type="text" name="search" class="search-input" 
-                       placeholder="Search by product code or description..." 
-                       th:value="${searchQuery}">
-                <button type="submit" class="btn-search">🔍 Search</button>
-                <a href="/admin/products" class="btn-clear">✕ Clear</a>
-            </form>
-        </div>
-        
-        <div th:if="${searchQuery}" class="search-info">
-            <span>Search results for: "<strong th:text="${searchQuery}">query</strong>"</span>
-            <span th:text="${totalProducts + ' product(s) found'}">0 products found</span>
-        </div>
-        
         <div class="table-container">
-            <div th:if="${products.isEmpty()}" class="no-products">
-                <div class="no-products-icon">🔍</div>
-                <h3>No products found</h3>
-                <p th:if="${searchQuery}">Try a different search term</p>
-                <p th:unless="${searchQuery}">No products available in the system</p>
+            <div class="search-bar">
+                <form method="get" th:action="@{/admin/customers}">
+                    <input type="text" name="search" placeholder="🔍 Search by Customer ID or Country..." 
+                           th:value="${searchQuery}">
+                </form>
             </div>
             
-            <table th:if="${!products.isEmpty()}">
+            <table>
                 <thead>
                     <tr>
-                        <th>Stock Code</th>
-                        <th>Description</th>
-                        <th>Units Sold</th>
-                        <th>Transactions</th>
-                        <th>Avg Price</th>
-                        <th>Total Revenue</th>
-                        <th>Customers</th>
+                        <th>Customer ID</th>
+                        <th>Country</th>
+                        <th>Segment</th>
+                        <th>Status</th>
+                        <th>Orders</th>
+                        <th>Revenue</th>
+                        <th>Avg Order Value</th>
+                        <th>Return Rate</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr th:each="product : ${products}">
+                    <tr th:each="customer : ${customers}">
+                        <td th:text="${customer.customerId}">12345</td>
+                        <td th:text="${customer.country}">United Kingdom</td>
                         <td>
-                            <span class="stock-code" th:text="${product.stockCode}">10001</span>
+                            <span class="badge"
+                                  th:classappend="${customer.customerSegment == 'VIP' ? 'badge-vip' : 
+                                                   customer.customerSegment == 'Premium' ? 'badge-premium' : 
+                                                   customer.customerSegment == 'Regular' ? 'badge-regular' : 
+                                                   customer.customerSegment == 'New' ? 'badge-new' : 'badge-basic'}"
+                                  th:text="${customer.customerSegment}">Regular</span>
                         </td>
                         <td>
-                            <div class="description" th:text="${product.description}" 
-                                 th:title="${product.description}">
-                                Product Description
-                            </div>
+                            <span th:class="${'status-' + #strings.toLowerCase(customer.status)}"
+                                  th:text="${customer.status}">Active</span>
                         </td>
-                        <td class="number" th:text="${#numbers.formatInteger(product.totalQuantitySold, 0, 'COMMA')}">1,000</td>
-                        <td class="number" th:text="${#numbers.formatInteger(product.totalTransactions, 0, 'COMMA')}">50</td>
-                        <td class="number currency" th:text="${'$' + #numbers.formatDecimal(product.averagePrice, 0, 'COMMA', 2, 'POINT')}">$10.00</td>
-                        <td class="number currency" th:text="${'$' + #numbers.formatDecimal(product.totalRevenue, 0, 'COMMA', 2, 'POINT')}">$10,000.00</td>
-                        <td class="number" th:text="${product.uniqueCustomers}">25</td>
+                        <td th:text="${customer.totalOrders}">10</td>
+                        <td th:text="${'$' + #numbers.formatDecimal(customer.totalRevenue, 0, 'COMMA', 2, 'POINT')}">$1,234.56</td>
+                        <td th:text="${'$' + #numbers.formatDecimal(customer.averageOrderValue, 0, 'COMMA', 2, 'POINT')}">$123.45</td>
+                        <td th:text="${#numbers.formatDecimal(customer.returnRate, 0, 2) + '%'}">5.00%</td>
                         <td>
-                            <a th:href="@{/admin/products/{code}(code=${product.stockCode})}" class="btn-view">
-                                👁️ Details
-                            </a>
+                            <a th:href="@{/admin/customers/{id}(id=${customer.customerId})}" class="btn-view">View Details</a>
                         </td>
                     </tr>
                 </tbody>
             </table>
+            
+            <div th:if="${customers.isEmpty()}" style="text-align: center; padding: 40px; color: #999;">
+                <p style="font-size: 18px;">No customers found.</p>
+            </div>
         </div>
         
         <!-- Pagination -->
-        <div th:if="${!products.isEmpty()}" class="pagination-container">
+        <div th:if="${!customers.isEmpty()}" class="pagination-container">
             <div class="pagination-info">
-                <span th:text="'Showing ' + ${(currentPage - 1) * pageSize + 1} + ' to ' + ${(currentPage - 1) * pageSize + products.size()} + ' of ' + ${totalProducts} + ' products'">
-                    Showing 1 to 20 of 100 products
+                <span th:text="'Showing ' + ${(currentPage - 1) * pageSize + 1} + ' to ' + ${(currentPage - 1) * pageSize + customers.size()} + ' of ' + ${totalCustomers} + ' customers'">
+                    Showing 1 to 20 of 100 customers
                 </span>
             </div>
             
             <div class="pagination">
                 <!-- First Page -->
-                <a th:href="@{/admin/products(page=1, size=${pageSize}, search=${searchQuery})}" 
+                <a th:href="@{/admin/customers(page=1, size=${pageSize}, search=${searchQuery})}" 
                    th:class="${currentPage == 1} ? 'page-link disabled' : 'page-link'"
                    title="First Page">
                     ⏮️
                 </a>
                 
                 <!-- Previous Page -->
-                <a th:href="@{/admin/products(page=${currentPage - 1}, size=${pageSize}, search=${searchQuery})}" 
+                <a th:href="@{/admin/customers(page=${currentPage - 1}, size=${pageSize}, search=${searchQuery})}" 
                    th:class="${currentPage == 1} ? 'page-link disabled' : 'page-link'"
                    title="Previous">
                     ◀️
@@ -495,7 +452,7 @@
                 <!-- Page Numbers -->
                 <th:block th:each="i : ${#numbers.sequence(1, totalPages)}">
                     <a th:if="${i == currentPage || (i >= currentPage - 2 && i <= currentPage + 2) || i == 1 || i == totalPages}"
-                       th:href="@{/admin/products(page=${i}, size=${pageSize}, search=${searchQuery})}" 
+                       th:href="@{/admin/customers(page=${i}, size=${pageSize}, search=${searchQuery})}" 
                        th:class="${i == currentPage} ? 'page-link active' : 'page-link'"
                        th:text="${i}">
                         1
@@ -507,14 +464,14 @@
                 </th:block>
                 
                 <!-- Next Page -->
-                <a th:href="@{/admin/products(page=${currentPage + 1}, size=${pageSize}, search=${searchQuery})}" 
+                <a th:href="@{/admin/customers(page=${currentPage + 1}, size=${pageSize}, search=${searchQuery})}" 
                    th:class="${currentPage == totalPages} ? 'page-link disabled' : 'page-link'"
                    title="Next">
                     ▶️
                 </a>
                 
                 <!-- Last Page -->
-                <a th:href="@{/admin/products(page=${totalPages}, size=${pageSize}, search=${searchQuery})}" 
+                <a th:href="@{/admin/customers(page=${totalPages}, size=${pageSize}, search=${searchQuery})}" 
                    th:class="${currentPage == totalPages} ? 'page-link disabled' : 'page-link'"
                    title="Last Page">
                     ⏭️
@@ -536,7 +493,7 @@
     <script th:inline="javascript">
         function changePageSize(size) {
             const searchQuery = /*[[${searchQuery}]]*/ null;
-            let url = '/admin/products?page=1&size=' + size;
+            let url = '/admin/customers?page=1&size=' + size;
             if (searchQuery) {
                 url += '&search=' + encodeURIComponent(searchQuery);
             }

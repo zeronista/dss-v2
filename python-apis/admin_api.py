@@ -12,9 +12,78 @@ from datetime import datetime, timedelta
 import pandas as pd
 import numpy as np
 from collections import defaultdict
+import os
 
 # Import database utilities
 from db_utils import get_transactions_df, get_db
+
+# ============ Local Data Configuration ============
+# Path to local cleaned data file (faster than MongoDB)
+DATA_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'data')
+CSV_FILE = os.path.join(DATA_DIR, 'online_retail_cleaned.csv')
+PARQUET_FILE = os.path.join(DATA_DIR, 'online_retail_cleaned.parquet')
+
+# Cache for loaded data
+_cached_df = None
+_cache_timestamp = None
+_cache_ttl = 3600  # Cache for 1 hour
+
+def get_local_transactions_df() -> pd.DataFrame:
+    """
+    Load transactions from local CSV file (FAST!)
+    Uses caching to avoid repeated file reads
+    
+    Returns:
+        pandas DataFrame with cleaned transactions
+    """
+    global _cached_df, _cache_timestamp
+    
+    # Check if cache is valid
+    if _cached_df is not None and _cache_timestamp is not None:
+        if (datetime.now() - _cache_timestamp).seconds < _cache_ttl:
+            print(f"✅ Using cached data ({len(_cached_df)} rows)")
+            df_copy = _cached_df.copy()
+            # Ensure InvoiceDate is datetime type
+            if df_copy['InvoiceDate'].dtype == 'object':
+                df_copy['InvoiceDate'] = pd.to_datetime(df_copy['InvoiceDate'], errors='coerce')
+            return df_copy
+    
+    print(f"📂 Loading data from local file...")
+    
+    try:
+        # Use CSV file (as requested)
+        if os.path.exists(CSV_FILE):
+            print(f"📊 Loading from CSV: {CSV_FILE}")
+            df = pd.read_csv(CSV_FILE)
+            # Convert InvoiceDate to datetime
+            df['InvoiceDate'] = pd.to_datetime(df['InvoiceDate'], errors='coerce')
+            print(f"✅ Loaded {len(df)} transactions from CSV")
+        # Fallback to parquet if CSV not found
+        elif os.path.exists(PARQUET_FILE):
+            print(f"📊 Loading from parquet: {PARQUET_FILE}")
+            df = pd.read_parquet(PARQUET_FILE)
+            # Ensure datetime conversion
+            if df['InvoiceDate'].dtype == 'object':
+                df['InvoiceDate'] = pd.to_datetime(df['InvoiceDate'], errors='coerce')
+            print(f"✅ Loaded {len(df)} transactions from parquet (fallback)")
+        else:
+            raise FileNotFoundError(f"No data file found in {DATA_DIR}")
+        
+        # Ensure required columns
+        if 'Revenue' not in df.columns and 'Quantity' in df.columns and 'UnitPrice' in df.columns:
+            df['Revenue'] = df['Quantity'] * df['UnitPrice']
+        
+        # Cache the data
+        _cached_df = df.copy()
+        _cache_timestamp = datetime.now()
+        
+        return df
+    
+    except Exception as e:
+        print(f"❌ Error loading local data: {e}")
+        print(f"💡 Falling back to MongoDB...")
+        # Fallback to MongoDB if local file fails
+        return get_transactions_df()
 
 app = FastAPI(
     title="Admin API - Sales Overview",
@@ -82,6 +151,7 @@ async def root():
         "dss_type": "Descriptive",
         "endpoints": [
             "/health",
+            "/countries",
             "/kpis",
             "/monthly-trend",
             "/top-countries",
@@ -89,6 +159,29 @@ async def root():
             "/revenue-summary"
         ]
     }
+
+@app.get("/countries")
+async def get_countries() -> Dict[str, Any]:
+    """
+    Get list of all available countries for filter dropdown
+    """
+    try:
+        df = get_local_transactions_df()
+        
+        if df.empty:
+            raise HTTPException(status_code=404, detail="No data found")
+        
+        # Get unique countries sorted alphabetically
+        countries = sorted(df['Country'].unique().tolist())
+        
+        return {
+            "success": True,
+            "countries": countries,
+            "count": len(countries)
+        }
+    
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error getting countries: {str(e)}")
 
 @app.post("/kpis", response_model=KPIResponse)
 async def get_kpis(filters: FilterRequest):
@@ -309,28 +402,31 @@ async def get_revenue_summary(filters: FilterRequest) -> Dict[str, Any]:
 def _apply_filters(filters: FilterRequest) -> pd.DataFrame:
     """
     Apply filters and return filtered DataFrame
+    NOW USING LOCAL DATA FOR FASTER PERFORMANCE! 🚀
     """
-    # Build MongoDB query
-    query = {}
+    # Get data from LOCAL FILE (much faster!)
+    df = get_local_transactions_df()
     
-    # Date range filter
+    if df.empty:
+        return df
+    
+    # Apply date range filter
     if filters.start_date or filters.end_date:
-        date_query = {}
         if filters.start_date:
-            date_query['$gte'] = filters.start_date
+            df = df[df['InvoiceDate'] >= pd.to_datetime(filters.start_date)]
         if filters.end_date:
-            date_query['$lte'] = filters.end_date
-        if date_query:
-            query['InvoiceDate'] = date_query
+            end_datetime = pd.to_datetime(filters.end_date) + pd.Timedelta(days=1) - pd.Timedelta(seconds=1)
+            df = df[df['InvoiceDate'] <= end_datetime]
     
-    # Country filter
+    # Apply country filter
     if filters.countries and len(filters.countries) > 0:
-        query['Country'] = {'$in': filters.countries}
+        df = df[df['Country'].isin(filters.countries)]
     
-    # Get data from MongoDB
-    df = get_transactions_df(filters=query, exclude_cancelled=filters.exclude_cancelled)
+    # Exclude cancelled invoices
+    if filters.exclude_cancelled:
+        df = df[~df['InvoiceNo'].astype(str).str.startswith('C')]
     
-    return df
+    return df.copy()
 
 # ============ Run Server ============
 
