@@ -1,323 +1,131 @@
-<!DOCTYPE html>
+﻿<!doctype html>
 <html xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Customer Details - DSS</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #f5f5f5;
-        }
-        
-        .navbar {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 15px 30px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-        
-        .navbar-brand {
-            font-size: 24px;
-            font-weight: bold;
-        }
-        
-        .navbar-user {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-        }
-        
-        .btn-back {
-            background: rgba(255,255,255,0.2);
-            color: white;
-            border: 2px solid white;
-            padding: 8px 20px;
-            border-radius: 6px;
-            font-weight: 600;
-            text-decoration: none;
-            transition: all 0.3s;
-        }
-        
-        .btn-back:hover {
-            background: white;
-            color: #667eea;
-        }
-        
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 30px;
-        }
-        
-        .header-card {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 40px;
-            border-radius: 12px;
-            margin-bottom: 30px;
-            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.3);
-        }
-        
-        .header-card h1 {
-            font-size: 36px;
-            margin-bottom: 10px;
-        }
-        
-        .header-card p {
-            font-size: 18px;
-            opacity: 0.9;
-        }
-        
-        .badge {
-            display: inline-block;
-            padding: 6px 16px;
-            border-radius: 20px;
-            font-size: 14px;
-            font-weight: 600;
-            margin-left: 10px;
-        }
-        
-        .badge-vip {
-            background: rgba(255,255,255,0.3);
-        }
-        
-        .badge-premium {
-            background: rgba(79, 172, 254, 0.3);
-        }
-        
-        .badge-regular {
-            background: rgba(67, 233, 123, 0.3);
-        }
-        
-        .badge-new {
-            background: rgba(250, 112, 154, 0.3);
-        }
-        
-        .badge-basic {
-            background: rgba(255,255,255,0.2);
-        }
-        
-        .content-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 30px;
-            margin-bottom: 30px;
-        }
-        
-        .info-card {
-            background: white;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-        }
-        
-        .info-card h2 {
-            color: #333;
-            margin-bottom: 20px;
-            font-size: 24px;
-            border-bottom: 3px solid #667eea;
-            padding-bottom: 10px;
-        }
-        
-        .info-row {
-            display: flex;
-            justify-content: space-between;
-            padding: 15px 0;
-            border-bottom: 1px solid #f0f0f0;
-        }
-        
-        .info-row:last-child {
-            border-bottom: none;
-        }
-        
-        .info-label {
-            color: #666;
-            font-weight: 600;
-        }
-        
-        .info-value {
-            color: #333;
-            font-weight: 500;
-        }
-        
-        .stat-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-        
-        .stat-card {
-            background: white;
-            padding: 25px;
-            border-radius: 12px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-            text-align: center;
-        }
-        
-        .stat-card .icon {
-            font-size: 40px;
-            margin-bottom: 10px;
-        }
-        
-        .stat-card .value {
-            font-size: 32px;
-            font-weight: bold;
-            color: #667eea;
-            margin-bottom: 5px;
-        }
-        
-        .stat-card .label {
-            color: #666;
-            font-size: 14px;
-        }
-        
-        .full-width {
-            grid-column: 1 / -1;
-        }
-        
-        .status-active { color: #28a745; font-weight: 600; }
-        .status-at-risk { color: #ffc107; font-weight: 600; }
-        .status-inactive { color: #dc3545; font-weight: 600; }
-        .status-churned { color: #6c757d; font-weight: 600; }
-    </style>
-</head>
-<body>
+    <link rel="stylesheet" th:href="@{/css/neo-dashboard.css}" />
+  </head>
+  <body>
     <nav class="navbar">
-        <div class="navbar-brand">👤 Customer Details</div>
-        <div class="navbar-user">
-            <a th:href="@{/admin/customers}" class="btn-back">← Back to Customers</a>
-        </div>
+      <div class="navbar-brand">DSS Admin · Customer details</div>
+      <div class="navbar-user">
+        <a th:href="@{/admin/customers}" class="btn-link">Back to customers</a>
+      </div>
     </nav>
-    
+
     <div class="container">
-        <div class="header-card">
-            <h1>
-                👤 Customer #<span th:text="${customer.customerId}">12345</span>
-                <span class="badge"
-                      th:classappend="${customer.customerSegment == 'VIP' ? 'badge-vip' : 
-                                       customer.customerSegment == 'Premium' ? 'badge-premium' : 
-                                       customer.customerSegment == 'Regular' ? 'badge-regular' : 
-                                       customer.customerSegment == 'New' ? 'badge-new' : 'badge-basic'}"
-                      th:text="${customer.customerSegment}">VIP</span>
-            </h1>
-            <p>
-                📍 <span th:text="${customer.country}">United Kingdom</span> • 
-                <span th:class="${'status-' + #strings.toLowerCase(customer.status)}"
-                      th:text="${customer.status}">Active</span>
-            </p>
+      <section class="detail-hero">
+        <div>
+          <p class="segment-label">Customer</p>
+          <h1>
+            #<span th:text="${customer.customerId}">12345</span>
+            <span
+              class="segment-pill"
+              th:classappend="${customer.customerSegment} != null ? ' ' + #strings.toLowerCase(customer.customerSegment) : ''"
+              th:text="${customer.customerSegment}"
+              >VIP</span
+            >
+          </h1>
+          <p>
+            <strong th:text="${customer.country}">United Kingdom</strong>
+            ·
+            <span
+              class="status-pill"
+              th:classappend="${#strings.equalsIgnoreCase(customer.status, 'Active')} ? ' success' : (${#strings.equalsIgnoreCase(customer.status, 'Inactive')} ? ' danger' : ' warning')"
+              th:text="${customer.status}"
+              >Active</span
+            >
+          </p>
         </div>
-        
-        <!-- Statistics Grid -->
-        <div class="stat-grid">
-            <div class="stat-card">
-                <div class="icon">🛒</div>
-                <div class="value" th:text="${customer.totalOrders}">25</div>
-                <div class="label">Total Orders</div>
-            </div>
-            
-            <div class="stat-card">
-                <div class="icon">💰</div>
-                <div class="value" th:text="${'$' + #numbers.formatDecimal(customer.totalRevenue, 0, 'COMMA', 0, 'POINT')}">$5,234</div>
-                <div class="label">Total Revenue</div>
-            </div>
-            
-            <div class="stat-card">
-                <div class="icon">📊</div>
-                <div class="value" th:text="${'$' + #numbers.formatDecimal(customer.averageOrderValue, 0, 'COMMA', 0, 'POINT')}">$209</div>
-                <div class="label">Avg Order Value</div>
-            </div>
-            
-            <div class="stat-card">
-                <div class="icon">📦</div>
-                <div class="value" th:text="${customer.totalItems}">150</div>
-                <div class="label">Total Items</div>
-            </div>
-            
-            <div class="stat-card">
-                <div class="icon">🎁</div>
-                <div class="value" th:text="${customer.uniqueProductsPurchased}">45</div>
-                <div class="label">Unique Products</div>
-            </div>
-            
-            <div class="stat-card">
-                <div class="icon">↩️</div>
-                <div class="value" th:text="${#numbers.formatDecimal(customer.returnRate, 0, 1) + '%'}">5.2%</div>
-                <div class="label">Return Rate</div>
-            </div>
-        </div>
-        
-        <!-- Detailed Information -->
-        <div class="content-grid">
-            <div class="info-card">
-                <h2>📅 Purchase History</h2>
-                <div class="info-row">
-                    <span class="info-label">First Purchase</span>
-                    <span class="info-value" th:text="${customer.firstPurchaseDate}">2010-12-01</span>
-                </div>
-                <div class="info-row">
-                    <span class="info-label">Last Purchase</span>
-                    <span class="info-value" th:text="${customer.lastPurchaseDate}">2011-12-09</span>
-                </div>
-                <div class="info-row">
-                    <span class="info-label">Days Since Last Purchase</span>
-                    <span class="info-value" th:text="${customer.daysSinceLastPurchase != null ? customer.daysSinceLastPurchase + ' days' : 'N/A'}">5 days</span>
-                </div>
-                <div class="info-row">
-                    <span class="info-label">Customer Status</span>
-                    <span class="info-value"
-                          th:class="${'status-' + #strings.toLowerCase(customer.status)}"
-                          th:text="${customer.status}">Active</span>
-                </div>
-            </div>
-            
-            <div class="info-card">
-                <h2>📊 Order Statistics</h2>
-                <div class="info-row">
-                    <span class="info-label">Total Orders</span>
-                    <span class="info-value" th:text="${customer.totalOrders}">25</span>
-                </div>
-                <div class="info-row">
-                    <span class="info-label">Returned Orders</span>
-                    <span class="info-value" th:text="${customer.returnedOrders}">3</span>
-                </div>
-                <div class="info-row">
-                    <span class="info-label">Return Rate</span>
-                    <span class="info-value" th:text="${#numbers.formatDecimal(customer.returnRate, 0, 2) + '%'}">12.00%</span>
-                </div>
-                <div class="info-row">
-                    <span class="info-label">Customer Segment</span>
-                    <span class="info-value" th:text="${customer.customerSegment}">VIP</span>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Top Product -->
-        <div class="info-card full-width" th:if="${customer.topProductStockCode != null}">
-            <h2>⭐ Top Purchased Product</h2>
-            <div class="info-row">
-                <span class="info-label">Product Code</span>
-                <span class="info-value" th:text="${customer.topProductStockCode}">85123A</span>
-            </div>
-            <div class="info-row">
-                <span class="info-label">Description</span>
-                <span class="info-value" th:text="${customer.topProductDescription}">WHITE HANGING HEART T-LIGHT HOLDER</span>
-            </div>
-            <div class="info-row">
-                <span class="info-label">Total Quantity Purchased</span>
-                <span class="info-value" th:text="${customer.topProductQuantity}">48</span>
-            </div>
-        </div>
+      </section>
+
+      <div class="dashboard-grid">
+        <article class="stat-card">
+          <div class="stat-card-title">Total orders</div>
+          <div class="stat-card-value" th:text="${customer.totalOrders}">25</div>
+        </article>
+        <article class="stat-card">
+          <div class="stat-card-title">Total revenue</div>
+          <div class="stat-card-value" th:text="${'$' + #numbers.formatDecimal(customer.totalRevenue, 0, 'COMMA', 0, 'POINT')}">$5,234</div>
+        </article>
+        <article class="stat-card">
+          <div class="stat-card-title">Avg order value</div>
+          <div class="stat-card-value" th:text="${'$' + #numbers.formatDecimal(customer.averageOrderValue, 0, 'COMMA', 0, 'POINT')}">$209</div>
+        </article>
+        <article class="stat-card">
+          <div class="stat-card-title">Total items</div>
+          <div class="stat-card-value" th:text="${customer.totalItems}">150</div>
+        </article>
+        <article class="stat-card">
+          <div class="stat-card-title">Unique products</div>
+          <div class="stat-card-value" th:text="${customer.uniqueProductsPurchased}">45</div>
+        </article>
+        <article class="stat-card">
+          <div class="stat-card-title">Return rate</div>
+          <div class="stat-card-value" th:text="${#numbers.formatDecimal(customer.returnRate, 0, 1) + '%'}">5.2%</div>
+        </article>
+      </div>
+
+      <div class="detail-grid">
+        <article class="detail-card">
+          <h2>Purchase history</h2>
+          <ul class="detail-list">
+            <li>
+              <span class="detail-label">First purchase</span>
+              <span class="detail-value" th:text="${customer.firstPurchaseDate}">2010-12-01</span>
+            </li>
+            <li>
+              <span class="detail-label">Last purchase</span>
+              <span class="detail-value" th:text="${customer.lastPurchaseDate}">2011-12-09</span>
+            </li>
+            <li>
+              <span class="detail-label">Days since last order</span>
+              <span class="detail-value" th:text="${customer.daysSinceLastPurchase != null ? customer.daysSinceLastPurchase + ' days' : 'N/A'}">5 days</span>
+            </li>
+            <li>
+              <span class="detail-label">Status</span>
+              <span class="detail-value" th:text="${customer.status}">Active</span>
+            </li>
+          </ul>
+        </article>
+
+        <article class="detail-card">
+          <h2>Order statistics</h2>
+          <ul class="detail-list">
+            <li>
+              <span class="detail-label">Returned orders</span>
+              <span class="detail-value" th:text="${customer.returnedOrders}">3</span>
+            </li>
+            <li>
+              <span class="detail-label">Return rate</span>
+              <span class="detail-value" th:text="${#numbers.formatDecimal(customer.returnRate, 0, 2) + '%'}">12%</span>
+            </li>
+            <li>
+              <span class="detail-label">Segment</span>
+              <span class="detail-value" th:text="${customer.customerSegment}">VIP</span>
+            </li>
+          </ul>
+        </article>
+      </div>
+
+      <article class="detail-card" th:if="${customer.topProductStockCode != null}">
+        <h2>Top purchased product</h2>
+        <ul class="detail-list">
+          <li>
+            <span class="detail-label">Product code</span>
+            <span class="detail-value" th:text="${customer.topProductStockCode}">85123A</span>
+          </li>
+          <li>
+            <span class="detail-label">Description</span>
+            <span class="detail-value" th:text="${customer.topProductDescription}">WHITE HANGING HEART T-LIGHT HOLDER</span>
+          </li>
+          <li>
+            <span class="detail-label">Units purchased</span>
+            <span class="detail-value" th:text="${customer.topProductQuantity}">48</span>
+          </li>
+        </ul>
+      </article>
     </div>
-</body>
+  </body>
 </html>
