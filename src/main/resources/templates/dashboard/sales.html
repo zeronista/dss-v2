@@ -303,6 +303,92 @@
             font-size: 14px;
         }
         
+        .export-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .btn-export {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .btn-export-csv {
+            background: #10b981;
+            color: white;
+        }
+        
+        .btn-export-csv:hover {
+            background: #059669;
+            transform: translateY(-2px);
+        }
+        
+        .btn-export-excel {
+            background: #3b82f6;
+            color: white;
+        }
+        
+        .btn-export-excel:hover {
+            background: #2563eb;
+            transform: translateY(-2px);
+        }
+        
+        .btn-export-pdf {
+            background: #ef4444;
+            color: white;
+        }
+        
+        .btn-export-pdf:hover {
+            background: #dc2626;
+            transform: translateY(-2px);
+        }
+        
+        .filter-controls {
+            display: flex;
+            gap: 15px;
+            align-items: flex-end;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .filter-group label {
+            margin-bottom: 5px;
+            color: #666;
+            font-weight: 600;
+            font-size: 13px;
+        }
+        
+        .filter-group select {
+            padding: 8px 12px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .filter-group select:focus {
+            outline: none;
+            border-color: #4facfe;
+            box-shadow: 0 0 0 3px rgba(79, 172, 254, 0.1);
+        }
+        
         .insights-box {
             background: #f0f8ff;
             padding: 20px;
@@ -382,19 +468,46 @@
         
         <div class="dashboard-grid">
             <div class="stat-card">
+                <div class="stat-card-icon">💵</div>
+                <div class="stat-card-title">Total Revenue</div>
+                <div class="stat-card-value" id="totalRevenue">Loading...</div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-card-icon">📦</div>
+                <div class="stat-card-title">Total Orders</div>
+                <div class="stat-card-value" id="totalOrders">Loading...</div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-card-icon">👥</div>
+                <div class="stat-card-title">Total Customers</div>
+                <div class="stat-card-value" id="totalCustomers">Loading...</div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-card-icon">💰</div>
+                <div class="stat-card-title">Avg Order Value</div>
+                <div class="stat-card-value" id="avgOrderValue">Loading...</div>
+            </div>
+        </div>
+        
+        <!-- Performance Metrics -->
+        <div class="dashboard-grid" style="margin-top: 20px;">
+            <div class="stat-card">
                 <div class="stat-card-icon">🎯</div>
                 <div class="stat-card-title">Recommendations Found</div>
                 <div class="stat-card-value" id="recsFound">-</div>
             </div>
             
             <div class="stat-card">
-                <div class="stat-card-icon">💰</div>
+                <div class="stat-card-icon">�</div>
                 <div class="stat-card-title">Potential Revenue</div>
                 <div class="stat-card-value" id="potentialRevenue">-</div>
             </div>
             
             <div class="stat-card">
-                <div class="stat-card-icon">�</div>
+                <div class="stat-card-icon">📊</div>
                 <div class="stat-card-title">Avg Confidence</div>
                 <div class="stat-card-value" id="avgConfidence">-</div>
             </div>
@@ -403,6 +516,14 @@
                 <div class="stat-card-icon">⭐</div>
                 <div class="stat-card-title">Avg Lift</div>
                 <div class="stat-card-value" id="avgLift">-</div>
+            </div>
+        </div>
+        
+        <!-- Top Products Section -->
+        <div class="recommendation-container" style="margin-top: 30px;">
+            <h2>🏆 Top Selling Products</h2>
+            <div id="topProductsContainer">
+                <p class="loading">Loading top products...</p>
             </div>
         </div>
         
@@ -431,6 +552,19 @@
                 <p class="loading">Enter a product code and click "Get Recommendations"</p>
             </div>
             
+            <!-- Export Buttons for Recommendations -->
+            <div class="export-buttons" id="exportRecommendations" style="display: none;">
+                <button class="btn-export btn-export-csv" onclick="exportRecommendations('csv')">
+                    📄 Export CSV
+                </button>
+                <button class="btn-export btn-export-excel" onclick="exportRecommendations('excel')">
+                    📊 Export Excel
+                </button>
+                <button class="btn-export btn-export-pdf" onclick="exportRecommendations('pdf')">
+                    📑 Export PDF
+                </button>
+            </div>
+            
             <div id="insightsContainer" style="display: none;">
                 <div class="insights-box">
                     <h3>💡 Cross-sell Strategy Insights</h3>
@@ -457,12 +591,37 @@
                 Most frequently bought together products across all customers.
             </p>
             
-            <button class="btn-primary" onclick="loadTopBundles()">
-                📊 Load Top Bundles
-            </button>
+            <div class="filter-controls">
+                <div class="filter-group">
+                    <label for="topNSelect">Select Top N</label>
+                    <select id="topNSelect">
+                        <option value="5">Top 5</option>
+                        <option value="10" selected>Top 10</option>
+                        <option value="20">Top 20</option>
+                        <option value="30">Top 30</option>
+                        <option value="50">Top 50</option>
+                    </select>
+                </div>
+                <button class="btn-primary" onclick="loadTopBundles()">
+                    📊 Load Top Bundles
+                </button>
+            </div>
             
             <div id="bundlesContainer">
-                <p class="loading">Click "Load Top Bundles" to see popular product combinations</p>
+                <p class="loading">Select Top N and click "Load Top Bundles" to see popular product combinations</p>
+            </div>
+            
+            <!-- Export Buttons for Bundles -->
+            <div class="export-buttons" id="exportBundles" style="display: none;">
+                <button class="btn-export btn-export-csv" onclick="exportBundles('csv')">
+                    📄 Export CSV
+                </button>
+                <button class="btn-export btn-export-excel" onclick="exportBundles('excel')">
+                    📊 Export Excel
+                </button>
+                <button class="btn-export btn-export-pdf" onclick="exportBundles('pdf')">
+                    📑 Export PDF
+                </button>
             </div>
         </div>
         
@@ -472,14 +631,6 @@
                 <a href="/invoices" class="action-btn">
                     <span class="action-btn-icon">📋</span>
                     View Invoices
-                </a>
-                <a href="/sales/deals" class="action-btn">
-                    <span class="action-btn-icon">💼</span>
-                    Active Deals
-                </a>
-                <a href="/sales/leads" class="action-btn">
-                    <span class="action-btn-icon">🎯</span>
-                    Lead Pipeline
                 </a>
                 <a href="/sales/reports" class="action-btn">
                     <span class="action-btn-icon">📊</span>
@@ -622,7 +773,7 @@
                 // Update stats
                 document.getElementById('recsFound').textContent = data.recommendations.length;
                 
-                const totalImpact = data.recommendations.reduce((sum, r) => sum + r.expected_impact, 0);
+                const totalImpact = data.recommendations.reduce((sum, r) => sum + r.estimated_impact, 0);
                 document.getElementById('potentialRevenue').textContent = '$' + totalImpact.toFixed(0);
                 
                 const avgConf = data.recommendations.reduce((sum, r) => sum + r.confidence, 0) / data.recommendations.length;
@@ -630,6 +781,9 @@
                 
                 const avgLiftVal = data.recommendations.reduce((sum, r) => sum + r.lift, 0) / data.recommendations.length;
                 document.getElementById('avgLift').textContent = avgLiftVal.toFixed(2) + 'x';
+                
+                // Store recommendations for export
+                currentRecommendations = data.recommendations;
                 
                 // Display recommendations
                 container.innerHTML = `
@@ -666,6 +820,9 @@
                         `).join('')}
                     </div>
                 `;
+                
+                // Show export buttons
+                document.getElementById('exportRecommendations').style.display = 'flex';
                 
                 // Load insights
                 loadCrossSellInsights(stockCode, customerId);
@@ -749,11 +906,15 @@
         
         // Load top bundles
         async function loadTopBundles() {
+            const topN = document.getElementById('topNSelect').value;
             const container = document.getElementById('bundlesContainer');
             container.innerHTML = '<div class="loading">Mining top product bundles...</div>';
             
+            // Hide export buttons while loading
+            document.getElementById('exportBundles').style.display = 'none';
+            
             try {
-                const response = await fetch(`${SALES_API_URL}/top-bundles?min_support=0.01&min_confidence=0.3&top_n=10`);
+                const response = await fetch(`${SALES_API_URL}/top-bundles?min_support=0.01&min_confidence=0.3&top_n=${topN}`);
                 
                 if (!response.ok) throw new Error('Failed to load bundles');
                 
@@ -763,6 +924,9 @@
                     container.innerHTML = '<p class="loading">No bundles found. Try lowering the thresholds.</p>';
                     return;
                 }
+                
+                // Store bundles for export
+                currentBundles = data.bundles;
                 
                 // Display in table
                 container.innerHTML = `
@@ -802,12 +966,293 @@
                     </table>
                 `;
                 
+                // Show export buttons
+                document.getElementById('exportBundles').style.display = 'flex';
+                
             } catch (error) {
                 console.error('Error loading bundles:', error);
                 container.innerHTML = '<div class="error">Failed to load bundles. Make sure the Sales API is running on port 8004.</div>';
             }
         }
+        
+        // Global variable to store current data for export
+        let currentRecommendations = null;
+        let currentBundles = null;
+        
+        // Export recommendations to different formats
+        function exportRecommendations(format) {
+            if (!currentRecommendations || currentRecommendations.length === 0) {
+                alert('No recommendations to export. Please generate recommendations first.');
+                return;
+            }
+            
+            const stockCode = document.getElementById('stockCode').value.trim();
+            const timestamp = new Date().toISOString().slice(0, 10);
+            const filename = `recommendations_${stockCode}_${timestamp}`;
+            
+            if (format === 'csv') {
+                exportToCSV(currentRecommendations, filename);
+            } else if (format === 'excel') {
+                exportToExcel(currentRecommendations, filename);
+            } else if (format === 'pdf') {
+                exportToPDF(currentRecommendations, filename, 'Product Recommendations');
+            }
+        }
+        
+        // Export bundles to different formats
+        function exportBundles(format) {
+            if (!currentBundles || currentBundles.length === 0) {
+                alert('No bundles to export. Please load bundles first.');
+                return;
+            }
+            
+            const topN = document.getElementById('topNSelect').value;
+            const timestamp = new Date().toISOString().slice(0, 10);
+            const filename = `top${topN}_bundles_${timestamp}`;
+            
+            if (format === 'csv') {
+                exportBundlesToCSV(currentBundles, filename);
+            } else if (format === 'excel') {
+                exportBundlesToExcel(currentBundles, filename);
+            } else if (format === 'pdf') {
+                exportBundlesToPDF(currentBundles, filename);
+            }
+        }
+        
+        // CSV Export for Recommendations
+        function exportToCSV(data, filename) {
+            const headers = ['Rank', 'Product Code', 'Description', 'Support', 'Confidence', 'Lift', 'Estimated Impact'];
+            const rows = data.map(rec => [
+                rec.rank,
+                rec.product_code,
+                `"${rec.description.replace(/"/g, '""')}"`,
+                rec.support,
+                rec.confidence,
+                rec.lift,
+                rec.estimated_impact
+            ]);
+            
+            let csvContent = headers.join(',') + '\n';
+            csvContent += rows.map(row => row.join(',')).join('\n');
+            
+            downloadFile(csvContent, filename + '.csv', 'text/csv');
+        }
+        
+        // CSV Export for Bundles
+        function exportBundlesToCSV(data, filename) {
+            const headers = ['Rank', 'Antecedent Codes', 'Antecedent Names', 'Consequent Codes', 'Consequent Names', 'Support', 'Confidence', 'Lift', 'Score'];
+            const rows = data.map(bundle => [
+                bundle.rank,
+                `"${bundle.antecedent_codes.join(', ')}"`,
+                `"${bundle.antecedent_names.join(', ').replace(/"/g, '""')}"`,
+                `"${bundle.consequent_codes.join(', ')}"`,
+                `"${bundle.consequent_names.join(', ').replace(/"/g, '""')}"`,
+                bundle.support,
+                bundle.confidence,
+                bundle.lift,
+                bundle.score
+            ]);
+            
+            let csvContent = headers.join(',') + '\n';
+            csvContent += rows.map(row => row.join(',')).join('\n');
+            
+            downloadFile(csvContent, filename + '.csv', 'text/csv');
+        }
+        
+        // Excel Export (using HTML table format)
+        function exportToExcel(data, filename) {
+            let excelContent = `
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Rank</th>
+                            <th>Product Code</th>
+                            <th>Description</th>
+                            <th>Support</th>
+                            <th>Confidence</th>
+                            <th>Lift</th>
+                            <th>Estimated Impact</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${data.map(rec => `
+                            <tr>
+                                <td>${rec.rank}</td>
+                                <td>${rec.product_code}</td>
+                                <td>${rec.description}</td>
+                                <td>${rec.support.toFixed(4)}</td>
+                                <td>${rec.confidence.toFixed(4)}</td>
+                                <td>${rec.lift.toFixed(4)}</td>
+                                <td>${rec.estimated_impact.toFixed(2)}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+            
+            downloadFile(excelContent, filename + '.xls', 'application/vnd.ms-excel');
+        }
+        
+        // Excel Export for Bundles
+        function exportBundlesToExcel(data, filename) {
+            let excelContent = `
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Rank</th>
+                            <th>Antecedent Codes</th>
+                            <th>Antecedent Names</th>
+                            <th>Consequent Codes</th>
+                            <th>Consequent Names</th>
+                            <th>Support</th>
+                            <th>Confidence</th>
+                            <th>Lift</th>
+                            <th>Score</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${data.map(bundle => `
+                            <tr>
+                                <td>${bundle.rank}</td>
+                                <td>${bundle.antecedent_codes.join(', ')}</td>
+                                <td>${bundle.antecedent_names.join(', ')}</td>
+                                <td>${bundle.consequent_codes.join(', ')}</td>
+                                <td>${bundle.consequent_names.join(', ')}</td>
+                                <td>${bundle.support.toFixed(4)}</td>
+                                <td>${bundle.confidence.toFixed(4)}</td>
+                                <td>${bundle.lift.toFixed(2)}</td>
+                                <td>${bundle.score.toFixed(2)}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+            
+            downloadFile(excelContent, filename + '.xls', 'application/vnd.ms-excel');
+        }
+        
+        // PDF Export (simple text-based)
+        function exportToPDF(data, filename, title) {
+            let pdfContent = `${title}\n\n`;
+            pdfContent += 'Rank | Product Code | Description | Support | Confidence | Lift | Impact\n';
+            pdfContent += '─'.repeat(100) + '\n';
+            
+            data.forEach(rec => {
+                pdfContent += `${rec.rank} | ${rec.product_code} | ${rec.description.slice(0, 30)} | ${rec.support.toFixed(4)} | ${rec.confidence.toFixed(4)} | ${rec.lift.toFixed(2)} | $${rec.estimated_impact.toFixed(0)}\n`;
+            });
+            
+            downloadFile(pdfContent, filename + '.txt', 'text/plain');
+            alert('Note: PDF export is simplified to text format. For full PDF, consider using a dedicated PDF library.');
+        }
+        
+        // PDF Export for Bundles
+        function exportBundlesToPDF(data, filename) {
+            let pdfContent = 'Top Product Bundles\n\n';
+            pdfContent += 'Rank | Antecedent → Consequent | Support | Confidence | Lift | Score\n';
+            pdfContent += '─'.repeat(100) + '\n';
+            
+            data.forEach(bundle => {
+                const ant = bundle.antecedent_codes.join(',');
+                const con = bundle.consequent_codes.join(',');
+                pdfContent += `${bundle.rank} | ${ant} → ${con} | ${bundle.support.toFixed(4)} | ${bundle.confidence.toFixed(4)} | ${bundle.lift.toFixed(2)} | ${bundle.score.toFixed(2)}\n`;
+            });
+            
+            downloadFile(pdfContent, filename + '.txt', 'text/plain');
+            alert('Note: PDF export is simplified to text format. For full PDF, consider using a dedicated PDF library.');
+        }
+        
+        // Helper function to download file
+        function downloadFile(content, filename, mimeType) {
+            const blob = new Blob([content], { type: mimeType });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+        }
+        
+        // Load Sales Reports & Analytics on page load
+        async function loadSalesReports() {
+            try {
+                const response = await fetch(`${SALES_API_URL}/reports?period=all&limit=5`);
+                if (!response.ok) {
+                    throw new Error('Failed to load sales reports');
+                }
+                
+                const data = await response.json();
+                const report = data.report;
+                
+                // Update sales stats
+                document.getElementById('totalRevenue').textContent = '$' + report.total_revenue.toLocaleString(undefined, {maximumFractionDigits: 0});
+                document.getElementById('totalOrders').textContent = report.total_orders.toLocaleString();
+                document.getElementById('totalCustomers').textContent = report.total_customers.toLocaleString();
+                document.getElementById('avgOrderValue').textContent = '$' + report.avg_order_value.toLocaleString(undefined, {maximumFractionDigits: 2});
+                
+                // Render top products
+                renderTopProducts(report.top_products);
+                
+            } catch (error) {
+                console.error('Error loading sales reports:', error);
+                document.getElementById('totalRevenue').textContent = 'Error';
+                document.getElementById('totalOrders').textContent = 'Error';
+                document.getElementById('totalCustomers').textContent = 'Error';
+                document.getElementById('avgOrderValue').textContent = 'Error';
+                document.getElementById('topProductsContainer').innerHTML = '<div class="error">Failed to load sales data. Please check the API connection.</div>';
+            }
+        }
+        
+        function renderTopProducts(products) {
+            if (!products || products.length === 0) {
+                document.getElementById('topProductsContainer').innerHTML = '<p class="loading">No products data available.</p>';
+                return;
+            }
+            
+            let html = `
+                <table style="width: 100%; border-collapse: collapse; margin-top: 15px;">
+                    <thead>
+                        <tr style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+                            <th style="padding: 12px; text-align: left;">Rank</th>
+                            <th style="padding: 12px; text-align: left;">Stock Code</th>
+                            <th style="padding: 12px; text-align: left;">Description</th>
+                            <th style="padding: 12px; text-align: right;">Revenue</th>
+                            <th style="padding: 12px; text-align: right;">Quantity Sold</th>
+                            <th style="padding: 12px; text-align: right;">Orders</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+            
+            products.forEach((product, index) => {
+                const rowColor = index % 2 === 0 ? '#f9fafb' : 'white';
+                html += `
+                    <tr style="background: ${rowColor}; border-bottom: 1px solid #e5e7eb;">
+                        <td style="padding: 12px;"><strong>#${index + 1}</strong></td>
+                        <td style="padding: 12px;"><code style="background: #e0e7ff; padding: 4px 8px; border-radius: 4px;">${product.stock_code}</code></td>
+                        <td style="padding: 12px;">${product.description}</td>
+                        <td style="padding: 12px; text-align: right;"><strong style="color: #059669;">$${product.revenue.toLocaleString(undefined, {maximumFractionDigits: 0})}</strong></td>
+                        <td style="padding: 12px; text-align: right;">${product.quantity_sold.toLocaleString()}</td>
+                        <td style="padding: 12px; text-align: right;">${product.orders.toLocaleString()}</td>
+                    </tr>
+                `;
+            });
+            
+            html += `
+                    </tbody>
+                </table>
+            `;
+            
+            document.getElementById('topProductsContainer').innerHTML = html;
+        }
+        
+        // Load sales reports when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            loadSalesReports();
+        });
     </script>
 </body>
 </html>
+
 

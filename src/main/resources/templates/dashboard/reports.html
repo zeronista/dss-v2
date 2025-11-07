@@ -31,10 +31,10 @@
             font-weight: bold;
         }
         
-        .navbar-user {
+        .navbar-actions {
             display: flex;
             align-items: center;
-            gap: 20px;
+            gap: 15px;
         }
         
         .btn-back {
@@ -46,6 +46,7 @@
             font-weight: 600;
             text-decoration: none;
             transition: all 0.3s;
+            display: inline-block;
         }
         
         .btn-back:hover {
@@ -81,10 +82,21 @@
         }
         
         .stat-card {
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-            padding: 20px;
-            border-radius: 10px;
-            text-align: center;
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            transition: all 0.3s;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+        
+        .stat-card-icon {
+            font-size: 32px;
+            margin-bottom: 10px;
         }
         
         .stat-value {
@@ -255,8 +267,8 @@
 <body>
     <nav class="navbar">
         <div class="navbar-brand">📊 Sales Reports & Analytics</div>
-        <div class="navbar-user">
-            <a href="/dashboard/sales" class="btn-back">← Back to Dashboard</a>
+        <div class="navbar-actions">
+            <a href="/sales/dashboard" class="btn-back">← Back to Sales Dashboard</a>
         </div>
     </nav>
     
@@ -267,22 +279,27 @@
             
             <div class="stats-grid" id="statsGrid">
                 <div class="stat-card">
+                    <div class="stat-card-icon">💰</div>
                     <div class="stat-value" id="totalRevenue">-</div>
                     <div class="stat-label">Total Revenue</div>
                 </div>
                 <div class="stat-card">
+                    <div class="stat-card-icon">📦</div>
                     <div class="stat-value" id="totalOrders">-</div>
                     <div class="stat-label">Total Orders</div>
                 </div>
                 <div class="stat-card">
+                    <div class="stat-card-icon">💵</div>
                     <div class="stat-value" id="avgOrderValue">-</div>
                     <div class="stat-label">Avg Order Value</div>
                 </div>
                 <div class="stat-card">
+                    <div class="stat-card-icon">👥</div>
                     <div class="stat-value" id="totalCustomers">-</div>
                     <div class="stat-label">Total Customers</div>
                 </div>
                 <div class="stat-card">
+                    <div class="stat-card-icon">📈</div>
                     <div class="stat-value" id="growthRate">-</div>
                     <div class="stat-label">Growth Rate</div>
                 </div>

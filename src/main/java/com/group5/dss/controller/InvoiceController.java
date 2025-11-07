@@ -24,9 +24,37 @@ public class InvoiceController {
     public String getInvoices(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "25") int size,
+            @RequestParam(required = false) String invoiceNo,
+            @RequestParam(required = false) String stockCode,
+            @RequestParam(required = false) String description,
+            @RequestParam(required = false) String customerId,
+            @RequestParam(required = false) String country,
             Model model) {
         
-        Page<Invoice> invoicePage = invoiceService.getAllInvoices(page, size);
+        Page<Invoice> invoicePage;
+        
+        // Check if any search parameter is provided
+        boolean hasSearchParams = (invoiceNo != null && !invoiceNo.trim().isEmpty()) ||
+                                 (stockCode != null && !stockCode.trim().isEmpty()) ||
+                                 (description != null && !description.trim().isEmpty()) ||
+                                 (customerId != null && !customerId.trim().isEmpty()) ||
+                                 (country != null && !country.trim().isEmpty());
+        
+        if (hasSearchParams) {
+            // Search with filters
+            invoicePage = invoiceService.searchInvoices(
+                invoiceNo, 
+                stockCode, 
+                description, 
+                customerId, 
+                country, 
+                page, 
+                size
+            );
+        } else {
+            // Get all invoices
+            invoicePage = invoiceService.getAllInvoices(page, size);
+        }
         
         model.addAttribute("invoices", invoicePage.getContent());
         model.addAttribute("currentPage", page);

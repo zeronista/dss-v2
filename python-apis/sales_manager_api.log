@@ -1,0 +1,55 @@
+nohup: ignoring input
+/home/ubuntu/anaconda3/lib/python3.12/site-packages/pydantic/_internal/_config.py:268: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.5/migration/
+  warnings.warn(DEPRECATION_MESSAGE, DeprecationWarning)
+/home/ubuntu/anaconda3/lib/python3.12/site-packages/websockets/legacy/__init__.py:6: DeprecationWarning: websockets.legacy is deprecated; see https://websockets.readthedocs.io/en/stable/howto/upgrade.html for upgrade instructions
+  warnings.warn(  # deprecated in 14.0 - 2024-11-09
+/home/ubuntu/anaconda3/lib/python3.12/site-packages/uvicorn/protocols/websockets/websockets_impl.py:22: DeprecationWarning: websockets.server.WebSocketServerProtocol is deprecated
+  from websockets.server import WebSocketServerProtocol
+INFO:     Started server process [89004]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8004 (Press CTRL+C to quit)
+📊 Loading data from CSV...
+✅ Successfully loaded with latin-1 encoding
+📊 Loaded 530,104 total transactions (FULL DATA)
+📅 Date range: 2010-12-01 08:26:00 to 2011-12-09 12:50:00
+🛍️  Unique products: 3,922
+👥 Unique customers: 4,338
+✅ Loaded 530,104 transactions
+🚀 Starting Sales Manager API on port 8004...
+🛍️  Role: Sales Manager - Cross-sell & Retention Engine
+📊 Data Source: CSV (530,104 transactions)
+📝 Documentation: http://localhost:8004/docs
+🔍 Health check: http://localhost:8004/health
+INFO:     127.0.0.1:41506 - "GET /reports?period=all&limit=10 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46446 - "GET /reports?period=all&limit=5 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:35670 - "GET /reports?period=monthly&limit=12 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:35670 - "GET /reports?period=monthly&limit=12 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:35670 - "GET /reports?period=weekly&limit=12 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:35670 - "GET /reports?period=monthly&limit=12 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:35670 - "GET /reports?period=daily&limit=12 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:35670 - "GET /reports?period=daily&limit=100 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:35670 - "GET /reports?period=daily&limit=200 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:35670 - "GET /reports?period=monthly&limit=200 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:35670 - "GET /reports?period=monthly&limit=12 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37084 - "GET /reports?period=all&limit=5 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:39696 - "GET /reports?period=monthly&limit=12 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43310 - "OPTIONS /generate-recommendations HTTP/1.1" 200 OK
+/home/ubuntu/anaconda3/lib/python3.12/site-packages/mlxtend/frequent_patterns/fpcommon.py:110: DeprecationWarning: DataFrames with non-bool types result in worse computationalperformance and their support might be discontinued in the future.Please use a DataFrame with bool type
+  warnings.warn(
+🔍 Analyzing 20,000 transactions with 100 products
+INFO:     127.0.0.1:43316 - "POST /generate-recommendations HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43316 - "OPTIONS /cross-sell-insights HTTP/1.1" 200 OK
+/home/ubuntu/anaconda3/lib/python3.12/site-packages/mlxtend/frequent_patterns/fpcommon.py:110: DeprecationWarning: DataFrames with non-bool types result in worse computationalperformance and their support might be discontinued in the future.Please use a DataFrame with bool type
+  warnings.warn(
+/home/ubuntu/DataScience/MyProject/dss-v2/python-apis/sales_manager_api.py:665: PydanticDeprecatedSince20: The `dict` method is deprecated; use `model_dump` instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.5/migration/
+  recommendations = [rec.dict() for rec in recs.recommendations]
+/home/ubuntu/anaconda3/lib/python3.12/site-packages/pydantic/main.py:979: PydanticDeprecatedSince20: The `dict` method is deprecated; use `model_dump` instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.5/migration/
+  warnings.warn('The `dict` method is deprecated; use `model_dump` instead.', DeprecationWarning)
+🔍 Analyzing 20,000 transactions with 100 products
+INFO:     127.0.0.1:43310 - "POST /cross-sell-insights HTTP/1.1" 200 OK
+INFO:     127.0.0.1:32938 - "GET /reports?period=monthly&limit=12 HTTP/1.1" 200 OK
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [89004]

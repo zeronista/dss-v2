@@ -1,4 +1,4 @@
-INFO:     Started server process [49681]
+INFO:     Started server process [67186]
 INFO:     Waiting for application startup.
 INFO:     Application startup complete.
 INFO:     Uvicorn running on http://0.0.0.0:8002 (Press CTRL+C to quit)
@@ -6,4 +6,18 @@ INFO:     Uvicorn running on http://0.0.0.0:8002 (Press CTRL+C to quit)
 📦 Role: Inventory Manager - Return Risk Management
 📝 Documentation: http://localhost:8002/docs
 🔍 Health check: http://localhost:8002/health
-INFO:     127.0.0.1:47716 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:41206 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51306 - "GET /health HTTP/1.1" 200 OK
+📂 Loading FULL transactions from local CSV: /home/ubuntu/DataScience/MyProject/dss-v2/python-apis/../data/online_retail.csv
+✅ Loaded 541909 FULL transactions from CSV
+   📊 Returns/Cancellations: 9288 (1.7%)
+   📊 Negative Quantities: 10624 (2.0%)
+   💾 Cached for 3600s
+INFO:     127.0.0.1:59952 - "GET /risk-distribution?sample_size=1000 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59964 - "OPTIONS /find-optimal-threshold HTTP/1.1" 200 OK
+✅ Using cached FULL data (541909 rows, age: 21s)
+INFO:     127.0.0.1:59952 - "POST /find-optimal-threshold HTTP/1.1" 500 Internal Server Error
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [67186]

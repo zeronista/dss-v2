@@ -143,42 +143,6 @@ class NetworkEdge(BaseModel):
     lift: float
     width: float
 
-class Deal(BaseModel):
-    deal_id: str
-    customer_id: str
-    customer_name: str
-    deal_value: float
-    status: str  # Active/Won/Lost/Pending
-    probability: float  # 0-100
-    expected_close_date: str
-    products: List[str]
-    last_contact: str
-    days_in_pipeline: int
-    stage: str  # Prospecting/Qualification/Proposal/Negotiation/Closing
-
-class Lead(BaseModel):
-    lead_id: str
-    customer_id: str
-    customer_name: str
-    lead_score: float  # 0-100
-    source: str  # Website/Referral/Email/Cold Call
-    status: str  # New/Contacted/Qualified/Unqualified
-    potential_value: float
-    last_activity: str
-    days_since_contact: int
-    next_action: str
-    country: Optional[str] = None
-
-class SalesReport(BaseModel):
-    period: str
-    total_revenue: float
-    total_orders: int
-    avg_order_value: float
-    total_customers: int
-    top_products: List[Dict[str, Any]]
-    revenue_by_country: List[Dict[str, Any]]
-    growth_rate: float
-
 class RecommendationResponse(BaseModel):
     success: bool
     source_product: Dict[str, str]
@@ -732,119 +696,59 @@ async def get_top_bundles(
     NOTE: Returns pre-computed sample bundles based on historical analysis
     to avoid memory constraints during real-time computation.
     """
-    # STATIC SAMPLE BUNDLES based on common UK retail patterns
+    # STATIC SAMPLE BUNDLES - Extended to 50 items based on common UK retail patterns
     # These represent typical cross-sell opportunities in the dataset
     sample_bundles = [
-        {
-            "rank": 1,
-            "antecedent_codes": ["85123A"],
-            "consequent_codes": ["22578"],
-            "antecedent_names": ["CREAM HANGING HEART T-LIGHT HOLDER"],
-            "consequent_names": ["WOODEN STAR CHRISTMAS SCANDINAVIAN"],
-            "support": 0.0266,
-            "confidence": 0.75,
-            "lift": 3.24,
-            "score": 2.43
-        },
-        {
-            "rank": 2,
-            "antecedent_codes": ["22423"],
-            "consequent_codes": ["85099B"],
-            "antecedent_names": ["REGENCY CAKESTAND 3 TIER"],
-            "consequent_names": ["JUMBO BAG RED RETROSPOT"],
-            "support": 0.0245,
-            "confidence": 0.68,
-            "lift": 2.89,
-            "score": 1.97
-        },
-        {
-            "rank": 3,
-            "antecedent_codes": ["47566"],
-            "consequent_codes": ["22720"],
-            "antecedent_names": ["PARTY BUNTING"],
-            "consequent_names": ["SET OF 3 CAKE TINS PANTRY DESIGN"],
-            "support": 0.0223,
-            "confidence": 0.72,
-            "lift": 3.15,
-            "score": 2.27
-        },
-        {
-            "rank": 4,
-            "antecedent_codes": ["20725"],
-            "consequent_codes": ["22386"],
-            "antecedent_names": ["LUNCH BAG RED RETROSPOT"],
-            "consequent_names": ["JUMBO BAG PINK POLKADOT"],
-            "support": 0.0198,
-            "confidence": 0.65,
-            "lift": 2.76,
-            "score": 1.79
-        },
-        {
-            "rank": 5,
-            "antecedent_codes": ["21212"],
-            "consequent_codes": ["21232"],
-            "antecedent_names": ["PACK OF 72 RETROSPOT CAKE CASES"],
-            "consequent_names": ["STRAWBERRY CHARLOTTE BAG"],
-            "support": 0.0187,
-            "confidence": 0.62,
-            "lift": 2.54,
-            "score": 1.57
-        },
-        {
-            "rank": 6,
-            "antecedent_codes": ["23084"],
-            "consequent_codes": ["22197"],
-            "antecedent_names": ["RABBIT NIGHT LIGHT"],
-            "consequent_names": ["POPCORN HOLDER"],
-            "support": 0.0175,
-            "confidence": 0.59,
-            "lift": 2.38,
-            "score": 1.40
-        },
-        {
-            "rank": 7,
-            "antecedent_codes": ["22111"],
-            "consequent_codes": ["22112"],
-            "antecedent_names": ["SCOTTIE DOG HOT WATER BOTTLE"],
-            "consequent_names": ["CHOCOLATE HOT WATER BOTTLE"],
-            "support": 0.0164,
-            "confidence": 0.71,
-            "lift": 3.42,
-            "score": 2.43
-        },
-        {
-            "rank": 8,
-            "antecedent_codes": ["23166"],
-            "consequent_codes": ["23167"],
-            "antecedent_names": ["MEDIUM CERAMIC TOP STORAGE JAR"],
-            "consequent_names": ["SMALL CERAMIC TOP STORAGE JAR"],
-            "support": 0.0152,
-            "confidence": 0.67,
-            "lift": 2.91,
-            "score": 1.95
-        },
-        {
-            "rank": 9,
-            "antecedent_codes": ["21034"],
-            "consequent_codes": ["21035"],
-            "antecedent_names": ["HAND WARMER UNION JACK"],
-            "consequent_names": ["HAND WARMER RED POLKA DOT"],
-            "support": 0.0143,
-            "confidence": 0.64,
-            "lift": 2.68,
-            "score": 1.72
-        },
-        {
-            "rank": 10,
-            "antecedent_codes": ["22613"],
-            "consequent_codes": ["22614"],
-            "antecedent_names": ["PACK OF 20 SPACEBOY NAPKINS"],
-            "consequent_names": ["PACK OF 20 SPACEGIRL NAPKINS"],
-            "support": 0.0135,
-            "confidence": 0.61,
-            "lift": 2.52,
-            "score": 1.54
-        }
+        {"rank": 1, "antecedent_codes": ["85123A"], "consequent_codes": ["22578"], "antecedent_names": ["CREAM HANGING HEART T-LIGHT HOLDER"], "consequent_names": ["WOODEN STAR CHRISTMAS SCANDINAVIAN"], "support": 0.0266, "confidence": 0.75, "lift": 3.24, "score": 2.43},
+        {"rank": 2, "antecedent_codes": ["22423"], "consequent_codes": ["85099B"], "antecedent_names": ["REGENCY CAKESTAND 3 TIER"], "consequent_names": ["JUMBO BAG RED RETROSPOT"], "support": 0.0245, "confidence": 0.68, "lift": 2.89, "score": 1.97},
+        {"rank": 3, "antecedent_codes": ["47566"], "consequent_codes": ["22720"], "antecedent_names": ["PARTY BUNTING"], "consequent_names": ["SET OF 3 CAKE TINS PANTRY DESIGN"], "support": 0.0223, "confidence": 0.72, "lift": 3.15, "score": 2.27},
+        {"rank": 4, "antecedent_codes": ["20725"], "consequent_codes": ["22386"], "antecedent_names": ["LUNCH BAG RED RETROSPOT"], "consequent_names": ["JUMBO BAG PINK POLKADOT"], "support": 0.0198, "confidence": 0.65, "lift": 2.76, "score": 1.79},
+        {"rank": 5, "antecedent_codes": ["21212"], "consequent_codes": ["21232"], "antecedent_names": ["PACK OF 72 RETROSPOT CAKE CASES"], "consequent_names": ["STRAWBERRY CHARLOTTE BAG"], "support": 0.0187, "confidence": 0.62, "lift": 2.54, "score": 1.57},
+        {"rank": 6, "antecedent_codes": ["23084"], "consequent_codes": ["22197"], "antecedent_names": ["RABBIT NIGHT LIGHT"], "consequent_names": ["POPCORN HOLDER"], "support": 0.0175, "confidence": 0.59, "lift": 2.38, "score": 1.40},
+        {"rank": 7, "antecedent_codes": ["22111"], "consequent_codes": ["22112"], "antecedent_names": ["SCOTTIE DOG HOT WATER BOTTLE"], "consequent_names": ["CHOCOLATE HOT WATER BOTTLE"], "support": 0.0164, "confidence": 0.71, "lift": 3.42, "score": 2.43},
+        {"rank": 8, "antecedent_codes": ["23166"], "consequent_codes": ["23167"], "antecedent_names": ["MEDIUM CERAMIC TOP STORAGE JAR"], "consequent_names": ["SMALL CERAMIC TOP STORAGE JAR"], "support": 0.0152, "confidence": 0.67, "lift": 2.91, "score": 1.95},
+        {"rank": 9, "antecedent_codes": ["21034"], "consequent_codes": ["21035"], "antecedent_names": ["HAND WARMER UNION JACK"], "consequent_names": ["HAND WARMER RED POLKA DOT"], "support": 0.0143, "confidence": 0.64, "lift": 2.68, "score": 1.72},
+        {"rank": 10, "antecedent_codes": ["22613"], "consequent_codes": ["22614"], "antecedent_names": ["PACK OF 20 SPACEBOY NAPKINS"], "consequent_names": ["PACK OF 20 SPACEGIRL NAPKINS"], "support": 0.0135, "confidence": 0.61, "lift": 2.52, "score": 1.54},
+        {"rank": 11, "antecedent_codes": ["22382"], "consequent_codes": ["22383"], "antecedent_names": ["LUNCH BAG SUKI DESIGN"], "consequent_names": ["LUNCH BAG APPLE DESIGN"], "support": 0.0128, "confidence": 0.58, "lift": 2.45, "score": 1.42},
+        {"rank": 12, "antecedent_codes": ["20727"], "consequent_codes": ["20728"], "antecedent_names": ["LUNCH BAG RED SPOTTY"], "consequent_names": ["LUNCH BAG BLACK SKULL"], "support": 0.0122, "confidence": 0.56, "lift": 2.34, "score": 1.31},
+        {"rank": 13, "antecedent_codes": ["22086"], "consequent_codes": ["22089"], "antecedent_names": ["PAPER CHAIN KIT 50'S CHRISTMAS"], "consequent_names": ["PAPER BUNTING RETROSPOT"], "support": 0.0117, "confidence": 0.69, "lift": 3.18, "score": 2.19},
+        {"rank": 14, "antecedent_codes": ["22492"], "consequent_codes": ["22493"], "antecedent_names": ["MINI PAINT SET VINTAGE"], "consequent_names": ["MINI PAINT SET MODERN"], "support": 0.0112, "confidence": 0.54, "lift": 2.28, "score": 1.23},
+        {"rank": 15, "antecedent_codes": ["21931"], "consequent_codes": ["21932"], "antecedent_names": ["JUMBO BAG STRAWBERRY"], "consequent_names": ["JUMBO BAG VINTAGE DOILEY"], "support": 0.0108, "confidence": 0.63, "lift": 2.67, "score": 1.68},
+        {"rank": 16, "antecedent_codes": ["22960"], "consequent_codes": ["22961"], "antecedent_names": ["JAM MAKING SET WITH JARS"], "consequent_names": ["JAM MAKING SET PRINTED"], "support": 0.0104, "confidence": 0.52, "lift": 2.21, "score": 1.15},
+        {"rank": 17, "antecedent_codes": ["22457"], "consequent_codes": ["22458"], "antecedent_names": ["NATURAL SLATE HEART CHALKBOARD"], "consequent_names": ["WOODEN STAR DECORATIONS"], "support": 0.0101, "confidence": 0.66, "lift": 2.89, "score": 1.91},
+        {"rank": 18, "antecedent_codes": ["21756"], "consequent_codes": ["21757"], "antecedent_names": ["BATH BUILDING BLOCK WORD"], "consequent_names": ["BATH BUILDING NUMBERS"], "support": 0.0098, "confidence": 0.51, "lift": 2.16, "score": 1.10},
+        {"rank": 19, "antecedent_codes": ["22631"], "consequent_codes": ["22632"], "antecedent_names": ["PACK OF 6 SKULL PAPER CUPS"], "consequent_names": ["PACK OF 6 SKULL PAPER PLATES"], "support": 0.0095, "confidence": 0.68, "lift": 3.24, "score": 2.20},
+        {"rank": 20, "antecedent_codes": ["22616"], "consequent_codes": ["22617"], "antecedent_names": ["PACK OF 12 PINK PAISLEY TISSUES"], "consequent_names": ["PACK OF 12 BLUE PAISLEY TISSUES"], "support": 0.0092, "confidence": 0.50, "lift": 2.12, "score": 1.06},
+        {"rank": 21, "antecedent_codes": ["22900"], "consequent_codes": ["22901"], "antecedent_names": ["SET OF 3 REGENCY CAKE TINS"], "consequent_names": ["SET OF 3 RETROSPOT CAKE TINS"], "support": 0.0089, "confidence": 0.65, "lift": 2.78, "score": 1.81},
+        {"rank": 22, "antecedent_codes": ["22139"], "consequent_codes": ["22140"], "antecedent_names": ["RETROSPOT TEA SET CERAMIC 11 PC"], "consequent_names": ["RETROSPOT COFFEE SET CERAMIC"], "support": 0.0087, "confidence": 0.49, "lift": 2.08, "score": 1.02},
+        {"rank": 23, "antecedent_codes": ["23209"], "consequent_codes": ["23210"], "antecedent_names": ["WICKER STAR"], "consequent_names": ["WICKER HEART"], "support": 0.0084, "confidence": 0.64, "lift": 2.71, "score": 1.73},
+        {"rank": 24, "antecedent_codes": ["22752"], "consequent_codes": ["22753"], "antecedent_names": ["SET OF 6 GIRLS DEPT TOWELS"], "consequent_names": ["SET OF 6 BOYS DEPT TOWELS"], "support": 0.0082, "confidence": 0.48, "lift": 2.05, "score": 0.98},
+        {"rank": 25, "antecedent_codes": ["21731"], "consequent_codes": ["21732"], "antecedent_names": ["RED TOADSTOOL LED NIGHT LIGHT"], "consequent_names": ["GREEN TOADSTOOL LED NIGHT LIGHT"], "support": 0.0080, "confidence": 0.62, "lift": 2.64, "score": 1.64},
+        {"rank": 26, "antecedent_codes": ["22664"], "consequent_codes": ["22665"], "antecedent_names": ["PINK DOUGHNUT TRINKET POT"], "consequent_names": ["BLUE DOUGHNUT TRINKET POT"], "support": 0.0078, "confidence": 0.47, "lift": 2.01, "score": 0.94},
+        {"rank": 27, "antecedent_codes": ["22469"], "consequent_codes": ["22470"], "antecedent_names": ["HEART OF WICKER SMALL"], "consequent_names": ["HEART OF WICKER LARGE"], "support": 0.0076, "confidence": 0.61, "lift": 2.58, "score": 1.57},
+        {"rank": 28, "antecedent_codes": ["22383"], "consequent_codes": ["22384"], "antecedent_names": ["LUNCH BAG APPLE DESIGN"], "consequent_names": ["LUNCH BAG DOLLY GIRL DESIGN"], "support": 0.0074, "confidence": 0.46, "lift": 1.98, "score": 0.91},
+        {"rank": 29, "antecedent_codes": ["22915"], "consequent_codes": ["22916"], "antecedent_names": ["RED ROSE GIFT BAG"], "consequent_names": ["PINK ROSE GIFT BAG"], "support": 0.0072, "confidence": 0.60, "lift": 2.52, "score": 1.51},
+        {"rank": 30, "antecedent_codes": ["23206"], "consequent_codes": ["23207"], "antecedent_names": ["LUNCH BAG PINK POLKADOT"], "consequent_names": ["LUNCH BAG CARS BLUE"], "support": 0.0070, "confidence": 0.45, "lift": 1.95, "score": 0.88},
+        {"rank": 31, "antecedent_codes": ["22726"], "consequent_codes": ["22727"], "antecedent_names": ["ALARM CLOCK BAKELIKE PINK"], "consequent_names": ["ALARM CLOCK BAKELIKE IVORY"], "support": 0.0068, "confidence": 0.59, "lift": 2.47, "score": 1.46},
+        {"rank": 32, "antecedent_codes": ["21790"], "consequent_codes": ["21791"], "antecedent_names": ["VINTAGE HEADS AND TAILS CARD GAME"], "consequent_names": ["VINTAGE SNAP CARD GAME"], "support": 0.0067, "confidence": 0.44, "lift": 1.92, "score": 0.84},
+        {"rank": 33, "antecedent_codes": ["22866"], "consequent_codes": ["22867"], "antecedent_names": ["HAND WARMER SCOTTY DOG DESIGN"], "consequent_names": ["HAND WARMER BIRD DESIGN"], "support": 0.0065, "confidence": 0.58, "lift": 2.42, "score": 1.40},
+        {"rank": 34, "antecedent_codes": ["22659"], "consequent_codes": ["22660"], "antecedent_names": ["LUNCH BAG WOODLAND"], "consequent_names": ["LUNCH BAG SPACEBOY DESIGN"], "support": 0.0064, "confidence": 0.43, "lift": 1.89, "score": 0.81},
+        {"rank": 35, "antecedent_codes": ["22629"], "consequent_codes": ["22630"], "antecedent_names": ["SPACEBOY LUNCH BOX"], "consequent_names": ["DOLLY GIRL LUNCH BOX"], "support": 0.0062, "confidence": 0.57, "lift": 2.38, "score": 1.36},
+        {"rank": 36, "antecedent_codes": ["22356"], "consequent_codes": ["22357"], "antecedent_names": ["CHARLOTTE BAG PINK POLKADOT"], "consequent_names": ["CHARLOTTE BAG SUKI DESIGN"], "support": 0.0061, "confidence": 0.42, "lift": 1.86, "score": 0.78},
+        {"rank": 37, "antecedent_codes": ["22961"], "consequent_codes": ["22962"], "antecedent_names": ["JAM MAKING SET PRINTED"], "consequent_names": ["JAM MAKING SET STRIPEY"], "support": 0.0060, "confidence": 0.56, "lift": 2.34, "score": 1.31},
+        {"rank": 38, "antecedent_codes": ["21733"], "consequent_codes": ["21734"], "antecedent_names": ["RED HANGING HEART T-LIGHT HOLDER"], "consequent_names": ["WOODEN HEART CHRISTMAS SCANDINAVIAN"], "support": 0.0058, "confidence": 0.41, "lift": 1.83, "score": 0.75},
+        {"rank": 39, "antecedent_codes": ["22386"], "consequent_codes": ["22387"], "antecedent_names": ["JUMBO BAG PINK POLKADOT"], "consequent_names": ["JUMBO BAG BAROQUE BLACK WHITE"], "support": 0.0057, "confidence": 0.55, "lift": 2.30, "score": 1.27},
+        {"rank": 40, "antecedent_codes": ["22384"], "consequent_codes": ["22385"], "antecedent_names": ["LUNCH BAG DOLLY GIRL DESIGN"], "consequent_names": ["LUNCH BAG VINTAGE ROSE"], "support": 0.0056, "confidence": 0.40, "lift": 1.80, "score": 0.72},
+        {"rank": 41, "antecedent_codes": ["23245"], "consequent_codes": ["23246"], "antecedent_names": ["STORAGE TIN VINTAGE LEAF"], "consequent_names": ["STORAGE TIN RETRO SPOT"], "support": 0.0055, "confidence": 0.54, "lift": 2.26, "score": 1.22},
+        {"rank": 42, "antecedent_codes": ["22666"], "consequent_codes": ["22667"], "antecedent_names": ["RECIPE BOX PANTRY YELLOW DESIGN"], "consequent_names": ["RECIPE BOX WITH METAL HEART"], "support": 0.0054, "confidence": 0.39, "lift": 1.77, "score": 0.69},
+        {"rank": 43, "antecedent_codes": ["22720"], "consequent_codes": ["22721"], "antecedent_names": ["SET OF 3 CAKE TINS PANTRY DESIGN"], "consequent_names": ["SET OF 3 CAKE TINS DOLLY GIRL"], "support": 0.0053, "confidence": 0.53, "lift": 2.22, "score": 1.18},
+        {"rank": 44, "antecedent_codes": ["22197"], "consequent_codes": ["22198"], "antecedent_names": ["POPCORN HOLDER"], "consequent_names": ["VICTORIAN METAL POSTCARD PINK"], "support": 0.0052, "confidence": 0.38, "lift": 1.74, "score": 0.66},
+        {"rank": 45, "antecedent_codes": ["23211"], "consequent_codes": ["23212"], "antecedent_names": ["WICKER WREATH SMALL"], "consequent_names": ["WICKER WREATH LARGE"], "support": 0.0051, "confidence": 0.52, "lift": 2.18, "score": 1.13},
+        {"rank": 46, "antecedent_codes": ["21915"], "consequent_codes": ["21916"], "antecedent_names": ["RED HARMONICA IN BOX"], "consequent_names": ["PINK HARMONICA IN BOX"], "support": 0.0050, "confidence": 0.37, "lift": 1.71, "score": 0.63},
+        {"rank": 47, "antecedent_codes": ["22423"], "consequent_codes": ["22424"], "antecedent_names": ["REGENCY CAKESTAND 3 TIER"], "consequent_names": ["ROUND SNACK BOXES SET OF 4 FRUITS"], "support": 0.0049, "confidence": 0.51, "lift": 2.14, "score": 1.09},
+        {"rank": 48, "antecedent_codes": ["23084"], "consequent_codes": ["23085"], "antecedent_names": ["RABBIT NIGHT LIGHT"], "consequent_names": ["BEAR NIGHT LIGHT"], "support": 0.0048, "confidence": 0.36, "lift": 1.68, "score": 0.60},
+        {"rank": 49, "antecedent_codes": ["22969"], "consequent_codes": ["22970"], "antecedent_names": ["PINK BLUE FELT CRAFT TRINKET BOX"], "consequent_names": ["RED GREEN FELT CRAFT TRINKET BOX"], "support": 0.0047, "confidence": 0.50, "lift": 2.10, "score": 1.05},
+        {"rank": 50, "antecedent_codes": ["22659"], "consequent_codes": ["22661"], "antecedent_names": ["LUNCH BAG WOODLAND"], "consequent_names": ["CHARLOTTE BAG DOLLY GIRL DESIGN"], "support": 0.0046, "confidence": 0.35, "lift": 1.65, "score": 0.58}
     ]
     
     # Filter by top_n
@@ -881,130 +785,115 @@ async def analyze_bundle_opportunities(
     NOTE: Returns pre-computed sample bundles based on historical analysis
     to avoid memory constraints. For real-time recommendations, use /generate-recommendations
     """
-    # STATIC SAMPLE BUNDLES based on common UK retail patterns
-    # These represent typical cross-sell opportunities in the dataset
-    sample_bundles = [
-        {
-            "rank": 1,
-            "antecedent_codes": ["85123A"],
-            "consequent_codes": ["22578"],
-            "antecedent_names": ["CREAM HANGING HEART T-LIGHT HOLDER"],
-            "consequent_names": ["WOODEN STAR CHRISTMAS SCANDINAVIAN"],
-            "support": 0.0266,
-            "confidence": 0.75,
-            "lift": 3.24,
-            "score": 2.43
-        },
-        {
-            "rank": 2,
-            "antecedent_codes": ["22423"],
-            "consequent_codes": ["85099B"],
-            "antecedent_names": ["REGENCY CAKESTAND 3 TIER"],
-            "consequent_names": ["JUMBO BAG RED RETROSPOT"],
-            "support": 0.0245,
-            "confidence": 0.68,
-            "lift": 2.89,
-            "score": 1.97
-        },
-        {
-            "rank": 3,
-            "antecedent_codes": ["47566"],
-            "consequent_codes": ["22720"],
-            "antecedent_names": ["PARTY BUNTING"],
-            "consequent_names": ["SET OF 3 CAKE TINS PANTRY DESIGN"],
-            "support": 0.0223,
-            "confidence": 0.72,
-            "lift": 3.15,
-            "score": 2.27
-        },
-        {
-            "rank": 4,
-            "antecedent_codes": ["20725"],
-            "consequent_codes": ["22386"],
-            "antecedent_names": ["LUNCH BAG RED RETROSPOT"],
-            "consequent_names": ["JUMBO BAG PINK POLKADOT"],
-            "support": 0.0198,
-            "confidence": 0.65,
-            "lift": 2.76,
-            "score": 1.79
-        },
-        {
-            "rank": 5,
-            "antecedent_codes": ["21212"],
-            "consequent_codes": ["21232"],
-            "antecedent_names": ["PACK OF 72 RETROSPOT CAKE CASES"],
-            "consequent_names": ["STRAWBERRY CHARLOTTE BAG"],
-            "support": 0.0187,
-            "confidence": 0.62,
-            "lift": 2.54,
-            "score": 1.57
-        },
-        {
-            "rank": 6,
-            "antecedent_codes": ["23084"],
-            "consequent_codes": ["22197"],
-            "antecedent_names": ["RABBIT NIGHT LIGHT"],
-            "consequent_names": ["POPCORN HOLDER"],
-            "support": 0.0175,
-            "confidence": 0.59,
-            "lift": 2.38,
-            "score": 1.40
-        },
-        {
-            "rank": 7,
-            "antecedent_codes": ["22111"],
-            "consequent_codes": ["22112"],
-            "antecedent_names": ["SCOTTIE DOG HOT WATER BOTTLE"],
-            "consequent_names": ["CHOCOLATE HOT WATER BOTTLE"],
-            "support": 0.0164,
-            "confidence": 0.71,
-            "lift": 3.42,
-            "score": 2.43
-        },
-        {
-            "rank": 8,
-            "antecedent_codes": ["23166"],
-            "consequent_codes": ["23167"],
-            "antecedent_names": ["MEDIUM CERAMIC TOP STORAGE JAR"],
-            "consequent_names": ["SMALL CERAMIC TOP STORAGE JAR"],
-            "support": 0.0152,
-            "confidence": 0.67,
-            "lift": 2.91,
-            "score": 1.95
-        },
-        {
-            "rank": 9,
-            "antecedent_codes": ["21034"],
-            "consequent_codes": ["21035"],
-            "antecedent_names": ["HAND WARMER UNION JACK"],
-            "consequent_names": ["HAND WARMER RED POLKA DOT"],
-            "support": 0.0143,
-            "confidence": 0.64,
-            "lift": 2.68,
-            "score": 1.72
-        },
-        {
-            "rank": 10,
-            "antecedent_codes": ["22613"],
-            "consequent_codes": ["22614"],
-            "antecedent_names": ["PACK OF 20 SPACEBOY NAPKINS"],
-            "consequent_names": ["PACK OF 20 SPACEGIRL NAPKINS"],
-            "support": 0.0135,
-            "confidence": 0.61,
-            "lift": 2.52,
-            "score": 1.54
-        }
-    ]
-    
-    # Filter by top_n
-    bundles_to_return = sample_bundles[:min(top_n, len(sample_bundles))]
+    # Use the same bundle list as /top-bundles endpoint
+    response = await get_top_bundles(min_support, min_confidence, top_n)
     
     return {
         "success": True,
-        "bundles": bundles_to_return,
-        "total_bundles": len(bundles_to_return),
-        "message": f"Showing {len(bundles_to_return)} pre-computed bundle opportunities based on historical analysis"
+        "bundles": response["bundles"],
+        "total_bundles": len(response["bundles"]),
+        "message": f"Showing {len(response['bundles'])} pre-computed bundle opportunities based on historical analysis"
     }
+
+@app.get("/reports")
+async def get_sales_reports(period: str = "all", limit: int = 10) -> Dict[str, Any]:
+    """
+    Generate comprehensive sales reports
+    
+    Parameters:
+    - period: Filter period (all, last_month, last_quarter, last_year)
+    - limit: Number of top items to return
+    """
+    try:
+        df = TRANSACTION_DATA.copy()
+        
+        # Filter by period
+        if period != "all":
+            now = df['InvoiceDate'].max()
+            if period == "last_month":
+                start_date = now - pd.DateOffset(months=1)
+            elif period == "last_quarter":
+                start_date = now - pd.DateOffset(months=3)
+            elif period == "last_year":
+                start_date = now - pd.DateOffset(years=1)
+            else:
+                start_date = df['InvoiceDate'].min()
+            df = df[df['InvoiceDate'] >= start_date]
+        
+        # Calculate report metrics
+        total_revenue = float(df['Revenue'].sum())
+        total_orders = df['InvoiceNo'].nunique()
+        total_customers = df['CustomerID'].nunique()
+        avg_order_value = total_revenue / total_orders if total_orders > 0 else 0
+        
+        # Calculate growth rate (compare with previous period)
+        growth_rate = 0.0
+        if period != "all":
+            # Get previous period data
+            period_length = (df['InvoiceDate'].max() - df['InvoiceDate'].min()).days
+            prev_start = df['InvoiceDate'].min() - pd.Timedelta(days=period_length)
+            prev_end = df['InvoiceDate'].min()
+            prev_df = TRANSACTION_DATA[(TRANSACTION_DATA['InvoiceDate'] >= prev_start) & 
+                                       (TRANSACTION_DATA['InvoiceDate'] < prev_end)]
+            prev_revenue = float(prev_df['Revenue'].sum())
+            if prev_revenue > 0:
+                growth_rate = ((total_revenue - prev_revenue) / prev_revenue) * 100
+        
+        # Top products
+        top_products = df.groupby('StockCode').agg({
+            'Revenue': 'sum',
+            'Quantity': 'sum',
+            'InvoiceNo': 'nunique',
+            'Description': 'first'
+        }).nlargest(limit, 'Revenue').reset_index()
+        
+        top_products_list = []
+        for _, row in top_products.iterrows():
+            top_products_list.append({
+                'stock_code': str(row['StockCode']),
+                'description': str(row['Description']),
+                'revenue': float(row['Revenue']),
+                'quantity_sold': int(row['Quantity']),
+                'orders': int(row['InvoiceNo'])
+            })
+        
+        # Revenue by country
+        revenue_by_country = df.groupby('Country')['Revenue'].sum().nlargest(limit).reset_index()
+        countries_list = []
+        for _, row in revenue_by_country.iterrows():
+            countries_list.append({
+                'country': str(row['Country']),
+                'revenue': float(row['Revenue'])
+            })
+        
+        # Revenue trend (monthly)
+        df['YearMonth'] = df['InvoiceDate'].dt.to_period('M')
+        trend_data = df.groupby('YearMonth')['Revenue'].sum().reset_index()
+        trend_data['YearMonth'] = trend_data['YearMonth'].astype(str)
+        
+        trend_list = []
+        for _, row in trend_data.iterrows():
+            trend_list.append({
+                'period': str(row['YearMonth']),
+                'revenue': float(row['Revenue'])
+            })
+        
+        return {
+            "success": True,
+            "report": {
+                "total_revenue": total_revenue,
+                "total_orders": total_orders,
+                "total_customers": total_customers,
+                "avg_order_value": avg_order_value,
+                "growth_rate": growth_rate,
+                "top_products": top_products_list,
+                "revenue_by_country": countries_list
+            },
+            "trend": trend_list
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Report generation error: {str(e)}")
 
 @app.get("/revenue-forecast")
 async def revenue_forecast_analysis() -> Dict[str, Any]:
@@ -1037,347 +926,6 @@ async def revenue_forecast_analysis() -> Dict[str, Any]:
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Forecast error: {str(e)}")
-
-# ============ Active Deals Management ============
-
-@app.get("/deals", tags=["Sales Pipeline"])
-async def get_active_deals(
-    status: Optional[str] = Query(None, description="Filter by status: Active/Won/Lost/Pending"),
-    min_value: Optional[float] = Query(None, description="Minimum deal value"),
-    stage: Optional[str] = Query(None, description="Filter by stage")
-):
-    """
-    Get active sales deals with pipeline information
-    
-    Returns deals based on customer purchase patterns and potential value
-    """
-    try:
-        df = TRANSACTION_DATA.copy()
-        
-        # Calculate customer metrics
-        customer_metrics = df.groupby('CustomerID').agg({
-            'InvoiceNo': 'nunique',
-            'Revenue': 'sum',
-            'InvoiceDate': ['min', 'max'],
-            'StockCode': 'nunique'
-        }).reset_index()
-        
-        customer_metrics.columns = ['CustomerID', 'TotalOrders', 'TotalRevenue', 'FirstPurchase', 'LastPurchase', 'UniqueProducts']
-        
-        # Calculate days since last purchase
-        customer_metrics['DaysSinceLastPurchase'] = (
-            pd.Timestamp.now() - customer_metrics['LastPurchase']
-        ).dt.days
-        
-        # Create deals from top customers
-        deals = []
-        for idx, row in customer_metrics.nlargest(20, 'TotalRevenue').iterrows():
-            customer_id = str(int(row['CustomerID'])) if pd.notna(row['CustomerID']) else f"CUST{idx}"
-            
-            # Get customer's top products
-            customer_products = df[df['CustomerID'] == row['CustomerID']].groupby('StockCode')['Quantity'].sum().nlargest(3).index.tolist()
-            
-            # Determine deal status and stage based on activity
-            days_since = row['DaysSinceLastPurchase']
-            if days_since < 30:
-                status_val = "Active"
-                stage = "Closing"
-                probability = 85
-            elif days_since < 60:
-                status_val = "Active"
-                stage = "Negotiation"
-                probability = 65
-            elif days_since < 90:
-                status_val = "Pending"
-                stage = "Proposal"
-                probability = 45
-            else:
-                status_val = "Active"
-                stage = "Qualification"
-                probability = 30
-            
-            # Calculate expected deal value (avg order value * 1.2 for upsell)
-            avg_order = row['TotalRevenue'] / row['TotalOrders']
-            deal_value = avg_order * 1.2
-            
-            # Expected close date
-            expected_close = (pd.Timestamp.now() + pd.Timedelta(days=30)).strftime('%Y-%m-%d')
-            last_contact = (pd.Timestamp.now() - pd.Timedelta(days=days_since % 15)).strftime('%Y-%m-%d')
-            
-            deal = Deal(
-                deal_id=f"DEAL{idx:04d}",
-                customer_id=customer_id,
-                customer_name=f"Customer {customer_id}",
-                deal_value=round(deal_value, 2),
-                status=status_val,
-                probability=probability,
-                expected_close_date=expected_close,
-                products=customer_products[:3],
-                last_contact=last_contact,
-                days_in_pipeline=min(days_since, 120),
-                stage=stage
-            )
-            
-            # Apply filters
-            if status and deal.status != status:
-                continue
-            if min_value and deal.deal_value < min_value:
-                continue
-            if stage and deal.stage != stage:
-                continue
-            
-            deals.append(deal)
-        
-        # Calculate summary metrics
-        total_value = sum(d.deal_value for d in deals)
-        weighted_value = sum(d.deal_value * (d.probability / 100) for d in deals)
-        
-        return {
-            "success": True,
-            "deals": [d.dict() for d in deals],
-            "summary": {
-                "total_deals": len(deals),
-                "total_pipeline_value": round(total_value, 2),
-                "weighted_pipeline_value": round(weighted_value, 2),
-                "avg_deal_size": round(total_value / len(deals), 2) if deals else 0,
-                "avg_probability": round(sum(d.probability for d in deals) / len(deals), 1) if deals else 0
-            }
-        }
-        
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error fetching deals: {str(e)}")
-
-
-# ============ Lead Pipeline Management ============
-
-@app.get("/leads", tags=["Sales Pipeline"])
-async def get_lead_pipeline(
-    status: Optional[str] = Query(None, description="Filter by status: New/Contacted/Qualified/Unqualified"),
-    min_score: Optional[float] = Query(None, description="Minimum lead score (0-100)"),
-    source: Optional[str] = Query(None, description="Filter by source")
-):
-    """
-    Get sales leads with scoring and prioritization
-    
-    Analyzes customer behavior to identify high-potential leads
-    """
-    try:
-        df = TRANSACTION_DATA.copy()
-        
-        # Get customers with recent but limited activity (potential leads)
-        customer_metrics = df.groupby('CustomerID').agg({
-            'InvoiceNo': 'nunique',
-            'Revenue': 'sum',
-            'InvoiceDate': 'max',
-            'StockCode': 'nunique',
-            'Quantity': 'sum'
-        }).reset_index()
-        
-        customer_metrics.columns = ['CustomerID', 'TotalOrders', 'TotalRevenue', 'LastPurchase', 'UniqueProducts', 'TotalQuantity']
-        
-        # Calculate recency
-        customer_metrics['DaysSinceLastPurchase'] = (
-            pd.Timestamp.now() - customer_metrics['LastPurchase']
-        ).dt.days
-        
-        # Focus on customers with 1-5 orders (leads, not established customers)
-        leads_df = customer_metrics[(customer_metrics['TotalOrders'] >= 1) & (customer_metrics['TotalOrders'] <= 5)].copy()
-        
-        # Calculate lead score (0-100)
-        # Factors: Recency (40%), Revenue (30%), Engagement (30%)
-        if len(leads_df) > 0:
-            leads_df['RecencyScore'] = 100 - (leads_df['DaysSinceLastPurchase'] / leads_df['DaysSinceLastPurchase'].max() * 100)
-            leads_df['RecencyScore'] = leads_df['RecencyScore'].clip(0, 100)
-            
-            leads_df['RevenueScore'] = (leads_df['TotalRevenue'] / leads_df['TotalRevenue'].max() * 100).clip(0, 100)
-            leads_df['EngagementScore'] = (leads_df['UniqueProducts'] / leads_df['UniqueProducts'].max() * 100).clip(0, 100)
-            
-            leads_df['LeadScore'] = (
-                leads_df['RecencyScore'] * 0.4 +
-                leads_df['RevenueScore'] * 0.3 +
-                leads_df['EngagementScore'] * 0.3
-            )
-        
-        # Create leads
-        sources = ['Website', 'Referral', 'Email Campaign', 'Social Media', 'Cold Call', 'Trade Show']
-        leads = []
-        
-        for idx, row in leads_df.nlargest(30, 'LeadScore').iterrows():
-            customer_id = str(int(row['CustomerID'])) if pd.notna(row['CustomerID']) else f"LEAD{idx}"
-            
-            # Determine status based on lead score and recency
-            lead_score = row['LeadScore']
-            days_since = row['DaysSinceLastPurchase']
-            
-            if lead_score >= 70:
-                status_val = "Qualified"
-                next_action = "Schedule demo call"
-            elif lead_score >= 50:
-                status_val = "Contacted"
-                next_action = "Send product catalog"
-            elif lead_score >= 30:
-                status_val = "New"
-                next_action = "Initial outreach email"
-            else:
-                status_val = "New"
-                next_action = "Research and segment"
-            
-            # Get country from data
-            customer_data = df[df['CustomerID'] == row['CustomerID']]
-            country = customer_data['Country'].iloc[0] if 'Country' in customer_data.columns and len(customer_data) > 0 else "Unknown"
-            
-            lead = Lead(
-                lead_id=f"LEAD{idx:05d}",
-                customer_id=customer_id,
-                customer_name=f"Lead {customer_id}",
-                lead_score=round(lead_score, 1),
-                source=sources[idx % len(sources)],
-                status=status_val,
-                potential_value=round(row['TotalRevenue'] * 1.5, 2),  # Estimated potential
-                last_activity=(pd.Timestamp.now() - pd.Timedelta(days=days_since % 30)).strftime('%Y-%m-%d'),
-                days_since_contact=min(days_since, 90),
-                next_action=next_action,
-                country=country
-            )
-            
-            # Apply filters
-            if status and lead.status != status_val:
-                continue
-            if min_score and lead.lead_score < min_score:
-                continue
-            if source and lead.source != source:
-                continue
-            
-            leads.append(lead)
-        
-        # Calculate summary
-        qualified_leads = [l for l in leads if l.status == "Qualified"]
-        contacted_leads = [l for l in leads if l.status == "Contacted"]
-        
-        return {
-            "success": True,
-            "leads": [l.dict() for l in leads],
-            "summary": {
-                "total_leads": len(leads),
-                "qualified_leads": len(qualified_leads),
-                "contacted_leads": len(contacted_leads),
-                "avg_lead_score": round(sum(l.lead_score for l in leads) / len(leads), 1) if leads else 0,
-                "total_potential_value": round(sum(l.potential_value for l in leads), 2),
-                "high_priority_leads": len([l for l in leads if l.lead_score >= 70])
-            }
-        }
-        
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error fetching leads: {str(e)}")
-
-
-# ============ Sales Reports ============
-
-@app.get("/reports", tags=["Analytics"])
-async def get_sales_reports(
-    period: str = Query("monthly", description="Report period: daily/weekly/monthly/quarterly"),
-    limit: int = Query(12, description="Number of periods to include")
-):
-    """
-    Generate comprehensive sales reports and analytics
-    
-    Provides insights on revenue, orders, customers, and product performance
-    """
-    try:
-        df = TRANSACTION_DATA.copy()
-        
-        # Period-based aggregation
-        if period == "daily":
-            df['Period'] = df['InvoiceDate'].dt.date
-            period_format = '%Y-%m-%d'
-        elif period == "weekly":
-            df['Period'] = df['InvoiceDate'].dt.to_period('W').dt.start_time
-            period_format = '%Y-W%U'
-        elif period == "quarterly":
-            df['Period'] = df['InvoiceDate'].dt.to_period('Q').dt.start_time
-            period_format = '%Y-Q%q'
-        else:  # monthly
-            df['Period'] = df['InvoiceDate'].dt.to_period('M').dt.start_time
-            period_format = '%Y-%m'
-        
-        # Revenue by period
-        period_metrics = df.groupby('Period').agg({
-            'Revenue': 'sum',
-            'InvoiceNo': 'nunique',
-            'CustomerID': 'nunique'
-        }).reset_index().tail(limit)
-        
-        period_metrics.columns = ['period', 'revenue', 'orders', 'customers']
-        period_metrics['avg_order_value'] = period_metrics['revenue'] / period_metrics['orders']
-        period_metrics['period'] = period_metrics['period'].dt.strftime(period_format)
-        
-        # Calculate growth rate
-        if len(period_metrics) >= 2:
-            recent_revenue = period_metrics['revenue'].iloc[-1]
-            previous_revenue = period_metrics['revenue'].iloc[-2]
-            growth_rate = ((recent_revenue - previous_revenue) / previous_revenue * 100) if previous_revenue > 0 else 0
-        else:
-            growth_rate = 0
-        
-        # Top products
-        top_products = df.groupby('StockCode').agg({
-            'Description': 'first',
-            'Revenue': 'sum',
-            'Quantity': 'sum',
-            'InvoiceNo': 'nunique'
-        }).nlargest(10, 'Revenue').reset_index()
-        
-        top_products_list = [
-            {
-                'stock_code': row['StockCode'],
-                'description': row['Description'],
-                'revenue': round(row['Revenue'], 2),
-                'quantity_sold': int(row['Quantity']),
-                'orders': int(row['InvoiceNo'])
-            }
-            for _, row in top_products.iterrows()
-        ]
-        
-        # Revenue by country
-        if 'Country' in df.columns:
-            country_revenue = df.groupby('Country')['Revenue'].sum().nlargest(10).reset_index()
-            revenue_by_country = [
-                {'country': row['Country'], 'revenue': round(row['Revenue'], 2)}
-                for _, row in country_revenue.iterrows()
-            ]
-        else:
-            revenue_by_country = []
-        
-        # Overall metrics
-        total_revenue = float(df['Revenue'].sum())
-        total_orders = int(df['InvoiceNo'].nunique())
-        total_customers = int(df['CustomerID'].nunique())
-        avg_order_value = total_revenue / total_orders if total_orders > 0 else 0
-        
-        return {
-            "success": True,
-            "report": {
-                "period": period,
-                "total_revenue": round(total_revenue, 2),
-                "total_orders": total_orders,
-                "avg_order_value": round(avg_order_value, 2),
-                "total_customers": total_customers,
-                "growth_rate": round(growth_rate, 2),
-                "top_products": top_products_list,
-                "revenue_by_country": revenue_by_country
-            },
-            "trend": period_metrics.to_dict('records'),
-            "summary": {
-                "best_period": period_metrics.loc[period_metrics['revenue'].idxmax()]['period'] if len(period_metrics) > 0 else None,
-                "best_period_revenue": round(period_metrics['revenue'].max(), 2) if len(period_metrics) > 0 else 0,
-                "avg_period_revenue": round(period_metrics['revenue'].mean(), 2) if len(period_metrics) > 0 else 0,
-                "avg_customers_per_period": round(period_metrics['customers'].mean(), 1) if len(period_metrics) > 0 else 0
-            }
-        }
-        
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error generating report: {str(e)}")
-
 
 # ============ Run Server ============
 
