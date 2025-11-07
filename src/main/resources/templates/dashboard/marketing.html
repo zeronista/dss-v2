@@ -29,11 +29,11 @@
         <!-- Tabbed Interface -->
         <div class="tabs-container">
             <div class="tab-navigation">
-                <button class="tab-button active" onclick="switchTab('segmentation')">
+                <button class="tab-button active" onclick="switchTab('segmentation', this)">
                     <span class="tab-icon">👥</span>
                     Customer Segmentation
                 </button>
-                <button class="tab-button" onclick="switchTab('market-basket')">
+                <button class="tab-button" onclick="switchTab('market-basket', this)">
                     <span class="tab-icon">🛒</span>
                     Market Basket Analysis
                 </button>
@@ -45,6 +45,15 @@
                 <p class="helper-text">
                     Heuristic segmentation based on Recency, Frequency, and Monetary values.
                 </p>
+
+                <div class="insight-guide">
+                    <p class="insight-guide-title">How to read this view</p>
+                    <ul class="insight-guide-list">
+                        <li>Each card = a behavioral segment. The blurb tells you why it matters.</li>
+                        <li>The metric grid highlights volume, spend, and RFM benchmarks to size opportunities.</li>
+                        <li>Use the recommended plays to align campaigns (retention, loyalty, reactivation, etc.).</li>
+                    </ul>
+                </div>
                 
                 <!-- Phase 5: Date Range Filter -->
                 <div class="date-filter-section">
@@ -96,6 +105,15 @@
                 <p class="helper-text">
                     Frequently bought together products using Apriori algorithm with segment-specific insights.
                 </p>
+
+                <div class="insight-guide">
+                    <p class="insight-guide-title">How to read this view</p>
+                    <ul class="insight-guide-list">
+                        <li>Top banner shows the strongest bundle with confidence / lift / revenue attribution.</li>
+                        <li>Each card compares the “trigger” product (left) to the follow-on purchase (right).</li>
+                        <li>Support = share of orders containing the pair; confidence = conversion rate; lift > 1 means incremental impact.</li>
+                    </ul>
+                </div>
                 
                 <!-- Phase 5: Date Range Filter -->
                 <div class="date-filter-section">
@@ -149,21 +167,11 @@
             </div>
         </div>
         
-        <!-- Quick Actions -->
-        <div class="quick-actions">
-            <h2>Quick Actions</h2>
-            <div class="action-grid">
-                <a href="/invoices" class="action-btn">
-                    <span class="action-btn-icon">📋</span>
-                    View Invoices
-                </a>
-            </div>
-        </div>
     </div>
     
     <script>
         // Tab switching function
-        function switchTab(tabName) {
+        function switchTab(tabName, button) {
             // Hide all tabs
             const tabs = document.querySelectorAll('.tab-content');
             tabs.forEach(tab => tab.classList.remove('active'));
@@ -179,7 +187,9 @@
             }
             
             // Activate button
-            event.target.closest('.tab-button').classList.add('active');
+            if (button) {
+                button.classList.add('active');
+            }
         }
         
         // API Configuration
@@ -294,50 +304,54 @@
                 document.getElementById('totalCustomers').textContent = 
                     data.total_customers.toLocaleString();
                 
-                // Display segments (Phase 5 Enhanced)
-                container.innerHTML = data.segments.map(segment => `
-                    <div class="segment-card" data-segment="${segment.segment_name}">
-                        <div class="segment-card-header">
-                            <h3>${segment.segment_name}</h3>
-                            <span class="segment-emoji">${getSegmentEmoji(segment.segment_name)}</span>
-                        </div>
-                        <div class="segment-card-body">
-                            <div class="segment-characteristics">
+                                // Display segments with clearer hierarchy
+                container.innerHTML = data.segments.map((segment) => {
+                    const metrics = [
+                        { label: 'Customers', value: segment.customer_count.toLocaleString() },
+                        { label: 'Total Value', value: `$${segment.total_value.toLocaleString(undefined, { maximumFractionDigits: 0 })}` },
+                        { label: 'Avg Recency', value: `${segment.avg_recency.toFixed(0)} days` },
+                        { label: 'Avg Frequency', value: `${segment.avg_frequency.toFixed(1)} orders` },
+                        { label: 'Avg Monetary', value: `$${segment.avg_monetary.toFixed(0)}` },
+                    ]
+                        .map(
+                            (metric) => `
+                                <div class="segment-metric">
+                                    <span>${metric.label}</span>
+                                    <strong>${metric.value}</strong>
+                                </div>
+                            `
+                        )
+                        .join('');
+
+                    const actions =
+                        (segment.recommended_actions || [])
+                            .map((action) => `<li>${action}</li>`)
+                            .join('') || '<li>No playbook suggestions.</li>';
+
+                    return `
+                        <article class="segment-card" data-segment="${segment.segment_name}">
+                            <div class="segment-head">
+                                <div>
+                                    <p class="segment-label">Segment</p>
+                                    <h3>${segment.segment_name}</h3>
+                                </div>
+                                <span class="segment-emoji">${getSegmentEmoji(segment.segment_name)}</span>
+                            </div>
+                            <div class="segment-highlight">
                                 ${segment.characteristics}
                             </div>
-                            
-                            <div class="segment-stats">
-                                <div class="segment-stat">
-                                    <span>Customers</span>
-                                    <strong>${segment.customer_count.toLocaleString()}</strong>
-                                </div>
-                                <div class="segment-stat">
-                                    <span>Total Value</span>
-                                    <strong>$${segment.total_value.toLocaleString(undefined, {maximumFractionDigits: 0})}</strong>
-                                </div>
-                                <div class="segment-stat">
-                                    <span>Avg Recency</span>
-                                    <strong>${segment.avg_recency.toFixed(0)} days</strong>
-                                </div>
-                                <div class="segment-stat">
-                                    <span>Avg Frequency</span>
-                                    <strong>${segment.avg_frequency.toFixed(1)} orders</strong>
-                                </div>
-                                <div class="segment-stat">
-                                    <span>Avg Monetary</span>
-                                    <strong>$${segment.avg_monetary.toFixed(0)}</strong>
-                                </div>
+                            <div class="segment-meta-grid">
+                                ${metrics}
                             </div>
-                            
                             <div class="segment-actions">
-                                <strong>📌 Recommended Actions:</strong>
-                                <ul>
-                                    ${segment.recommended_actions.map(action => `<li>${action}</li>`).join('')}
+                                <p class="segment-actions-title">Recommended plays</p>
+                                <ul class="segment-actions-list">
+                                    ${actions}
                                 </ul>
                             </div>
-                        </div>
-                    </div>
-                `).join('');
+                        </article>
+                    `;
+                }).join('');
                 
                 // Show date range if filtered (Phase 5)
                 if (data.date_range && data.date_range.filtered) {
@@ -469,40 +483,35 @@
                     `;
                 }
                 
-                // Display bundles table (Phase 5 Enhanced)
+                                // Display bundles as cards (clearer hierarchy)
                 html += `
-                    <table class="bundles-table">
-                        <thead>
-                            <tr>
-                                <th>💡</th>
-                                <th>If Customers Buy...</th>
-                                <th>They Also Buy...</th>
-                                <th>Support</th>
-                                <th>Confidence</th>
-                                <th>Lift</th>
-                                <th>Expected Revenue</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${data.bundles.map(bundle => `
-                                <tr>
-                                    <td class="strength-indicator">${bundle.strength || ''}</td>
-                                    <td class="product-display">
-                                        <strong>${bundle.antecedents_display || bundle.antecedents.join(', ')}</strong>
-                                    </td>
-                                    <td class="product-display">
-                                        <strong>${bundle.consequents_display || bundle.consequents.join(', ')}</strong>
-                                    </td>
-                                    <td>${(bundle.support * 100).toFixed(2)}%</td>
-                                    <td>${(bundle.confidence * 100).toFixed(1)}%</td>
-                                    <td>${bundle.lift.toFixed(2)}x</td>
-                                    <td>$${bundle.expected_revenue.toLocaleString()}</td>
-                                </tr>
-                            `).join('')}
-                        </tbody>
-                    </table>
+                    <div class="bundle-list">
+                        ${data.bundles.map((bundle, index) => `
+                            <article class="bundle-card">
+                                <div class="bundle-card-header">
+                                    <span class="bundle-rank">#${index + 1}</span>
+                                    <span class="metric-chip">${bundle.strength || 'Top pick'}</span>
+                                </div>
+                                <div class="bundle-products">
+                                    <div>
+                                        <p class="bundle-label">If customers buy</p>
+                                        <h4>${bundle.antecedents_display || bundle.antecedents.join(', ')}</h4>
+                                    </div>
+                                    <div>
+                                        <p class="bundle-label">They also buy</p>
+                                        <h4>${bundle.consequents_display || bundle.consequents.join(', ')}</h4>
+                                    </div>
+                                </div>
+                                <div class="bundle-metrics">
+                                    <span class="metric-chip">Support ${(bundle.support * 100).toFixed(2)}%</span>
+                                    <span class="metric-chip">Confidence ${(bundle.confidence * 100).toFixed(1)}%</span>
+                                    <span class="metric-chip">Lift ${bundle.lift.toFixed(2)}x</span>
+                                    <span class="metric-chip">Expected $${bundle.expected_revenue.toLocaleString()}</span>
+                                </div>
+                            </article>
+                        `).join('')}
+                    </div>
                 `;
-                
                 container.innerHTML = html;
                 
             } catch (error) {
