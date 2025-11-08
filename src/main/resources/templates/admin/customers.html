@@ -97,7 +97,7 @@
                 <td>
                   <span
                     class="segment-pill"
-                    th:classappend="${customer.customerSegment} != null ? ' ' + #strings.toLowerCase(customer.customerSegment) : ''"
+                    th:classappend="${customer.customerSegment != null ? #strings.toLowerCase(customer.customerSegment) : ''}"
                     th:text="${customer.customerSegment}"
                     >Regular</span
                   >

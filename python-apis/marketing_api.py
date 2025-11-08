@@ -56,7 +56,8 @@ def get_local_transactions_df() -> pd.DataFrame:
         # Use CSV file (as requested)
         if os.path.exists(CSV_FILE):
             print(f"📊 Loading from CSV: {CSV_FILE}")
-            df = pd.read_csv(CSV_FILE)
+            # Fix DtypeWarning: Specify dtype for mixed type columns and set low_memory=False
+            df = pd.read_csv(CSV_FILE, low_memory=False, dtype={'CustomerID': str})
             # Convert InvoiceDate to datetime
             df['InvoiceDate'] = pd.to_datetime(df['InvoiceDate'], errors='coerce')
             print(f"✅ Loaded {len(df)} transactions from CSV")
@@ -729,7 +730,8 @@ async def segment_basket_analysis(
         
         # Create basket (one-hot encoding by Description)
         basket = seg_df.groupby(['InvoiceNo', 'Description'])['Quantity'].sum().unstack().fillna(0)
-        basket_encoded = basket.map(lambda x: 1 if x > 0 else 0)
+        # Fix DeprecationWarning: Convert to boolean type for better performance
+        basket_encoded = (basket > 0).astype(bool)
         
         # Run Apriori algorithm
         frequent_itemsets = apriori(
@@ -851,11 +853,12 @@ async def market_basket_analysis(request: BasketAnalysisRequest) -> Dict[str, An
         df = df[df['Description'].isin(top_products)].copy()
         
         # Limit transactions to most recent
-        df = df.nlargest(50000, 'InvoiceDate')
+        df = df.nlargest(100000, 'InvoiceDate')
         
         # Create basket (one-hot encoding)
         basket = df.groupby(['InvoiceNo', 'Description'])['Quantity'].sum().unstack().fillna(0)
-        basket_encoded = basket.map(lambda x: 1 if x > 0 else 0)
+        # Fix DeprecationWarning: Convert to boolean type for better performance
+        basket_encoded = (basket > 0).astype(bool)
         
         # Run Apriori algorithm
         frequent_itemsets = apriori(

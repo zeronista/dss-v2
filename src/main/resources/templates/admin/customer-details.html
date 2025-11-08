@@ -22,7 +22,7 @@
             #<span th:text="${customer.customerId}">12345</span>
             <span
               class="segment-pill"
-              th:classappend="${customer.customerSegment} != null ? ' ' + #strings.toLowerCase(customer.customerSegment) : ''"
+              th:classappend="${customer.customerSegment != null ? #strings.toLowerCase(customer.customerSegment) : ''}"
               th:text="${customer.customerSegment}"
               >VIP</span
             >
