@@ -39,8 +39,10 @@ Hệ thống Marketing Dashboard sử dụng kiến trúc **3-tier** với **mic
                        ▼
 ┌─────────────────────────────────────────────────────────────┐
 │              DATA SOURCES                                    │
-│   - data/online_retail_cleaned.csv (Local File)             │
-│   - MongoDB (Fallback)                                       │
+│   - python-apis/data/data.csv (Full dataset - ưu tiên)      │
+│   - data/online_retail.csv (Full dataset fallback)          │
+│   - data/online_retail_cleaned.csv/.parquet (Legacy cache)  │
+│   - MongoDB (Fallback cuối cùng)                             │
 └─────────────────────────────────────────────────────────────┘
 ```
 
@@ -79,7 +81,49 @@ FastAPI Application (Port 8003)
     └── /market-basket-analysis          # MBA tổng quát
 ```
 
-### 2.2. Chi tiết các chức năng chính
+### 2.2. Data Loading & Cache Refresh (Full Dataset)
+
+**Mục tiêu:** Marketing API luôn dùng được **bản dữ liệu đầy đủ** (bao gồm cả cancelled invoices, negative qty...) nhưng vẫn đảm bảo tốc độ thông qua cache trên RAM.
+
+#### 2.2.1 Thứ tự ưu tiên data source
+
+1. `python-apis/data/data.csv` — bản CSV full copy kèm theo mã nguồn backend.
+2. `data/online_retail.csv` — bản full dataset dùng chung giữa các role khác.
+3. `data/online_retail_cleaned.csv` & `data/online_retail_cleaned.parquet` — legacy cleaned snapshot (đã lọc cancelled + negative) dùng làm **backup** khi 2 bản full không tồn tại.
+4. MongoDB — fallback cuối cùng nếu toàn bộ file local bị mất.
+
+`get_local_transactions_df()` sẽ cache DataFrame trong 3600s và tự động gắn nhãn `data_source` để mọi API response (root, date-range, RFM, segmentation, market-basket) cùng biết dữ liệu đang đến từ đâu.
+
+#### 2.2.2 Lightweight cleaning trước khi phân tích
+
+- Chuẩn hóa chuỗi: trim khoảng trắng, `StockCode` → uppercase, `Description` rỗng ⇒ `UNKNOWN PRODUCT`, Country rỗng ⇒ `Unknown`.
+- Ép kiểu `InvoiceDate` sang `datetime`, `Quantity`/`UnitPrice` sang số thực.
+- Loại bỏ record thiếu `InvoiceDate`/`InvoiceNo`/`StockCode`, lọc `Quantity <= 0` hoặc `UnitPrice <= 0`.
+- Tự tạo cột `Revenue = Quantity * UnitPrice`, drop duplicates, sort theo `InvoiceDate`.
+
+Nhờ vậy mọi module (RFM, clustering, Apriori) dùng chung một schema ổn định, không cần viết lại logic riêng cho từng nguồn dữ liệu.
+
+#### 2.2.3 Làm mới cache khi cần
+
+- Mặc định cache sống **1 giờ**. Khi bạn cập nhật file CSV hoặc muốn chạy lại toàn bộ pipeline từ đầu, gọi endpoint:
+
+```bash
+curl -X POST http://localhost:8003/cache/refresh
+```
+
+- API trả về:
+
+```json
+{
+  "success": true,
+  "message": "Marketing data cache cleared. Next request will reload from disk.",
+  "data_source": "Local CSV (data.csv)"
+}
+```
+
+- Endpoint hỗ trợ cả GET/POST và có/không dấu `/` cuối để tương thích gateway (`/cache/refresh`, `/cache/refresh/`).
+
+### 2.3. Chi tiết các chức năng chính
 
 #### 🎯 **A. Customer Segmentation (Phân khúc khách hàng)**
 
