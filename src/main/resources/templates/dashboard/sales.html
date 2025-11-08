@@ -497,7 +497,7 @@
         async function loadTopBundles() {
             const topN = document.getElementById('topNSelect').value;
             const container = document.getElementById('bundlesContainer');
-            container.innerHTML = '<div class="loading">Mining top product bundles...</div>';
+            container.innerHTML = '<div class="loading loading-pulse">⏳ Mining top product bundles...</div>';
             
             // Hide export buttons while loading
             document.getElementById('exportBundles').classList.add('is-hidden');
@@ -517,9 +517,12 @@
                 // Store bundles for export
                 currentBundles = data.bundles;
                 
-                // Display in table
+                // Add 5-second delay for realistic loading effect
+                await new Promise(resolve => setTimeout(resolve, 5000));
+                
+                // Display in table with fade-in animation
                 container.innerHTML = `
-                    <table>
+                    <table style="animation: fadeIn 0.5s ease-in;">
                         <thead>
                             <tr>
                                 <th>Rank</th>
