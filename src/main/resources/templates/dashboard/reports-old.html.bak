@@ -6,6 +6,7 @@
     <title>Sales Reports - Sales Dashboard</title>
     <link rel="stylesheet" th:href="@{/css/neo-dashboard.css}" />
     <style>
+        /* Additional styles specific to reports page */
         .filter-controls {
             background: #f8f9fa;
             padding: 20px;
@@ -13,7 +14,7 @@
             margin-bottom: 20px;
             display: flex;
             gap: 15px;
-            align-items: end;
+            align-items: center;
             flex-wrap: wrap;
         }
         
@@ -109,9 +110,11 @@
     </nav>
     
     <div class="container">
-        <div class="welcome-section">
+                <div class="welcome-section">
             <h1>Sales Reports & Analytics 📊</h1>
             <p>Comprehensive sales performance analysis and insights</p>
+        </div>
+        
         </div>
         
         <!-- Stats Grid -->
@@ -169,21 +172,102 @@
         <!-- Revenue Trend -->
         <div class="content-card">
             <h2>📈 Revenue Trend</h2>
-            <div id="trendContainer" class="chart-container">
-                <p class="loading">Loading trend data...</p>
-            </div>
+            <div id="trendContainer" class="chart-container"></div>
         </div>
         
         <!-- Top Products -->
         <div class="content-card">
             <h2>🏆 Top Selling Products</h2>
+            <div id="productsContainer"></div>
+        </div>
+        
+        <!-- Revenue by Country -->
+        <div class="content-card">
+            <h2>🌍 Revenue by Country</h2>
+            <div id="countriesContainer"></div>
+        </div>
+    </div>
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="navbar-brand">📊 Sales Reports & Analytics</div>
+        <div class="navbar-actions">
+            <a href="/sales/dashboard" class="btn-back">← Back to Sales Dashboard</a>
+        </div>
+    </nav>
+    
+    <div class="container">
+        <div class="header-section">
+            <h1>📊 Sales Reports & Analytics</h1>
+            <p style="color: #666;">Comprehensive sales performance insights</p>
+            
+            <div class="stats-grid" id="statsGrid">
+                <div class="stat-card">
+                    <div class="stat-card-icon">💰</div>
+                    <div class="stat-value" id="totalRevenue">-</div>
+                    <div class="stat-label">Total Revenue</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-card-icon">📦</div>
+                    <div class="stat-value" id="totalOrders">-</div>
+                    <div class="stat-label">Total Orders</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-card-icon">💵</div>
+                    <div class="stat-value" id="avgOrderValue">-</div>
+                    <div class="stat-label">Avg Order Value</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-card-icon">👥</div>
+                    <div class="stat-value" id="totalCustomers">-</div>
+                    <div class="stat-label">Total Customers</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-card-icon">📈</div>
+                    <div class="stat-value" id="growthRate">-</div>
+                    <div class="stat-label">Growth Rate</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="filters-section">
+            <div class="filter-group">
+                <div class="filter-item">
+                    <label>Report Period</label>
+                    <select id="periodFilter">
+                        <option value="monthly" selected>Monthly</option>
+                        <option value="weekly">Weekly</option>
+                        <option value="quarterly">Quarterly</option>
+                        <option value="daily">Daily</option>
+                    </select>
+                </div>
+                <div class="filter-item">
+                    <label>Number of Periods</label>
+                    <input type="number" id="limitFilter" value="12" min="1" max="100">
+                </div>
+                <div class="filter-item">
+                    <label>&nbsp;</label>
+                    <button class="btn-filter" onclick="loadReport()">📊 Generate Report</button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="content-section">
+            <h2>📈 Revenue Trend</h2>
+            <div id="trendContainer">
+                <p class="loading">Loading trend data...</p>
+            </div>
+        </div>
+        
+        <div class="content-section">
+            <h2>🏆 Top Performing Products</h2>
             <div id="productsContainer">
                 <p class="loading">Loading top products...</p>
             </div>
         </div>
         
-        <!-- Revenue by Country -->
-        <div class="content-card">
+        <div class="content-section">
             <h2>🌍 Revenue by Country</h2>
             <div id="countriesContainer">
                 <p class="loading">Loading countries data...</p>
@@ -217,7 +301,7 @@
                 const growthElement = document.getElementById('growthRate');
                 const growthValue = data.report.growth_rate;
                 growthElement.textContent = (growthValue > 0 ? '+' : '') + growthValue.toFixed(2) + '%';
-                growthElement.className = 'stat-card-value ' + (growthValue >= 0 ? 'growth-positive' : 'growth-negative');
+                growthElement.className = 'stat-value ' + (growthValue >= 0 ? 'growth-positive' : 'growth-negative');
                 
                 // Render trend
                 renderTrend(data.trend);
@@ -267,15 +351,15 @@
             }
             
             let html = `
-                <table class="data-table">
+                <table>
                     <thead>
                         <tr>
                             <th>Rank</th>
                             <th>Stock Code</th>
                             <th>Description</th>
-                            <th class="text-right">Revenue</th>
-                            <th class="text-right">Quantity Sold</th>
-                            <th class="text-right">Orders</th>
+                            <th>Revenue</th>
+                            <th>Quantity Sold</th>
+                            <th>Orders</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -284,21 +368,17 @@
             products.forEach((product, index) => {
                 html += `
                     <tr>
-                        <td class="rank-cell"><strong>#${index + 1}</strong></td>
-                        <td><code class="code-pill">${product.stock_code}</code></td>
+                        <td><strong>#${index + 1}</strong></td>
+                        <td><code>${product.stock_code}</code></td>
                         <td>${product.description}</td>
-                        <td class="text-right"><strong class="text-success">$${product.revenue.toLocaleString()}</strong></td>
-                        <td class="text-right">${product.quantity_sold.toLocaleString()}</td>
-                        <td class="text-right">${product.orders.toLocaleString()}</td>
+                        <td><strong>$${product.revenue.toLocaleString()}</strong></td>
+                        <td>${product.quantity_sold.toLocaleString()}</td>
+                        <td>${product.orders.toLocaleString()}</td>
                     </tr>
                 `;
             });
             
-            html += `
-                    </tbody>
-                </table>
-            `;
-            
+            html += '</tbody></table>';
             document.getElementById('productsContainer').innerHTML = html;
         }
         
@@ -308,30 +388,39 @@
                 return;
             }
             
-            const maxRevenue = Math.max(...countries.map(c => c.revenue));
+            let html = `
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Rank</th>
+                            <th>Country</th>
+                            <th>Revenue</th>
+                            <th>% of Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
             
-            let html = '<div class="trend-chart">';
+            const totalRevenue = countries.reduce((sum, c) => sum + c.revenue, 0);
+            
             countries.forEach((country, index) => {
-                const barWidth = (country.revenue / maxRevenue * 100).toFixed(2);
+                const percentage = (country.revenue / totalRevenue * 100).toFixed(2);
                 html += `
-                    <div class="trend-row">
-                        <div class="trend-period">#${index + 1} ${country.country}</div>
-                        <div class="trend-bar-container">
-                            <div class="trend-bar" style="width: ${barWidth}%"></div>
-                        </div>
-                        <div class="trend-value">$${country.revenue.toLocaleString()}</div>
-                    </div>
+                    <tr>
+                        <td><strong>#${index + 1}</strong></td>
+                        <td>${country.country}</td>
+                        <td><strong>$${country.revenue.toLocaleString()}</strong></td>
+                        <td>${percentage}%</td>
+                    </tr>
                 `;
             });
-            html += '</div>';
             
+            html += '</tbody></table>';
             document.getElementById('countriesContainer').innerHTML = html;
         }
         
-        // Load initial report
-        document.addEventListener('DOMContentLoaded', function() {
-            loadReport();
-        });
+        // Load report on page load
+        loadReport();
     </script>
 </body>
 </html>

@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invoice Management - DSS</title>
+    <link rel="stylesheet" th:href="@{/css/neo-dashboard.css}" />
+    <style>
+        /* Additional styles specific to invoices page */
+        .search-container {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        
+        .search-form {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            align-items: end;
+        }
+        
+        .search-field {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .search-field label {
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: #333;
+            font-size: 13px;
+        }
+        
+        .search-field input,
+        .search-field select {
+            padding: 10px 12px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+        
+        .search-field input:focus,
+        .search-field select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .search-buttons {
+            display: flex;
+            gap: 10px;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="navbar-brand">📋 DSS - Invoice Management</div>
+        <div class="navbar-actions">
+            <a href="/sales/dashboard" class="btn-back">← Back to Sales Dashboard</a>
+        </div>
+    </nav>
+            background: #6c757d;
+            color: white;
+        }
+        
+        .btn-reset:hover {
+            background: #5a6268;
+            transform: translateY(-2px);
+        }
+        
+        .search-info {
+            background: #e7f3ff;
+            padding: 12px 15px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .search-info strong {
+            color: #667eea;
+        }
+        
+        .no-data {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+            font-size: 18px;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                border-radius: 0;
+            }
+            
+            .header h1 {
+                font-size: 24px;
+            }
+            
+            .stats {
+                gap: 10px;
+            }
+            
+            .stat-item {
+                padding: 8px 15px;
+            }
+            
+            .content {
+                padding: 15px;
+            }
+            
+            th, td {
+                padding: 8px;
+                font-size: 12px;
+            }
+            
+            .pagination a,
+            .pagination span {
+                padding: 8px 12px;
+                font-size: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="navbar-brand">📋 Invoice Management</div>
+        <div class="navbar-actions">
+            <a href="/sales/dashboard" class="btn-back">← Back to Sales Dashboard</a>
+        </div>
+    </nav>
+    
+    <div class="container">
+        <div class="welcome-section">
+            <h1>📊 Invoice Management System</h1>
+            <p>Search, filter, and manage all invoice records</p>
+        </div>
+        
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-card-icon">📄</div>
+                <div class="stat-card-label">Total Records</div>
+                <div class="stat-card-value" th:text="${totalItems}">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-card-icon">📖</div>
+                <div class="stat-card-label">Current Page</div>
+                <div class="stat-card-value" th:text="${currentPage + 1} + ' / ' + ${totalPages}">1 / 1</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-card-icon">📊</div>
+                <div class="stat-card-label">Per Page</div>
+                <div class="stat-card-value" th:text="${pageSize}">25</div>
+            </div>
+        </div>
+        
+        <div class="content">
+            <!-- Search Form -->
+            <div class="search-container">
+                <form class="search-form" method="get" action="/invoices">
+                    <div class="search-field">
+                        <label for="invoiceNo">🔢 Invoice No</label>
+                        <input type="text" 
+                               id="invoiceNo" 
+                               name="invoiceNo" 
+                               placeholder="e.g., 536365"
+                               th:value="${param.invoiceNo}">
+                    </div>
+                    
+                    <div class="search-field">
+                        <label for="stockCode">📦 Stock Code</label>
+                        <input type="text" 
+                               id="stockCode" 
+                               name="stockCode" 
+                               placeholder="e.g., 85123A"
+                               th:value="${param.stockCode}">
+                    </div>
+                    
+                    <div class="search-field">
+                        <label for="description">📝 Description</label>
+                        <input type="text" 
+                               id="description" 
+                               name="description" 
+                               placeholder="Search in description"
+                               th:value="${param.description}">
+                    </div>
+                    
+                    <div class="search-field">
+                        <label for="customerId">👤 Customer ID</label>
+                        <input type="text" 
+                               id="customerId" 
+                               name="customerId" 
+                               placeholder="e.g., 17850"
+                               th:value="${param.customerId}">
+                    </div>
+                    
+                    <div class="search-field">
+                        <label for="country">🌍 Country</label>
+                        <input type="text" 
+                               id="country" 
+                               name="country" 
+                               placeholder="e.g., United Kingdom"
+                               th:value="${param.country}">
+                    </div>
+                    
+                    <div class="search-field">
+                        <label>&nbsp;</label>
+                        <div class="search-buttons">
+                            <button type="submit" class="btn btn-search">🔍 Search</button>
+                            <a href="/invoices" class="btn btn-reset">🔄 Reset</a>
+                        </div>
+                    </div>
+                    
+                    <input type="hidden" name="size" th:value="${pageSize}">
+                </form>
+            </div>
+            
+            <!-- Search Results Info -->
+            <div class="search-info" th:if="${param.invoiceNo != null or param.stockCode != null or param.description != null or param.customerId != null or param.country != null}">
+                <strong>🔍 Search Results:</strong> Found <strong th:text="${totalItems}">0</strong> matching records
+                <span th:if="${param.invoiceNo != null}"> | Invoice: <strong th:text="${param.invoiceNo}"></strong></span>
+                <span th:if="${param.stockCode != null}"> | Stock: <strong th:text="${param.stockCode}"></strong></span>
+                <span th:if="${param.description != null}"> | Description: <strong th:text="${param.description}"></strong></span>
+                <span th:if="${param.customerId != null}"> | Customer: <strong th:text="${param.customerId}"></strong></span>
+                <span th:if="${param.country != null}"> | Country: <strong th:text="${param.country}"></strong></span>
+            </div>
+            
+            <div class="page-size-selector">
+                <label for="pageSize">Records per page:</label>
+                <select id="pageSize" th:value="${pageSize}" onchange="changePageSize(this.value)">
+                    <option value="10" th:selected="${pageSize == 10}">10</option>
+                    <option value="25" th:selected="${pageSize == 25}">25</option>
+                    <option value="50" th:selected="${pageSize == 50}">50</option>
+                    <option value="100" th:selected="${pageSize == 100}">100</option>
+                </select>
+            </div>
+            
+            <div class="table-container" th:if="${invoices != null and !invoices.isEmpty()}">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Invoice No</th>
+                            <th>Stock Code</th>
+                            <th>Description</th>
+                            <th>Quantity</th>
+                            <th>Unit Price</th>
+                            <th>Total Price</th>
+                            <th>Invoice Date</th>
+                            <th>Invoice Year</th>
+                            <th>Invoice Month</th>
+                            <th>Customer ID</th>
+                            <th>Country</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="invoice : ${invoices}">
+                            <td th:text="${invoice.invoiceNo}">-</td>
+                            <td th:text="${invoice.stockCode}">-</td>
+                            <td th:text="${invoice.description}">-</td>
+                            <td th:text="${invoice.quantity}">-</td>
+                            <td th:text="${#numbers.formatDecimal(invoice.unitPrice, 1, 2)}">-</td>
+                            <td th:text="${#numbers.formatDecimal(invoice.totalPrice, 1, 2)}">-</td>
+                            <td th:text="${invoice.invoiceDate}">-</td>
+                            <td th:text="${invoice.invoiceYear}">-</td>
+                            <td th:text="${invoice.invoiceMonth}">-</td>
+                            <td th:text="${invoice.customerId}">-</td>
+                            <td th:text="${invoice.country}">-</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="no-data" th:if="${invoices == null or invoices.isEmpty()}">
+                <p>📭 No data available</p>
+            </div>
+            
+            <div class="pagination" th:if="${totalPages > 0}">
+                <a th:if="${hasPrevious}" 
+                   th:href="@{/invoices(page=0, size=${pageSize}, invoiceNo=${param.invoiceNo}, stockCode=${param.stockCode}, description=${param.description}, customerId=${param.customerId}, country=${param.country})}"
+                   title="First Page">⏮️ First</a>
+                <span th:unless="${hasPrevious}" class="disabled">⏮️ First</span>
+                
+                <a th:if="${hasPrevious}" 
+                   th:href="@{/invoices(page=${currentPage - 1}, size=${pageSize}, invoiceNo=${param.invoiceNo}, stockCode=${param.stockCode}, description=${param.description}, customerId=${param.customerId}, country=${param.country})}"
+                   title="Previous Page">◀️ Previous</a>
+                <span th:unless="${hasPrevious}" class="disabled">◀️ Previous</span>
+                
+                <span th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
+                      th:if="${i >= currentPage - 2 and i <= currentPage + 2}">
+                    <a th:if="${i != currentPage}" 
+                       th:href="@{/invoices(page=${i}, size=${pageSize}, invoiceNo=${param.invoiceNo}, stockCode=${param.stockCode}, description=${param.description}, customerId=${param.customerId}, country=${param.country})}"
+                       th:text="${i + 1}">1</a>
+                    <span th:if="${i == currentPage}" 
+                          class="current"
+                          th:text="${i + 1}">1</span>
+                </span>
+                
+                <a th:if="${hasNext}" 
+                   th:href="@{/invoices(page=${currentPage + 1}, size=${pageSize}, invoiceNo=${param.invoiceNo}, stockCode=${param.stockCode}, description=${param.description}, customerId=${param.customerId}, country=${param.country})}"
+                   title="Next Page">Next ▶️</a>
+                <span th:unless="${hasNext}" class="disabled">Next ▶️</span>
+                
+                <a th:if="${hasNext}" 
+                   th:href="@{/invoices(page=${totalPages - 1}, size=${pageSize}, invoiceNo=${param.invoiceNo}, stockCode=${param.stockCode}, description=${param.description}, customerId=${param.customerId}, country=${param.country})}"
+                   title="Last Page">Last ⏭️</a>
+                <span th:unless="${hasNext}" class="disabled">Last ⏭️</span>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        function changePageSize(size) {
+            window.location.href = '/invoices?page=0&size=' + size;
+        }
+    </script>
+</body>
+</html>
+

@@ -41,6 +41,7 @@ public class SecurityConfig {
             .authorizeHttpRequests(authz -> authz
                 .requestMatchers("/login", "/css/**", "/js/**", "/images/**").permitAll()
                 .requestMatchers("/api/gateway/health").permitAll()  // Public health check
+                .requestMatchers("/invoices").permitAll()  // Allow public access to invoices
                 .requestMatchers("/admin/**").hasRole("ADMIN")
                 .requestMatchers("/inventory/**").hasRole("INVENTORY_MANAGER")
                 .requestMatchers("/marketing/**").hasRole("MARKETING_MANAGER")

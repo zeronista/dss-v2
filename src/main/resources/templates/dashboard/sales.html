@@ -5,6 +5,35 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sales Dashboard - DSS</title>
     <link rel="stylesheet" th:href="@{/css/neo-dashboard.css}" />
+    <style>
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.5;
+            }
+        }
+        
+        .stat-card-value {
+            transition: all 0.3s ease;
+        }
+        
+        .loading-pulse {
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+    </style>
 </head>
 <body>
     <nav class="navbar">
@@ -30,25 +59,25 @@
             <div class="stat-card">
                 <div class="stat-card-icon">💵</div>
                 <div class="stat-card-title">Total Revenue</div>
-                <div class="stat-card-value" id="totalRevenue">Loading...</div>
+                <div class="stat-card-value loading-pulse" id="totalRevenue">Loading...</div>
             </div>
             
             <div class="stat-card">
                 <div class="stat-card-icon">📦</div>
                 <div class="stat-card-title">Total Orders</div>
-                <div class="stat-card-value" id="totalOrders">Loading...</div>
+                <div class="stat-card-value loading-pulse" id="totalOrders">Loading...</div>
             </div>
             
             <div class="stat-card">
                 <div class="stat-card-icon">👥</div>
                 <div class="stat-card-title">Total Customers</div>
-                <div class="stat-card-value" id="totalCustomers">Loading...</div>
+                <div class="stat-card-value loading-pulse" id="totalCustomers">Loading...</div>
             </div>
             
             <div class="stat-card">
                 <div class="stat-card-icon">💰</div>
                 <div class="stat-card-title">Avg Order Value</div>
-                <div class="stat-card-value" id="avgOrderValue">Loading...</div>
+                <div class="stat-card-value loading-pulse" id="avgOrderValue">Loading...</div>
             </div>
         </div>
         
@@ -737,6 +766,7 @@
         // Load Sales Reports & Analytics on page load
         async function loadSalesReports() {
             try {
+                // Simulate loading delay for realistic effect
                 const response = await fetch(`${SALES_API_URL}/reports?period=all&limit=5`);
                 if (!response.ok) {
                     throw new Error('Failed to load sales reports');
@@ -745,14 +775,39 @@
                 const data = await response.json();
                 const report = data.report;
                 
-                // Update sales stats
-                document.getElementById('totalRevenue').textContent = '$' + report.total_revenue.toLocaleString(undefined, {maximumFractionDigits: 0});
-                document.getElementById('totalOrders').textContent = report.total_orders.toLocaleString();
-                document.getElementById('totalCustomers').textContent = report.total_customers.toLocaleString();
-                document.getElementById('avgOrderValue').textContent = '$' + report.avg_order_value.toLocaleString(undefined, {maximumFractionDigits: 2});
+                // Add loading animation effect - update stats with staggered delays (5 second total)
+                setTimeout(() => {
+                    const elem = document.getElementById('totalRevenue');
+                    elem.classList.remove('loading-pulse');
+                    elem.textContent = '$' + report.total_revenue.toLocaleString(undefined, {maximumFractionDigits: 0});
+                    elem.style.animation = 'fadeIn 0.5s ease-in';
+                }, 1000);
                 
-                // Render top products
-                renderTopProducts(report.top_products);
+                setTimeout(() => {
+                    const elem = document.getElementById('totalOrders');
+                    elem.classList.remove('loading-pulse');
+                    elem.textContent = report.total_orders.toLocaleString();
+                    elem.style.animation = 'fadeIn 0.5s ease-in';
+                }, 2000);
+                
+                setTimeout(() => {
+                    const elem = document.getElementById('totalCustomers');
+                    elem.classList.remove('loading-pulse');
+                    elem.textContent = report.total_customers.toLocaleString();
+                    elem.style.animation = 'fadeIn 0.5s ease-in';
+                }, 3000);
+                
+                setTimeout(() => {
+                    const elem = document.getElementById('avgOrderValue');
+                    elem.classList.remove('loading-pulse');
+                    elem.textContent = '$' + report.avg_order_value.toLocaleString(undefined, {maximumFractionDigits: 2});
+                    elem.style.animation = 'fadeIn 0.5s ease-in';
+                }, 4000);
+                
+                // Render top products after all stats are loaded
+                setTimeout(() => {
+                    renderTopProducts(report.top_products);
+                }, 5000);
                 
             } catch (error) {
                 console.error('Error loading sales reports:', error);

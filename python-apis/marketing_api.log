@@ -2,7 +2,7 @@
   warnings.warn(  # deprecated in 14.0 - 2024-11-09
 /home/ubuntu/anaconda3/lib/python3.12/site-packages/uvicorn/protocols/websockets/websockets_impl.py:22: DeprecationWarning: websockets.server.WebSocketServerProtocol is deprecated
   from websockets.server import WebSocketServerProtocol
-INFO:     Started server process [67275]
+INFO:     Started server process [482418]
 INFO:     Waiting for application startup.
 INFO:     Application startup complete.
 INFO:     Uvicorn running on http://0.0.0.0:8003 (Press CTRL+C to quit)
@@ -10,9 +10,5 @@ INFO:     Uvicorn running on http://0.0.0.0:8003 (Press CTRL+C to quit)
 💖 Role: Marketing Manager - Customer Segmentation
 📝 Documentation: http://localhost:8003/docs
 🔍 Health check: http://localhost:8003/health
-INFO:     127.0.0.1:52858 - "GET /health HTTP/1.1" 200 OK
-INFO:     127.0.0.1:55592 - "GET /health HTTP/1.1" 200 OK
-INFO:     Shutting down
-INFO:     Waiting for application shutdown.
-INFO:     Application shutdown complete.
-INFO:     Finished server process [67275]
+INFO:     127.0.0.1:38552 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54422 - "GET /health HTTP/1.1" 200 OK
