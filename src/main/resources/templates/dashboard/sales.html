@@ -497,12 +497,17 @@
         async function loadTopBundles() {
             const topN = document.getElementById('topNSelect').value;
             const container = document.getElementById('bundlesContainer');
-            container.innerHTML = '<div class="loading loading-pulse">⏳ Mining top product bundles...</div>';
+            container.innerHTML = '<div class="loading loading-pulse" style="font-size: 18px; padding: 40px; text-align: center;">⏳ Mining top product bundles... Please wait 5 seconds...</div>';
             
             // Hide export buttons while loading
             document.getElementById('exportBundles').classList.add('is-hidden');
             
             try {
+                // Add 5-second delay BEFORE fetching for realistic loading effect
+                console.log('Starting 5-second loading delay...');
+                await new Promise(resolve => setTimeout(resolve, 5000));
+                console.log('Loading delay completed, fetching data...');
+                
                 const response = await fetch(`${SALES_API_URL}/top-bundles?min_support=0.01&min_confidence=0.3&top_n=${topN}`);
                 
                 if (!response.ok) throw new Error('Failed to load bundles');
@@ -515,12 +520,7 @@
                 }
                 
                 // Store bundles for export
-                currentBundles = data.bundles;
-                
-                // Add 5-second delay for realistic loading effect
-                await new Promise(resolve => setTimeout(resolve, 5000));
-                
-                // Display in table with fade-in animation
+                currentBundles = data.bundles;                // Display in table with fade-in animation
                 container.innerHTML = `
                     <table style="animation: fadeIn 0.5s ease-in;">
                         <thead>
