@@ -20,72 +20,163 @@ import os
 from db_utils import get_transactions_df, get_customers_rfm, get_db, filter_by_date_range, get_date_range_fast
 
 # ============ Local Data Configuration ============
-# Path to local cleaned data file (faster than MongoDB)
 DATA_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'data')
-PARQUET_FILE = os.path.join(DATA_DIR, 'online_retail_cleaned.parquet')
-CSV_FILE = os.path.join(DATA_DIR, 'online_retail_cleaned.csv')
+# Preferred full-data CSVs (larger, unfiltered copies)
+FULL_CSV_CANDIDATES = [
+    os.path.join(os.path.dirname(__file__), 'data', 'data.csv'),
+    os.path.join(DATA_DIR, 'online_retail.csv'),
+]
+# Legacy cleaned artifacts kept as fallbacks
+CLEANED_CSV_FILE = os.path.join(DATA_DIR, 'online_retail_cleaned.csv')
+CLEANED_PARQUET_FILE = os.path.join(DATA_DIR, 'online_retail_cleaned.parquet')
+FULL_DATA_ENCODING = 'ISO-8859-1'
 
 # Cache for loaded data
 _cached_df = None
 _cache_timestamp = None
 _cache_ttl = 3600  # Cache for 1 hour
+_data_source_label = "Local CSV (not loaded yet)"
+
+def _first_existing_path(paths: List[str]) -> Optional[str]:
+    """Return the first path that exists on disk."""
+    for candidate in paths:
+        if candidate and os.path.exists(candidate):
+            return candidate
+    return None
+
+def _standardize_customer_id(series: pd.Series) -> pd.Series:
+    """Normalize CustomerID to string without trailing decimals."""
+    str_series = series.astype('string')
+    return str_series.str.replace(r'\.0$', '', regex=True).str.strip()
+
+def _prepare_transactions_df(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Apply lightweight cleaning so the marketing pipeline can rely on
+    the same schema regardless of the source CSV.
+    """
+    df = df.copy()
+
+    # Normalize string columns
+    for col in ['InvoiceNo', 'StockCode', 'Description', 'Country']:
+        if col in df.columns:
+            df[col] = df[col].astype('string').str.strip()
+    if 'StockCode' in df.columns:
+        df['StockCode'] = df['StockCode'].str.upper()
+    if 'Description' in df.columns:
+        df['Description'] = df['Description'].fillna('UNKNOWN PRODUCT')
+    if 'Country' in df.columns:
+        df['Country'] = df['Country'].fillna('Unknown')
+
+    # Ensure datetime + numeric columns are usable
+    df['InvoiceDate'] = pd.to_datetime(df['InvoiceDate'], errors='coerce')
+    df['Quantity'] = pd.to_numeric(df['Quantity'], errors='coerce')
+    df['UnitPrice'] = pd.to_numeric(df['UnitPrice'], errors='coerce')
+
+    # Filter invalid records and compute revenue
+    df = df.dropna(subset=['InvoiceDate', 'InvoiceNo', 'StockCode'])
+    df = df[(df['Quantity'] > 0) & (df['UnitPrice'] > 0)].copy()
+    df['Revenue'] = df['Quantity'] * df['UnitPrice']
+
+    # CustomerID remains nullable; NaNs are ignored by groupby later on
+    if 'CustomerID' in df.columns:
+        df['CustomerID'] = _standardize_customer_id(df['CustomerID'])
+
+    df = df.drop_duplicates().sort_values('InvoiceDate')
+    return df
+
+def _load_full_dataset(csv_path: str) -> pd.DataFrame:
+    """Load and normalize the full CSV dataset requested by Marketing."""
+    dtype_overrides = {
+        'InvoiceNo': 'string',
+        'StockCode': 'string',
+        'Description': 'string',
+        'CustomerID': 'string',
+        'Country': 'string',
+    }
+    df = pd.read_csv(
+        csv_path,
+        dtype=dtype_overrides,
+        encoding=FULL_DATA_ENCODING,
+        low_memory=False,
+        parse_dates=['InvoiceDate'],
+    )
+    return _prepare_transactions_df(df)
 
 def get_local_transactions_df() -> pd.DataFrame:
     """
-    Load transactions from local parquet/CSV file (FAST!)
-    Uses caching to avoid repeated file reads
-    
+    Load transactions from the full CSV dataset (FAST!)
+    Applies caching plus lightweight cleaning so downstream
+    marketing logic can reuse the same schema.
+
     Returns:
         pandas DataFrame with cleaned transactions
     """
-    global _cached_df, _cache_timestamp
-    
+    global _cached_df, _cache_timestamp, _data_source_label
+
     # Check if cache is valid
     if _cached_df is not None and _cache_timestamp is not None:
         if (datetime.now() - _cache_timestamp).seconds < _cache_ttl:
-            print(f"✅ Using cached data ({len(_cached_df)} rows)")
+            print(f"?o. Using cached data ({len(_cached_df)} rows)")
             df_copy = _cached_df.copy()
             # Ensure InvoiceDate is datetime type (in case cache lost the type)
-            if df_copy['InvoiceDate'].dtype == 'object':
-                df_copy['InvoiceDate'] = pd.to_datetime(df_copy['InvoiceDate'])
+            if df_copy["InvoiceDate"].dtype == "object":
+                df_copy["InvoiceDate"] = pd.to_datetime(df_copy["InvoiceDate"])
             return df_copy
-    
-    print(f"📂 Loading data from local file...")
-    
+
+    print("[Marketing] Loading dataset from local CSV...")
+
     try:
-        # Use CSV file (as requested)
-        if os.path.exists(CSV_FILE):
-            print(f"📊 Loading from CSV: {CSV_FILE}")
-            df = pd.read_csv(CSV_FILE)
-            # Convert InvoiceDate to datetime
-            df['InvoiceDate'] = pd.to_datetime(df['InvoiceDate'], errors='coerce')
-            print(f"✅ Loaded {len(df)} transactions from CSV")
-        # Fallback to parquet if CSV not found
-        elif os.path.exists(PARQUET_FILE):
-            print(f"📊 Loading from parquet: {PARQUET_FILE}")
-            df = pd.read_parquet(PARQUET_FILE)
-            # Ensure datetime conversion for parquet too
-            if df['InvoiceDate'].dtype == 'object':
-                df['InvoiceDate'] = pd.to_datetime(df['InvoiceDate'], errors='coerce')
-            print(f"✅ Loaded {len(df)} transactions from parquet (fallback)")
+        csv_path = _first_existing_path(FULL_CSV_CANDIDATES)
+        if csv_path:
+            df = _load_full_dataset(csv_path)
+            _data_source_label = f"Local CSV ({os.path.basename(csv_path)})"
+            print(f"[Marketing] Loaded {len(df)} transactions from {csv_path}")
+        elif os.path.exists(CLEANED_CSV_FILE):
+            print(f"[Marketing][Fallback] Full dataset not found, using cleaned CSV: {CLEANED_CSV_FILE}")
+            df = pd.read_csv(CLEANED_CSV_FILE, low_memory=False, dtype={"CustomerID": str})
+            df["InvoiceDate"] = pd.to_datetime(df["InvoiceDate"], errors="coerce")
+            if "Revenue" not in df.columns and {"Quantity", "UnitPrice"}.issubset(df.columns):
+                df["Revenue"] = pd.to_numeric(df["Quantity"], errors="coerce") * pd.to_numeric(df["UnitPrice"], errors="coerce")
+            df = _prepare_transactions_df(df)
+            _data_source_label = f"Cleaned CSV ({os.path.basename(CLEANED_CSV_FILE)})"
+        elif os.path.exists(CLEANED_PARQUET_FILE):
+            print(f"[Marketing][Fallback] CSVs missing, loading cleaned parquet: {CLEANED_PARQUET_FILE}")
+            df = pd.read_parquet(CLEANED_PARQUET_FILE)
+            df = _prepare_transactions_df(df)
+            _data_source_label = f"Cleaned Parquet ({os.path.basename(CLEANED_PARQUET_FILE)})"
         else:
             raise FileNotFoundError(f"No data file found in {DATA_DIR}")
-        
-        # Ensure required columns
-        if 'Revenue' not in df.columns and 'Quantity' in df.columns and 'UnitPrice' in df.columns:
-            df['Revenue'] = df['Quantity'] * df['UnitPrice']
-        
+
         # Cache the data
         _cached_df = df.copy()
         _cache_timestamp = datetime.now()
-        
+
         return df
-    
+
     except Exception as e:
-        print(f"❌ Error loading local data: {e}")
-        print(f"💡 Falling back to MongoDB...")
+        print(f"??O Error loading local data: {e}")
+        print(f"dY'? Falling back to MongoDB...")
         # Fallback to MongoDB if local file fails
+        _data_source_label = "MongoDB fallback"
         return get_transactions_df()
+
+def get_data_source_label() -> str:
+    """Expose the most recent marketing dataset descriptor."""
+    return _data_source_label
+
+def clear_local_cache() -> Dict[str, Any]:
+    """
+    Reset the in-memory transaction cache so the next request reloads
+    the source CSV from disk. Helpful when the underlying file changes.
+    """
+    global _cached_df, _cache_timestamp
+    _cached_df = None
+    _cache_timestamp = None
+    return {
+        "success": True,
+        "message": "Marketing data cache cleared. Next request will reload from disk.",
+        "data_source": _data_source_label
+    }
 
 def get_date_range_from_local() -> Dict[str, datetime]:
     """
@@ -175,6 +266,16 @@ async def health_check():
         "port": 8003
     }
 
+@app.post("/cache/refresh")
+@app.post("/cache/refresh/")
+@app.get("/cache/refresh")
+@app.get("/cache/refresh/")
+async def refresh_cache() -> Dict[str, Any]:
+    """
+    Clear the marketing CSV cache so the next request reloads the dataset.
+    """
+    return clear_local_cache()
+
 # ============ Marketing Endpoints ============
 
 @app.get("/")
@@ -184,8 +285,10 @@ async def root():
         "version": "1.0.0",
         "role": "Marketing Manager",
         "dss_type": "Prescriptive",
+        "data_source": get_data_source_label(),
         "endpoints": [
             "/health",
+            "/cache/refresh",
             "/date-range-info",
             "/calculate-rfm",
             "/calculate-rfm-advanced",
@@ -361,7 +464,8 @@ async def get_date_range_info() -> Dict[str, Any]:
             "max_date": max_date.strftime('%Y-%m-%d'),
             "default_start": default_start.strftime('%Y-%m-%d'),
             "default_end": max_date.strftime('%Y-%m-%d'),
-            "total_days": (max_date - min_date).days
+            "total_days": (max_date - min_date).days,
+            "data_source": get_data_source_label()
         }
     
     except Exception as e:
@@ -407,6 +511,7 @@ async def calculate_rfm() -> Dict[str, Any]:
             "success": True,
             "message": "RFM calculation completed",
             "customers_analyzed": len(rfm),
+            "data_source": get_data_source_label(),
             "summary": {
                 "avg_recency": round(rfm['Recency'].mean(), 2),
                 "avg_frequency": round(rfm['Frequency'].mean(), 2),
@@ -482,6 +587,7 @@ async def calculate_rfm_advanced(request: RFMRequest) -> Dict[str, Any]:
             "success": True,
             "message": "Advanced RFM calculation completed",
             "customers_analyzed": len(rfm),
+            "data_source": get_data_source_label(),
             "date_range": {
                 "start": actual_start,
                 "end": actual_end,
@@ -576,6 +682,7 @@ async def run_segmentation(request: SegmentationRequest) -> Dict[str, Any]:
             "success": True,
             "n_segments": len(segment_summary),
             "total_customers": len(rfm),
+            "data_source": get_data_source_label(),
             "date_range": {
                 "start": df['InvoiceDate'].min().strftime('%Y-%m-%d'),
                 "end": df['InvoiceDate'].max().strftime('%Y-%m-%d')
@@ -729,7 +836,8 @@ async def segment_basket_analysis(
         
         # Create basket (one-hot encoding by Description)
         basket = seg_df.groupby(['InvoiceNo', 'Description'])['Quantity'].sum().unstack().fillna(0)
-        basket_encoded = basket.map(lambda x: 1 if x > 0 else 0)
+        # Fix DeprecationWarning: Convert to boolean type for better performance
+        basket_encoded = (basket > 0).astype(bool)
         
         # Run Apriori algorithm
         frequent_itemsets = apriori(
@@ -744,7 +852,8 @@ async def segment_basket_analysis(
                 "segment": segment_name,
                 "customer_count": len(segment_customers),
                 "message": "No frequent itemsets found. Try lowering min_support.",
-                "bundles": []
+                "bundles": [],
+                "data_source": get_data_source_label()
             }
         
         # Generate association rules
@@ -760,7 +869,8 @@ async def segment_basket_analysis(
                 "segment": segment_name,
                 "customer_count": len(segment_customers),
                 "message": "No rules found. Try lowering min_confidence.",
-                "bundles": []
+                "bundles": [],
+                "data_source": get_data_source_label()
             }
         
         # Sort by confidence and lift
@@ -822,7 +932,8 @@ async def segment_basket_analysis(
                 "min_support": min_support,
                 "min_confidence": min_confidence,
                 "top_n": top_n
-            }
+            },
+            "data_source": get_data_source_label()
         }
     
     except Exception as e:
@@ -851,11 +962,12 @@ async def market_basket_analysis(request: BasketAnalysisRequest) -> Dict[str, An
         df = df[df['Description'].isin(top_products)].copy()
         
         # Limit transactions to most recent
-        df = df.nlargest(50000, 'InvoiceDate')
+        df = df.nlargest(100000, 'InvoiceDate')
         
         # Create basket (one-hot encoding)
         basket = df.groupby(['InvoiceNo', 'Description'])['Quantity'].sum().unstack().fillna(0)
-        basket_encoded = basket.map(lambda x: 1 if x > 0 else 0)
+        # Fix DeprecationWarning: Convert to boolean type for better performance
+        basket_encoded = (basket > 0).astype(bool)
         
         # Run Apriori algorithm
         frequent_itemsets = apriori(
@@ -868,7 +980,8 @@ async def market_basket_analysis(request: BasketAnalysisRequest) -> Dict[str, An
             return {
                 "success": True,
                 "message": "No frequent itemsets found. Try lowering min_support.",
-                "bundles": []
+                "bundles": [],
+                "data_source": get_data_source_label()
             }
         
         # Generate association rules
@@ -882,7 +995,8 @@ async def market_basket_analysis(request: BasketAnalysisRequest) -> Dict[str, An
             return {
                 "success": True,
                 "message": "No rules found. Try lowering min_confidence.",
-                "bundles": []
+                "bundles": [],
+                "data_source": get_data_source_label()
             }
         
         # Sort by lift and confidence
@@ -942,7 +1056,8 @@ async def market_basket_analysis(request: BasketAnalysisRequest) -> Dict[str, An
             "parameters": {
                 "min_support": request.min_support,
                 "min_confidence": request.min_confidence
-            }
+            },
+            "data_source": get_data_source_label()
         }
     
     except Exception as e:
