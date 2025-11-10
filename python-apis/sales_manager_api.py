@@ -78,7 +78,7 @@ def load_data() -> pd.DataFrame:
         return pd.DataFrame()
 
 # Cache data in memory
-print("📊 Loading data from CSV...")
+print("📊 Loading data...")
 TRANSACTION_DATA = load_data()
 print(f"✅ Loaded {len(TRANSACTION_DATA):,} transactions")
 
@@ -418,7 +418,6 @@ async def generate_recommendations(request: RecommendationRequest) -> Recommenda
     """
     Main endpoint: Generate cross-sell recommendations
     
-    According to DSS_Lam.pdf specification:
     - Input: Product search, customer ID (optional), confidence threshold, top N
     - Output: Recommendations table, network visualization, bundle opportunity, 
               revenue impact, timing strategy

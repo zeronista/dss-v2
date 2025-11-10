@@ -4,7 +4,7 @@
   warnings.warn(  # deprecated in 14.0 - 2024-11-09
 /home/ubuntu/anaconda3/lib/python3.12/site-packages/uvicorn/protocols/websockets/websockets_impl.py:22: DeprecationWarning: websockets.server.WebSocketServerProtocol is deprecated
   from websockets.server import WebSocketServerProtocol
-INFO:     Started server process [482512]
+INFO:     Started server process [8500]
 INFO:     Waiting for application startup.
 INFO:     Application startup complete.
 INFO:     Uvicorn running on http://0.0.0.0:8004 (Press CTRL+C to quit)
@@ -20,36 +20,18 @@ INFO:     Uvicorn running on http://0.0.0.0:8004 (Press CTRL+C to quit)
 📊 Data Source: CSV (530,104 transactions)
 📝 Documentation: http://localhost:8004/docs
 🔍 Health check: http://localhost:8004/health
-INFO:     127.0.0.1:42142 - "GET /health HTTP/1.1" 200 OK
-INFO:     127.0.0.1:42154 - "GET /health HTTP/1.1" 200 OK
-INFO:     127.0.0.1:60864 - "GET /health HTTP/1.1" 200 OK
-INFO:     127.0.0.1:47432 - "GET /reports?period=all&limit=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:54390 - "OPTIONS /generate-recommendations HTTP/1.1" 200 OK
+INFO:     127.0.0.1:40062 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:40076 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:44674 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:45756 - "GET /reports?period=all&limit=5 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:35124 - "GET /reports?period=all&limit=5 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57310 - "GET /top-bundles?min_support=0.01&min_confidence=0.3&top_n=10 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57310 - "OPTIONS /generate-recommendations HTTP/1.1" 200 OK
 /home/ubuntu/anaconda3/lib/python3.12/site-packages/mlxtend/frequent_patterns/fpcommon.py:110: DeprecationWarning: DataFrames with non-bool types result in worse computationalperformance and their support might be discontinued in the future.Please use a DataFrame with bool type
   warnings.warn(
 🔍 Analyzing 20,000 transactions with 100 products
-INFO:     127.0.0.1:54404 - "POST /generate-recommendations HTTP/1.1" 200 OK
-INFO:     127.0.0.1:54404 - "OPTIONS /cross-sell-insights HTTP/1.1" 200 OK
-/home/ubuntu/anaconda3/lib/python3.12/site-packages/mlxtend/frequent_patterns/fpcommon.py:110: DeprecationWarning: DataFrames with non-bool types result in worse computationalperformance and their support might be discontinued in the future.Please use a DataFrame with bool type
-  warnings.warn(
-/home/ubuntu/DataScience/MyProject/dss-v2/python-apis/sales_manager_api.py:665: PydanticDeprecatedSince20: The `dict` method is deprecated; use `model_dump` instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.5/migration/
-  recommendations = [rec.dict() for rec in recs.recommendations]
-/home/ubuntu/anaconda3/lib/python3.12/site-packages/pydantic/main.py:979: PydanticDeprecatedSince20: The `dict` method is deprecated; use `model_dump` instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.5/migration/
-  warnings.warn('The `dict` method is deprecated; use `model_dump` instead.', DeprecationWarning)
-🔍 Analyzing 20,000 transactions with 100 products
-INFO:     127.0.0.1:54390 - "POST /cross-sell-insights HTTP/1.1" 200 OK
-INFO:     127.0.0.1:54390 - "GET /top-bundles?min_support=0.01&min_confidence=0.3&top_n=10 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:48542 - "GET /reports?period=all&limit=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:48542 - "GET /reports?period=all&limit=10 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:48542 - "GET /reports?period=all&limit=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:51020 - "GET /reports?period=all&limit=10 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:43178 - "GET /reports?period=all&limit=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:37120 - "GET /reports?period=all&limit=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:47376 - "GET /top-bundles?min_support=0.01&min_confidence=0.3&top_n=10 HTTP/1.1" 200 OK
-/home/ubuntu/anaconda3/lib/python3.12/site-packages/mlxtend/frequent_patterns/fpcommon.py:110: DeprecationWarning: DataFrames with non-bool types result in worse computationalperformance and their support might be discontinued in the future.Please use a DataFrame with bool type
-  warnings.warn(
-🔍 Analyzing 20,000 transactions with 100 products
-INFO:     127.0.0.1:34422 - "POST /generate-recommendations HTTP/1.1" 200 OK
+INFO:     127.0.0.1:45982 - "POST /generate-recommendations HTTP/1.1" 200 OK
+INFO:     127.0.0.1:45982 - "OPTIONS /cross-sell-insights HTTP/1.1" 200 OK
 /home/ubuntu/anaconda3/lib/python3.12/site-packages/mlxtend/frequent_patterns/fpcommon.py:110: DeprecationWarning: DataFrames with non-bool types result in worse computationalperformance and their support might be discontinued in the future.Please use a DataFrame with bool type
   warnings.warn(
 /home/ubuntu/DataScience/MyProject/dss-v2/python-apis/sales_manager_api.py:665: PydanticDeprecatedSince20: The `dict` method is deprecated; use `model_dump` instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.5/migration/
@@ -57,13 +39,15 @@ INFO:     127.0.0.1:34422 - "POST /generate-recommendations HTTP/1.1" 200 OK
 /home/ubuntu/anaconda3/lib/python3.12/site-packages/pydantic/main.py:979: PydanticDeprecatedSince20: The `dict` method is deprecated; use `model_dump` instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.5/migration/
   warnings.warn('The `dict` method is deprecated; use `model_dump` instead.', DeprecationWarning)
 🔍 Analyzing 20,000 transactions with 100 products
-INFO:     127.0.0.1:34422 - "POST /cross-sell-insights HTTP/1.1" 200 OK
-INFO:     127.0.0.1:49862 - "OPTIONS /generate-recommendations HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57310 - "POST /cross-sell-insights HTTP/1.1" 200 OK
+INFO:     127.0.0.1:45998 - "GET /reports?period=all&limit=10 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37988 - "GET /reports?period=all&limit=5 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60398 - "OPTIONS /generate-recommendations HTTP/1.1" 200 OK
 /home/ubuntu/anaconda3/lib/python3.12/site-packages/mlxtend/frequent_patterns/fpcommon.py:110: DeprecationWarning: DataFrames with non-bool types result in worse computationalperformance and their support might be discontinued in the future.Please use a DataFrame with bool type
   warnings.warn(
 🔍 Analyzing 20,000 transactions with 101 products
-INFO:     127.0.0.1:49876 - "POST /generate-recommendations HTTP/1.1" 200 OK
-INFO:     127.0.0.1:49876 - "OPTIONS /cross-sell-insights HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60414 - "POST /generate-recommendations HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60414 - "OPTIONS /cross-sell-insights HTTP/1.1" 200 OK
 /home/ubuntu/anaconda3/lib/python3.12/site-packages/mlxtend/frequent_patterns/fpcommon.py:110: DeprecationWarning: DataFrames with non-bool types result in worse computationalperformance and their support might be discontinued in the future.Please use a DataFrame with bool type
   warnings.warn(
 /home/ubuntu/DataScience/MyProject/dss-v2/python-apis/sales_manager_api.py:665: PydanticDeprecatedSince20: The `dict` method is deprecated; use `model_dump` instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.5/migration/
@@ -87,25 +71,11 @@ INFO:     127.0.0.1:49876 - "OPTIONS /cross-sell-insights HTTP/1.1" 200 OK
 /home/ubuntu/anaconda3/lib/python3.12/site-packages/pydantic/main.py:979: PydanticDeprecatedSince20: The `dict` method is deprecated; use `model_dump` instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.5/migration/
   warnings.warn('The `dict` method is deprecated; use `model_dump` instead.', DeprecationWarning)
 🔍 Analyzing 20,000 transactions with 101 products
-INFO:     127.0.0.1:49862 - "POST /cross-sell-insights HTTP/1.1" 200 OK
-INFO:     127.0.0.1:47456 - "GET /reports?period=all&limit=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:47368 - "GET /reports?period=all&limit=10 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:47368 - "GET /reports?period=all&limit=10 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:51394 - "GET /reports?period=all&limit=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:47672 - "GET /reports?period=all&limit=10 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:44628 - "GET /reports?period=all&limit=10 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:44628 - "GET /reports?period=last_month&limit=10 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:44628 - "GET /reports?period=all&limit=10 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:44628 - "GET /reports?period=last_year&limit=10 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:44628 - "GET /reports?period=all&limit=10 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:51704 - "GET /reports?period=all&limit=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:51720 - "GET /reports?period=all&limit=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:34950 - "GET /reports?period=all&limit=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:35376 - "GET /reports?period=all&limit=5 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60398 - "POST /cross-sell-insights HTTP/1.1" 200 OK
 /home/ubuntu/anaconda3/lib/python3.12/site-packages/mlxtend/frequent_patterns/fpcommon.py:110: DeprecationWarning: DataFrames with non-bool types result in worse computationalperformance and their support might be discontinued in the future.Please use a DataFrame with bool type
   warnings.warn(
 🔍 Analyzing 20,000 transactions with 101 products
-INFO:     127.0.0.1:42382 - "POST /generate-recommendations HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37210 - "POST /generate-recommendations HTTP/1.1" 200 OK
 /home/ubuntu/anaconda3/lib/python3.12/site-packages/mlxtend/frequent_patterns/fpcommon.py:110: DeprecationWarning: DataFrames with non-bool types result in worse computationalperformance and their support might be discontinued in the future.Please use a DataFrame with bool type
   warnings.warn(
 /home/ubuntu/DataScience/MyProject/dss-v2/python-apis/sales_manager_api.py:665: PydanticDeprecatedSince20: The `dict` method is deprecated; use `model_dump` instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.5/migration/
@@ -129,24 +99,19 @@ INFO:     127.0.0.1:42382 - "POST /generate-recommendations HTTP/1.1" 200 OK
 /home/ubuntu/anaconda3/lib/python3.12/site-packages/pydantic/main.py:979: PydanticDeprecatedSince20: The `dict` method is deprecated; use `model_dump` instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.5/migration/
   warnings.warn('The `dict` method is deprecated; use `model_dump` instead.', DeprecationWarning)
 🔍 Analyzing 20,000 transactions with 101 products
-INFO:     127.0.0.1:42382 - "POST /cross-sell-insights HTTP/1.1" 200 OK
-INFO:     127.0.0.1:57046 - "GET /reports?period=all&limit=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:47560 - "GET /top-bundles?min_support=0.01&min_confidence=0.3&top_n=10 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:50394 - "GET /docs HTTP/1.1" 200 OK
-INFO:     127.0.0.1:50394 - "GET /openapi.json HTTP/1.1" 200 OK
-INFO:     127.0.0.1:50402 - "GET /openapi.json HTTP/1.1" 200 OK
-INFO:     127.0.0.1:50402 - "GET /favicon.ico HTTP/1.1" 404 Not Found
-INFO:     127.0.0.1:40424 - "GET /reports?period=all&limit=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:40424 - "GET /top-bundles?min_support=0.01&min_confidence=0.3&top_n=10 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:40424 - "GET /reports?period=all&limit=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:40424 - "GET /top-bundles?min_support=0.01&min_confidence=0.3&top_n=10 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:38978 - "GET /reports?period=all&limit=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:38978 - "OPTIONS /generate-recommendations HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37210 - "POST /cross-sell-insights HTTP/1.1" 200 OK
+/home/ubuntu/anaconda3/lib/python3.12/site-packages/mlxtend/frequent_patterns/fpcommon.py:110: DeprecationWarning: DataFrames with non-bool types result in worse computationalperformance and their support might be discontinued in the future.Please use a DataFrame with bool type
+  warnings.warn(
+🔍 Analyzing 20,000 transactions with 101 products
+INFO:     127.0.0.1:37224 - "POST /generate-recommendations HTTP/1.1" 200 OK
+/home/ubuntu/anaconda3/lib/python3.12/site-packages/mlxtend/frequent_patterns/fpcommon.py:110: DeprecationWarning: DataFrames with non-bool types result in worse computationalperformance and their support might be discontinued in the future.Please use a DataFrame with bool type
+  warnings.warn(
+🔍 Analyzing 20,000 transactions with 101 products
+INFO:     127.0.0.1:37224 - "POST /generate-recommendations HTTP/1.1" 200 OK
 /home/ubuntu/anaconda3/lib/python3.12/site-packages/mlxtend/frequent_patterns/fpcommon.py:110: DeprecationWarning: DataFrames with non-bool types result in worse computationalperformance and their support might be discontinued in the future.Please use a DataFrame with bool type
   warnings.warn(
 🔍 Analyzing 20,000 transactions with 100 products
-INFO:     127.0.0.1:38994 - "POST /generate-recommendations HTTP/1.1" 200 OK
-INFO:     127.0.0.1:38994 - "OPTIONS /cross-sell-insights HTTP/1.1" 200 OK
+INFO:     127.0.0.1:44464 - "POST /generate-recommendations HTTP/1.1" 200 OK
 /home/ubuntu/anaconda3/lib/python3.12/site-packages/mlxtend/frequent_patterns/fpcommon.py:110: DeprecationWarning: DataFrames with non-bool types result in worse computationalperformance and their support might be discontinued in the future.Please use a DataFrame with bool type
   warnings.warn(
 /home/ubuntu/DataScience/MyProject/dss-v2/python-apis/sales_manager_api.py:665: PydanticDeprecatedSince20: The `dict` method is deprecated; use `model_dump` instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.5/migration/
@@ -154,13 +119,15 @@ INFO:     127.0.0.1:38994 - "OPTIONS /cross-sell-insights HTTP/1.1" 200 OK
 /home/ubuntu/anaconda3/lib/python3.12/site-packages/pydantic/main.py:979: PydanticDeprecatedSince20: The `dict` method is deprecated; use `model_dump` instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.5/migration/
   warnings.warn('The `dict` method is deprecated; use `model_dump` instead.', DeprecationWarning)
 🔍 Analyzing 20,000 transactions with 100 products
-INFO:     127.0.0.1:38978 - "POST /cross-sell-insights HTTP/1.1" 200 OK
-INFO:     127.0.0.1:38978 - "GET /top-bundles?min_support=0.01&min_confidence=0.3&top_n=10 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:34186 - "GET /reports?period=all&limit=5 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:44464 - "POST /cross-sell-insights HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49480 - "GET /reports?period=all&limit=5 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:44096 - "GET /top-bundles?min_support=0.01&min_confidence=0.3&top_n=10 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58500 - "GET /top-bundles?min_support=0.01&min_confidence=0.3&top_n=20 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:48478 - "GET /reports?period=all&limit=10 HTTP/1.1" 200 OK
 /home/ubuntu/anaconda3/lib/python3.12/site-packages/mlxtend/frequent_patterns/fpcommon.py:110: DeprecationWarning: DataFrames with non-bool types result in worse computationalperformance and their support might be discontinued in the future.Please use a DataFrame with bool type
   warnings.warn(
 🔍 Analyzing 20,000 transactions with 100 products
-INFO:     127.0.0.1:34188 - "POST /generate-recommendations HTTP/1.1" 200 OK
+INFO:     127.0.0.1:40322 - "POST /generate-recommendations HTTP/1.1" 200 OK
 /home/ubuntu/anaconda3/lib/python3.12/site-packages/mlxtend/frequent_patterns/fpcommon.py:110: DeprecationWarning: DataFrames with non-bool types result in worse computationalperformance and their support might be discontinued in the future.Please use a DataFrame with bool type
   warnings.warn(
 /home/ubuntu/DataScience/MyProject/dss-v2/python-apis/sales_manager_api.py:665: PydanticDeprecatedSince20: The `dict` method is deprecated; use `model_dump` instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.5/migration/
@@ -168,5 +135,72 @@ INFO:     127.0.0.1:34188 - "POST /generate-recommendations HTTP/1.1" 200 OK
 /home/ubuntu/anaconda3/lib/python3.12/site-packages/pydantic/main.py:979: PydanticDeprecatedSince20: The `dict` method is deprecated; use `model_dump` instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.5/migration/
   warnings.warn('The `dict` method is deprecated; use `model_dump` instead.', DeprecationWarning)
 🔍 Analyzing 20,000 transactions with 100 products
-INFO:     127.0.0.1:34188 - "POST /cross-sell-insights HTTP/1.1" 200 OK
-INFO:     127.0.0.1:34188 - "GET /top-bundles?min_support=0.01&min_confidence=0.3&top_n=10 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:40322 - "POST /cross-sell-insights HTTP/1.1" 200 OK
+/home/ubuntu/anaconda3/lib/python3.12/site-packages/mlxtend/frequent_patterns/fpcommon.py:110: DeprecationWarning: DataFrames with non-bool types result in worse computationalperformance and their support might be discontinued in the future.Please use a DataFrame with bool type
+  warnings.warn(
+🔍 Analyzing 20,000 transactions with 101 products
+INFO:     127.0.0.1:40638 - "POST /generate-recommendations HTTP/1.1" 200 OK
+/home/ubuntu/anaconda3/lib/python3.12/site-packages/mlxtend/frequent_patterns/fpcommon.py:110: DeprecationWarning: DataFrames with non-bool types result in worse computationalperformance and their support might be discontinued in the future.Please use a DataFrame with bool type
+  warnings.warn(
+🔍 Analyzing 20,000 transactions with 100 products
+INFO:     127.0.0.1:38182 - "POST /generate-recommendations HTTP/1.1" 200 OK
+/home/ubuntu/anaconda3/lib/python3.12/site-packages/mlxtend/frequent_patterns/fpcommon.py:110: DeprecationWarning: DataFrames with non-bool types result in worse computationalperformance and their support might be discontinued in the future.Please use a DataFrame with bool type
+  warnings.warn(
+/home/ubuntu/DataScience/MyProject/dss-v2/python-apis/sales_manager_api.py:665: PydanticDeprecatedSince20: The `dict` method is deprecated; use `model_dump` instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.5/migration/
+  recommendations = [rec.dict() for rec in recs.recommendations]
+/home/ubuntu/anaconda3/lib/python3.12/site-packages/pydantic/main.py:979: PydanticDeprecatedSince20: The `dict` method is deprecated; use `model_dump` instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.5/migration/
+  warnings.warn('The `dict` method is deprecated; use `model_dump` instead.', DeprecationWarning)
+🔍 Analyzing 20,000 transactions with 100 products
+INFO:     127.0.0.1:38182 - "POST /cross-sell-insights HTTP/1.1" 200 OK
+INFO:     127.0.0.1:45208 - "GET /reports?period=all&limit=5 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:45208 - "GET /reports?period=all&limit=10 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59196 - "GET /reports?period=all&limit=5 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60142 - "GET /reports?period=all&limit=5 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34792 - "OPTIONS /generate-recommendations HTTP/1.1" 200 OK
+/home/ubuntu/anaconda3/lib/python3.12/site-packages/mlxtend/frequent_patterns/fpcommon.py:110: DeprecationWarning: DataFrames with non-bool types result in worse computationalperformance and their support might be discontinued in the future.Please use a DataFrame with bool type
+  warnings.warn(
+🔍 Analyzing 20,000 transactions with 100 products
+INFO:     127.0.0.1:34798 - "POST /generate-recommendations HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34798 - "OPTIONS /cross-sell-insights HTTP/1.1" 200 OK
+/home/ubuntu/anaconda3/lib/python3.12/site-packages/mlxtend/frequent_patterns/fpcommon.py:110: DeprecationWarning: DataFrames with non-bool types result in worse computationalperformance and their support might be discontinued in the future.Please use a DataFrame with bool type
+  warnings.warn(
+/home/ubuntu/DataScience/MyProject/dss-v2/python-apis/sales_manager_api.py:665: PydanticDeprecatedSince20: The `dict` method is deprecated; use `model_dump` instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.5/migration/
+  recommendations = [rec.dict() for rec in recs.recommendations]
+/home/ubuntu/anaconda3/lib/python3.12/site-packages/pydantic/main.py:979: PydanticDeprecatedSince20: The `dict` method is deprecated; use `model_dump` instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.5/migration/
+  warnings.warn('The `dict` method is deprecated; use `model_dump` instead.', DeprecationWarning)
+🔍 Analyzing 20,000 transactions with 100 products
+INFO:     127.0.0.1:34792 - "POST /cross-sell-insights HTTP/1.1" 200 OK
+/home/ubuntu/anaconda3/lib/python3.12/site-packages/mlxtend/frequent_patterns/fpcommon.py:110: DeprecationWarning: DataFrames with non-bool types result in worse computationalperformance and their support might be discontinued in the future.Please use a DataFrame with bool type
+  warnings.warn(
+🔍 Analyzing 20,000 transactions with 101 products
+INFO:     127.0.0.1:42280 - "POST /generate-recommendations HTTP/1.1" 200 OK
+/home/ubuntu/anaconda3/lib/python3.12/site-packages/mlxtend/frequent_patterns/fpcommon.py:110: DeprecationWarning: DataFrames with non-bool types result in worse computationalperformance and their support might be discontinued in the future.Please use a DataFrame with bool type
+  warnings.warn(
+🔍 Analyzing 20,000 transactions with 101 products
+INFO:     127.0.0.1:60994 - "POST /generate-recommendations HTTP/1.1" 200 OK
+/home/ubuntu/anaconda3/lib/python3.12/site-packages/mlxtend/frequent_patterns/fpcommon.py:110: DeprecationWarning: DataFrames with non-bool types result in worse computationalperformance and their support might be discontinued in the future.Please use a DataFrame with bool type
+  warnings.warn(
+/home/ubuntu/DataScience/MyProject/dss-v2/python-apis/sales_manager_api.py:665: PydanticDeprecatedSince20: The `dict` method is deprecated; use `model_dump` instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.5/migration/
+  recommendations = [rec.dict() for rec in recs.recommendations]
+/home/ubuntu/anaconda3/lib/python3.12/site-packages/pydantic/main.py:979: PydanticDeprecatedSince20: The `dict` method is deprecated; use `model_dump` instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.5/migration/
+  warnings.warn('The `dict` method is deprecated; use `model_dump` instead.', DeprecationWarning)
+/home/ubuntu/DataScience/MyProject/dss-v2/python-apis/sales_manager_api.py:665: PydanticDeprecatedSince20: The `dict` method is deprecated; use `model_dump` instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.5/migration/
+  recommendations = [rec.dict() for rec in recs.recommendations]
+/home/ubuntu/anaconda3/lib/python3.12/site-packages/pydantic/main.py:979: PydanticDeprecatedSince20: The `dict` method is deprecated; use `model_dump` instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.5/migration/
+  warnings.warn('The `dict` method is deprecated; use `model_dump` instead.', DeprecationWarning)
+/home/ubuntu/DataScience/MyProject/dss-v2/python-apis/sales_manager_api.py:665: PydanticDeprecatedSince20: The `dict` method is deprecated; use `model_dump` instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.5/migration/
+  recommendations = [rec.dict() for rec in recs.recommendations]
+/home/ubuntu/anaconda3/lib/python3.12/site-packages/pydantic/main.py:979: PydanticDeprecatedSince20: The `dict` method is deprecated; use `model_dump` instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.5/migration/
+  warnings.warn('The `dict` method is deprecated; use `model_dump` instead.', DeprecationWarning)
+/home/ubuntu/DataScience/MyProject/dss-v2/python-apis/sales_manager_api.py:665: PydanticDeprecatedSince20: The `dict` method is deprecated; use `model_dump` instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.5/migration/
+  recommendations = [rec.dict() for rec in recs.recommendations]
+/home/ubuntu/anaconda3/lib/python3.12/site-packages/pydantic/main.py:979: PydanticDeprecatedSince20: The `dict` method is deprecated; use `model_dump` instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.5/migration/
+  warnings.warn('The `dict` method is deprecated; use `model_dump` instead.', DeprecationWarning)
+/home/ubuntu/DataScience/MyProject/dss-v2/python-apis/sales_manager_api.py:665: PydanticDeprecatedSince20: The `dict` method is deprecated; use `model_dump` instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.5/migration/
+  recommendations = [rec.dict() for rec in recs.recommendations]
+/home/ubuntu/anaconda3/lib/python3.12/site-packages/pydantic/main.py:979: PydanticDeprecatedSince20: The `dict` method is deprecated; use `model_dump` instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.5/migration/
+  warnings.warn('The `dict` method is deprecated; use `model_dump` instead.', DeprecationWarning)
+🔍 Analyzing 20,000 transactions with 101 products
+INFO:     127.0.0.1:60994 - "POST /cross-sell-insights HTTP/1.1" 200 OK
+INFO:     127.0.0.1:47562 - "GET /top-bundles?min_support=0.01&min_confidence=0.3&top_n=10 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60926 - "GET /top-bundles?min_support=0.01&min_confidence=0.3&top_n=50 HTTP/1.1" 200 OK
